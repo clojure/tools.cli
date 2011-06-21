@@ -1,11 +1,8 @@
-(ns clojure.tools.cli
-  #^{:author "Gareth Jones"
-     :doc ""}
+(ns ^{:author "Gareth Jones"}
+  clojure.tools.cli
   (:use [clojure.string :only (replace)]
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
-
-;; help message stuff
 
 (defn build-doc [{:keys [switches docs options]}]
   [(apply str (interpose ", " switches))
@@ -27,8 +24,6 @@
     (doseq [v vs]
       (cl-format true "~{ ~vA  ~vA  ~vA  ~vA ~}" v)
       (prn))))
-
-;; option parsing
 
 (defn print-and-fail [msg]
   (println msg)
@@ -130,7 +125,7 @@
                       (str parent name))]
       (map #(% full-name args) spec-fns))))
 
-(defn clargon
+(defn cli
   "Takes a list of args from the command line and applies the spec-fns
   to generate a map of options.
 

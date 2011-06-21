@@ -1,14 +1,13 @@
 # tools.cli
 
-Clargon is a Command Line ARG parser...ON. An attempt at creating a
-OptParser-like thing for clojure, but with the added bonus of nested
-groups of arguments.
+tools.cli is a command line argument parser, with the added bonus of
+nested groups of arguments.
 
 ## Usage
 
 Example:
 
-    (clargon args
+    (cli args
          (required ["-p" "--port" "Listen on this port"] #(Integer. %))
          (optional ["--host" "The hostname" :default "localhost"])
          (optional ["--verbose" :default true])

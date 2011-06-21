@@ -2,19 +2,6 @@
   (:use [clojure.test]
         [clojure.tools.cli]))
 
-(testing "help"
-  (deftest should-print-help-shortform
-    (let [help-called (atom nil)]
-      (binding [help-and-quit (partial reset! help-called)]
-        (cli '("-h") (optional ["--port"]))
-        (is (not (nil? @help-called))))))
-
-  (deftest should-print-help-longform
-    (let [help-called (atom nil)]
-      (binding [help-and-quit (partial reset! help-called)]
-        (cli '("--help") (optional ["--port"]))
-        (is (not (nil? @help-called)))))))
-
 (testing "syntax"
   (deftest should-handle-simple-strings
     (is (= {:host "localhost"}
@@ -47,6 +34,7 @@
       (is (= {:server "localhost"}
              (cli '("-s" "localhost")
                   (optional ["-s" "--server"])))))
+
     (deftest should-use-last-alias-provided-as-name-in-map
       (is (= {:sizzle "localhost"}
              (cli '("-s" "localhost")
@@ -55,12 +43,7 @@
   (testing "required"
     (deftest should-succeed-when-provided
       (cli '("--server" "localhost")
-           (required ["--server"])))
-    (deftest should-fail-when-not-provided
-      (try
-        (binding [print-and-fail (fn [x] (throw (Exception. "success!")))]
-          (is (thrown-with-msg? Exception #"success!"
-                (cli '() (required ["--server"]))))))))
+           (required ["--server"]))))
 
   (testing "grouped parameters"
     (deftest should-support-groups
@@ -70,6 +53,7 @@
                   (group "--server"
                          (optional ["--name"])
                          (optional ["--port"] #(Integer. %)))))))
+
     (deftest should-support-nested-groups
       (is (= {:servers {:client {:host {:name "localhost" :port 1234}}}}
              (cli '("--servers--client--host--name" "localhost")

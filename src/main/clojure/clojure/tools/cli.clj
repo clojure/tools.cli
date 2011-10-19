@@ -36,16 +36,16 @@
 (defn name-for [k]
   (replace k #"^--no-|^--|^-" ""))
 
-(defn flag-for [v]
+(defn flag-for [^String v]
   (not (.startsWith v "--no-")))
 
-(defn opt? [x]
+(defn opt? [^String x]
   (.startsWith x "-"))
 
-(defn strip-parents [alias]
+(defn strip-parents [^String alias]
   (last (.split alias "--")))
 
-(defn path-for [alias]
+(defn path-for [^String alias]
   (map keyword (.split alias "--")))
 
 (defn parse-args [args]

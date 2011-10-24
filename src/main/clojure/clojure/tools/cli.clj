@@ -70,7 +70,7 @@
                 (drop 2 args))
 
          :default
-         (recur (update-in result [:args] conj (first args)) (rest args)))))))
+         (recur (assoc result :args args) nil))))))
 
 (defn switches-for
   [switches flag]

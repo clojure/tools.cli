@@ -63,7 +63,8 @@ These should be self-explanatory. The defaults if not provided are as follows:
 
     {:default  nil
      :parse-fn identity
-     :required false}
+     :required false
+     :flag     false}
 
 ### Boolean Flags
 

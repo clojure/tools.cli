@@ -83,6 +83,14 @@
       (is (= {:verbose false
               :args ["some-file"]}
              (cli ["--no-verbose" "some-file"]
+                  ["--[no-]verbose"]))))
+
+    (deftest should-accept-double-hyphen-as-end-of-args
+      (is (= {:foo "bar"
+              :verbose true
+              :args ["file" "-x" "other"]}
+             (cli ["--foo" "bar" "--verbose" "--" "file" "-x" "other"]
+                  ["--foo"]
                   ["--[no-]verbose"]))))))
 
 (deftest all-together-now

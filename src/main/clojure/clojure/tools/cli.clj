@@ -41,6 +41,9 @@
 (defn flag? [x]
   (.startsWith x "--[no-]"))
 
+(defn end-of-args? [x]
+  (= "--" x))
+
 (defn spec-for
   [arg specs]
   (first (filter #(.contains (% :switches) arg) specs)))
@@ -58,6 +61,9 @@
       (let [opt  (first args)
             spec (spec-for opt specs)]
         (cond
+         (end-of-args? opt)
+         (recur (assoc result :args (vec (rest args))) nil)
+
          (and (opt? opt) (nil? spec))
          (throw (Exception. (str "'" opt "' is not a valid argument")))
          
@@ -117,4 +123,3 @@
     (let [result (apply-specs specs args)]
       (ensure-required-provided result specs)
       result)))
-

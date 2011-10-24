@@ -109,6 +109,16 @@ the resulting hash-map:
 This allows you to deal with parameters such as filenames which are
 commonly provided at the end of an argument list.
 
+If you with to explicitly signal the end of arguments, you can use a
+double-hyphen:
+
+    (cli ["--port" "9999" "-- "some" "--extra" "arguments"]
+         ["--port" :parse-fn #(Integer. %)])
+
+    => {:port 9999, :args ["some" "--extra" "arguments"]}
+
+This is useful when your extra arguments look like switches.
+
 ## License
 
 Copyright (c) Rich Hickey and contributors. All rights reserved.

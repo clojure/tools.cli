@@ -4,10 +4,10 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
-(defn build-doc [{:keys [switches docs options]}]
+(defn build-doc [{:keys [switches docs default required]}]
   [(apply str (interpose ", " switches))
-   (or (str (options :default)) "")
-   (if (options :required) "Yes" "No")
+   (or (str default) "")
+   (if required "Yes" "No")
    (or docs "")])
 
 (defn show-help [specs]
@@ -25,16 +25,12 @@
       (cl-format true "~{ ~vA  ~vA  ~vA  ~vA ~}" v)
       (prn))))
 
-(defn print-and-fail [msg]
-  (println msg)
-  (System/exit 1))
-
 (defn help-and-quit [specs]
   (show-help specs)
   (System/exit 0))
 
 (defn name-for [k]
-  (replace k #"^--no-|^--|^-" ""))
+  (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
 (defn flag-for [v]
   (not (.startsWith v "--no-")))
@@ -42,98 +38,83 @@
 (defn opt? [x]
   (.startsWith x "-"))
 
-(defn strip-parents [alias]
-  (last (.split alias "--")))
+(defn flag? [x]
+  (.startsWith x "--[no-]"))
 
-(defn path-for [alias]
-  (map keyword (.split alias "--")))
+(defn spec-for
+  [arg specs]
+  (first (filter #(.contains (% :switches) arg) specs)))
 
-(defn parse-args [args]
-  (into {}
-        (map (fn [[k v]]
-               (if (and (opt? k) (or (nil? v) (opt? v)))
-                 [(name-for k) (flag-for k)]
-                 [(name-for k) v]))
-             (filter (fn [[k v]] (opt? k))
-                     (partition-all 2 1 args)))))
+(defn default-values-for
+  [specs]
+  (into {:args []} (for [s specs] [(s :name) (s :default)])))
 
-(defn parse-spec [spec args]
-  (let [{:keys [parse-fn aliases options path]} spec
-        raw (->> (map #(args %) aliases)
-                 (remove nil?)
-                 (first))
-        raw (if (nil? raw)
-              (:default options)
-              raw)]
-    (if (and (nil? raw)
-             (:required options))
-      (print-and-fail (str (last aliases) " is a required parameter"))
-      (try
-        [path (parse-fn raw)]
-        (catch Exception _
-          (print-and-fail (str "could not parse " (last aliases) " with value of " raw)))))))
+(defn apply-specs
+  [specs args]
+  (loop [result  (default-values-for specs)
+         args    args]
+    (if-not (seq args)
+      result
+      (let [opt  (first args)
+            spec (spec-for opt specs)]
+        (cond
+         (and (opt? opt) (nil? spec))
+         (throw (Exception. (str "'" opt "' is not a valid argument")))
+         
+         (and (opt? opt) (spec :flag))
+         (recur (assoc result (spec :name) (flag-for opt))
+                (rest args))
 
-(defn optional
-  "Generates a function for parsing optional arguments. Params is a
-  vector containing string aliases for the argument (from less to more
-  specific), a doc string, and optionally a default value prefixed
-  by :default.
+         (opt? opt)
+         (recur (assoc result (spec :name) ((spec :parse-fn) (second args)))
+                (drop 2 args))
 
-  Parse-fn is an optional parsing function for converting
-  a string value into something more useful.
+         :default
+         (recur (update-in result [:args] conj (first args)) (rest args)))))))
 
-  Example:
+(defn switches-for
+  [switches flag]
+  (-> (for [s switches]
+        (cond
+         (and flag (flag? s))            [(replace s #"\[no-\]" "no-") (replace s #"\[no-\]" "")]
+         (and flag (.startsWith s "--")) [(replace s #"--" "--no-") s]
+         :default                        [s]))
+      flatten))
 
-  (optional [\"-p\" \"--port\"
-             \"Listen for connections on this port\"
-             :default 8080]
-            #(Integer. %))"
-  [params & [parse-fn]]
-  (fn [parent args]
-    (let [parse-fn (or parse-fn identity)
-          options (apply hash-map (drop-while string? params))
-          switches (->> (take-while #(and (string? %) (opt? %)) params)
-                        (map #(str parent %)))
-          aliases (map name-for switches)
-          docs (first (filter #(and (string? %) (not (opt? %))) params))
-          name (or (options :name)
-                   (strip-parents (last aliases)))
-          path (path-for (last aliases))]
-      {:parse-fn parse-fn
-       :options options
-       :aliases aliases
-       :switches switches
-       :docs docs
-       :name name
-       :path path})))
+(defn generate-spec
+  [raw-spec]
+  (let [[switches raw-spec] (split-with #(and (string? %) (opt? %)) raw-spec)
+        [docs raw-spec]     (split-with string? raw-spec)
+        options             (apply hash-map raw-spec)
+        aliases             (map name-for switches)
+        flag                (or (flag? (last switches)) (options :flag))]
+    (merge {:switches (switches-for switches flag)
+            :docs     (first docs)
+            :aliases  (set aliases)
+            :name     (keyword (last aliases))
+            :parse-fn identity
+            :default  (if flag false nil)
+            :required false
+            :flag     flag}
+           options)))
 
-(defn required
-  "Generates a function for parsing required arguments. Takes same
-  parameters as 'optional'. Not providing this argument to clargon
-  will cause an error to be printed and program execution to be
-  halted."
-  [params & [parse-fn]]
-  (optional (into params [:required true]) parse-fn))
+(defn wants-help?
+  [args]
+  (some #(or (= % "-h") (= % "--help")) args))
 
-(defn group
-  "Generates a function for parsing a named group of 'optional' and
-  'required' arguments."
-  [name & spec-fns]
-  (fn [parent args]
-    (let [full-name (if (empty? parent)
-                      name
-                      (str parent name))]
-      (map #(% full-name args) spec-fns))))
+(defn ensure-required-provided
+  [m specs]
+  (doseq [s specs
+          :when (s :required)]
+    (when-not (m (s :name))
+      (throw (Exception. (str (s :name) " is a required argument"))))))
 
 (defn cli
-  "Takes a list of args from the command line and applies the spec-fns
-  to generate a map of options.
+  [args & specs]
+  (let [specs (map generate-spec specs)]
+    (when (wants-help? args)
+      (help-and-quit specs))
+    (let [result (apply-specs specs args)]
+      (ensure-required-provided result specs)
+      result)))
 
-  Spec-fns are calls to 'optional', 'required', and 'group'."
-  [args & spec-fns]
-  (let [args (parse-args args)
-        specs (flatten (map #(% "" args) spec-fns))]
-    (if (some #(contains? #{"h" "help"} %) (keys args))
-      (help-and-quit specs)
-      (reduce (fn [h [path value]] (assoc-in h path value))
-              {} (map #(parse-spec % args) specs)))))

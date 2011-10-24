@@ -1,67 +1,112 @@
 # tools.cli
 
-tools.cli is a command line argument parser, with the added bonus of
-nested groups of arguments.
+tools.cli is a command line argument parser for Clojure.
 
-## Usage
-
-Example:
+## An Example
 
     (cli args
-         (required ["-p" "--port" "Listen on this port"] #(Integer. %))
-         (optional ["--host" "The hostname" :default "localhost"])
-         (optional ["--verbose" :default true])
-         (optional ["--log-directory" :default "/some/path"])
-         (group "--server"
-                (optional ["-n" "--name"])
-                (optional ["-p" "--port"] #(Integer. %))
-                (group "--paths"
-                       (optional ["--inbound" :default "/tmp/inbound"])
-                       (optional ["--outbound" :default "/tmp/outbound"]))))
-
+         ["-p" "--port" "Listen on this port" :required true :parse-fn #(Integer. %)] 
+         ["-t" "--host" "The hostname" :default "localhost"]
+         ["-v" "--[no-]verbose" :default true]
+         ["-l" "--log-directory" :default "/some/path"])
+         
 with args of:
 
-    '("-p" "8080"
-      "--no-verbose"
-      "--log-directory" "/tmp"
-      "--server--name" "localhost"
-      "--server--port" "9090"
-      "--server--paths--inbound" "/dev/null")
+    ["-p" "8080"
+     "--no-verbose"
+     "--log-directory" "/tmp"]
 
 will produce a clojure map with the names picked out for you as keywords:
 
      {:port 8080
       :host "localhost"
       :verbose false
-      :log-directory "/tmp"
-      :server {:name "localhost"
-               :port 9090
-               :paths {:inbound "/dev/null"
-                       :outbound "/tmp/outbound"}}}
+      :log-directory "/tmp"}
 
-A flag of -h or --help is provided which will currently give a
-documentation string:
+A flag of -h or --help is provided which will print a documentation
+string to STDOUT and call System/exit:
 
     Usage:
 
      Switches                    Default        Required  Desc          
      --------                    -------        --------  ----          
      -p, --port                                 Yes       Listen on this port              
-     --host                      localhost      No        The hostname     
-     --verbose                   true           No                      
-     --log-directory             /some/path     No        /some/path    
-     --server-n, --server--name                 No                      
-     --server-p, --server--port                 No                      
-     --server--paths--inbound    /tmp/inbound   No        /tmp/inbound  
-     --server--paths--outbound   /tmp/outbound  No        /tmp/outbound 
+     -h, --host                  localhost      No        The hostname     
+     -v, --no-verbose --verbose  true           No                      
+     -l, --log-directory         /some/path     No        
 
-Required parameters will halt program execution if not provided,
-optionals will not. Defaults can be provided as shown above. Errors
-caused by parsing functions (such as #(Integer. %) above) will halt
-program execution. Doc strings are provided as shown above on port and
-host.
+## Options
 
-See the tests for more example usage.
+An argument is specified by providing a vector of information:
+
+Switches should be provided first, from least to most specific. The
+last switch you provide will be used as the name for the argument in
+the resulting hash-map. The following:
+
+    ["-p" "--port"]
+
+defines an argument with two possible switches, the name of which will
+be :port in the resulting hash-map.
+
+Next is an optional doc string:
+
+    ["-p" "--port" "The port to listen on"]
+
+This will be printed in the 'Desc' column if the -h or --help flags
+are provided.
+
+Following that are optional parameters, provided in key-value pairs:
+
+    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %) :required true]
+
+These should be self-explanatory. The defaults if not provided are as follows:
+
+    {:default  nil
+     :parse-fn identity
+     :required false}
+
+### Boolean Flags
+
+Flags are indicated either through naming convention:
+
+    ["-v" "--[no-]verbose" "Be chatty"]
+
+(note the [no-] in the argument name).
+
+Or you can explicitly mark them as flags:
+
+    ["-v" "--verbose" "Be chatty" :flag true]
+
+Either way, when providing them on the command line, using the name
+itself will set to true, and using the name prefixed with 'no-' will
+set the argument to false:
+
+    (cli ["-v"]
+         ["-v" "--[no-]verbose"])
+  
+    => {:verbose true}
+
+    (cli ["--no-verbose"]
+         ["-v" "--[no-]verbose"])
+
+    => {:verbose false}
+
+Note: there is no short-form to set the flag to false (-no-v will not
+work!). 
+
+## Trailing Arguments
+
+After all of your arguments have been parsed, any trailing arguments
+given will be available to your program under a key called :args in
+the resulting hash-map:
+
+    (cli ["--port" "9999" "some" "extra" "arguments"]
+         ["--port" :parse-fn #(Integer. %)])
+
+    => {:port 9999, :args ["some" "extra" "arguments"]}
+
+This allows you to deal with parameters such as filenames which are
+commonly provided at the end of an argument list.
 
 ## License
 

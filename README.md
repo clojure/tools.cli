@@ -14,30 +14,36 @@ with args of:
 
     ["-p" "8080"
      "--no-verbose"
-     "--log-directory" "/tmp"]
+     "--log-directory" "/tmp"
+     "some-file"]
 
-will produce a clojure map with the names picked out for you as keywords:
+will produce a vector containing three elements:
 
-     {:port 8080
-      :host "localhost"
-      :verbose false
+a clojure map with the names picked out for you as keywords:
+
+     {:port          8080
+      :host          "localhost"
+      :verbose       false
       :log-directory "/tmp"}
 
-A flag of -h or --help is provided which will print a documentation
-string to STDOUT and call System/exit:
+a vector of trailing arguments that are not options:
 
-    Usage:
+    ["some-file"]
+
+and a documentation string to use to provide help:
+
+    "Usage:
 
      Switches                    Default        Required  Desc          
      --------                    -------        --------  ----          
      -p, --port                                 Yes       Listen on this port              
-     -h, --host                  localhost      No        The hostname     
+     -t, --host                  localhost      No        The hostname     
      -v, --no-verbose --verbose  true           No                      
-     -l, --log-directory         /some/path     No        
+     -l, --log-directory         /some/path     No"
 
 ## Options
 
-An argument is specified by providing a vector of information:
+An option is specified by providing a vector of information:
 
 Switches should be provided first, from least to most specific. The
 last switch you provide will be used as the name for the argument in
@@ -85,26 +91,25 @@ set the argument to false:
     (cli ["-v"]
          ["-v" "--[no-]verbose"])
   
-    => {:verbose true}
+    => [{:verbose true}, ...]
 
     (cli ["--no-verbose"]
          ["-v" "--[no-]verbose"])
 
-    => {:verbose false}
+    => [{:verbose false}, ...]
 
 Note: there is no short-form to set the flag to false (-no-v will not
 work!). 
 
 ## Trailing Arguments
 
-After all of your arguments have been parsed, any trailing arguments
-given will be available to your program under a key called :args in
-the resulting hash-map:
+Any trailing arguments given to `cli` are returned as the second item
+in the resulting vector:
 
     (cli ["--port" "9999" "some" "extra" "arguments"]
          ["--port" :parse-fn #(Integer. %)])
 
-    => {:port 9999, :args ["some" "extra" "arguments"]}
+    => [{:port 9999}, ["some" "extra" "arguments"], ...]
 
 This allows you to deal with parameters such as filenames which are
 commonly provided at the end of an argument list.
@@ -115,9 +120,22 @@ double-hyphen:
     (cli ["--port" "9999" "-- "some" "--extra" "arguments"]
          ["--port" :parse-fn #(Integer. %)])
 
-    => {:port 9999, :args ["some" "--extra" "arguments"]}
+    => [{:port 9999}, ["some" "--extra" "arguments"], ...]
 
 This is useful when your extra arguments look like switches.
+
+## Banner
+
+The third item in the resulting vector is a banner useful for
+providing help to the user:
+
+    (let [[options args banner] (cli ["--faux" "bar"]
+                                     ["-h" "--help" "Show help" :default false :flag true]
+                                     ["-f" "--faux" "The faux du fafa"])]
+      (when (:help options)
+        (println banner)
+        (System/exit 0))
+      (println options))
 
 ## License
 

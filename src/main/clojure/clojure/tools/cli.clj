@@ -10,7 +10,7 @@
    (if required "Yes" "No")
    (or docs "")])
 
-(defn show-help [specs]
+(defn banner-for [specs]
   (println "Usage:")
   (println)
   (let [docs (into (map build-doc specs)
@@ -24,10 +24,6 @@
     (doseq [v vs]
       (cl-format true "~{ ~vA  ~vA  ~vA  ~vA ~}" v)
       (prn))))
-
-(defn help-and-quit [specs]
-  (show-help specs)
-  (System/exit 0))
 
 (defn name-for [k]
   (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
@@ -50,33 +46,36 @@
 
 (defn default-values-for
   [specs]
-  (into {:args []} (for [s specs] [(s :name) (s :default)])))
+  (into {} (for [s specs] [(s :name) (s :default)])))
 
 (defn apply-specs
   [specs args]
-  (loop [result  (default-values-for specs)
-         args    args]
+  (loop [options    (default-values-for specs)
+         extra-args []
+         args       args]
     (if-not (seq args)
-      result
+      [options extra-args]
       (let [opt  (first args)
             spec (spec-for opt specs)]
         (cond
          (end-of-args? opt)
-         (recur (assoc result :args (vec (rest args))) nil)
+         (recur options (into extra-args (vec (rest args))) nil)
 
          (and (opt? opt) (nil? spec))
          (throw (Exception. (str "'" opt "' is not a valid argument")))
          
          (and (opt? opt) (spec :flag))
-         (recur (assoc result (spec :name) (flag-for opt))
+         (recur (assoc options (spec :name) (flag-for opt))
+                extra-args
                 (rest args))
 
          (opt? opt)
-         (recur (assoc result (spec :name) ((spec :parse-fn) (second args)))
+         (recur (assoc options (spec :name) ((spec :parse-fn) (second args)))
+                extra-args
                 (drop 2 args))
 
          :default
-         (recur (update-in result [:args] conj (first args)) (rest args)))))))
+         (recur options (conj extra-args (first args)) (rest args)))))))
 
 (defn switches-for
   [switches flag]
@@ -104,10 +103,6 @@
             :flag     flag}
            options)))
 
-(defn wants-help?
-  [args]
-  (some #(or (= % "-h") (= % "--help")) args))
-
 (defn ensure-required-provided
   [m specs]
   (doseq [s specs
@@ -118,8 +113,8 @@
 (defn cli
   [args & specs]
   (let [specs (map generate-spec specs)]
-    (when (wants-help? args)
-      (help-and-quit specs))
-    (let [result (apply-specs specs args)]
-      (ensure-required-provided result specs)
-      result)))
+    (let [[options extra-args] (apply-specs specs args)
+          banner  (with-out-str (banner-for specs))]
+      (ensure-required-provided options specs)
+      [options extra-args banner])))
+

@@ -58,8 +58,7 @@ Next is an optional doc string:
 
     ["-p" "--port" "The port to listen on"]
 
-This will be printed in the 'Desc' column if the -h or --help flags
-are provided.
+This will be printed in the 'Desc' column of the help banner. 
 
 Following that are optional parameters, provided in key-value pairs:
 

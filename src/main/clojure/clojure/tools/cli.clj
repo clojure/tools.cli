@@ -4,6 +4,8 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
+(set! *warn-on-reflection* true)
+
 (defn build-doc [{:keys [switches docs default required]}]
   [(apply str (interpose ", " switches))
    (or (str default) "")
@@ -28,13 +30,13 @@
 (defn name-for [k]
   (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
-(defn flag-for [v]
+(defn flag-for [^String v]
   (not (.startsWith v "--no-")))
 
-(defn opt? [x]
+(defn opt? [^String x]
   (.startsWith x "-"))
 
-(defn flag? [x]
+(defn flag? [^String x]
   (.startsWith x "--[no-]"))
 
 (defn end-of-args? [x]
@@ -42,7 +44,11 @@
 
 (defn spec-for
   [arg specs]
-  (first (filter #(.contains (% :switches) arg) specs)))
+  (->> specs
+       (filter (fn [s]
+                   (let [switches (set (s :switches))]
+                     (contains? switches arg))))
+       first))
 
 (defn default-values-for
   [specs]
@@ -79,7 +85,7 @@
 
 (defn switches-for
   [switches flag]
-  (-> (for [s switches]
+  (-> (for [^String s switches]
         (cond
          (and flag (flag? s))            [(replace s #"\[no-\]" "no-") (replace s #"\[no-\]" "")]
          (and flag (.startsWith s "--")) [(replace s #"--" "--no-") s]

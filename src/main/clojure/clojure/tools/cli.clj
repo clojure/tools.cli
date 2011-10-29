@@ -4,8 +4,6 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
-(set! *warn-on-reflection* true)
-
 (defn build-doc [{:keys [switches docs default required]}]
   [(apply str (interpose ", " switches))
    (or (str default) "")

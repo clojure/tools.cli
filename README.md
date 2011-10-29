@@ -116,7 +116,7 @@ commonly provided at the end of an argument list.
 If you with to explicitly signal the end of arguments, you can use a
 double-hyphen:
 
-    (cli ["--port" "9999" "-- "some" "--extra" "arguments"]
+    (cli ["--port" "9999" "--" "some" "--extra" "arguments"]
          ["--port" :parse-fn #(Integer. %)])
 
     => [{:port 9999}, ["some" "--extra" "arguments"], ...]

@@ -6,7 +6,7 @@ tools.cli is a command line argument parser for Clojure.
 
     (cli args
          ["-p" "--port" "Listen on this port" :required true :parse-fn #(Integer. %)] 
-         ["-t" "--host" "The hostname" :default "localhost"]
+         ["-h" "--host" "The hostname" :default "localhost"]
          ["-v" "--[no-]verbose" :default true]
          ["-l" "--log-directory" :default "/some/path"])
          
@@ -37,7 +37,7 @@ and a documentation string to use to provide help:
      Switches                    Default        Required  Desc          
      --------                    -------        --------  ----          
      -p, --port                                 Yes       Listen on this port              
-     -t, --host                  localhost      No        The hostname     
+     -h, --host                  localhost      No        The hostname     
      -v, --no-verbose --verbose  true           No                      
      -l, --log-directory         /some/path     No"
 

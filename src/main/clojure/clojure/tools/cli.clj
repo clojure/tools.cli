@@ -4,25 +4,24 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
-(defn build-doc [{:keys [switches docs default required]}]
+(defn build-doc [{:keys [switches docs default]}]
   [(apply str (interpose ", " switches))
    (or (str default) "")
-   (if required "Yes" "No")
    (or docs "")])
 
 (defn banner-for [specs]
   (println "Usage:")
   (println)
   (let [docs (into (map build-doc specs)
-                   [["--------" "-------" "--------" "----"]
-                    ["Switches" "Default" "Required" "Desc"]])
+                   [["--------" "-------" "----"]
+                    ["Switches" "Default" "Desc"]])
         max-cols (->> (for [d docs] (map count d))
                       (apply map (fn [& c] (apply vector c)))
                       (map #(apply max %)))
         vs (for [d docs]
              (mapcat (fn [& x] (apply vector x)) max-cols d))]
     (doseq [v vs]
-      (cl-format true "~{ ~vA  ~vA  ~vA  ~vA ~}" v)
+      (cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
       (prn))))
 
 (defn name-for [k]
@@ -103,22 +102,13 @@
             :name     (keyword (last aliases))
             :parse-fn identity
             :default  (if flag false nil)
-            :required false
             :flag     flag}
            options)))
-
-(defn ensure-required-provided
-  [m specs]
-  (doseq [s specs
-          :when (s :required)]
-    (when-not (m (s :name))
-      (throw (Exception. (str (s :name) " is a required argument"))))))
 
 (defn cli
   [args & specs]
   (let [specs (map generate-spec specs)]
     (let [[options extra-args] (apply-specs specs args)
           banner  (with-out-str (banner-for specs))]
-      (ensure-required-provided options specs)
       [options extra-args banner])))
 

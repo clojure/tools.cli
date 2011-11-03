@@ -5,7 +5,7 @@ tools.cli is a command line argument parser for Clojure.
 ## An Example
 
     (cli args
-         ["-p" "--port" "Listen on this port" :required true :parse-fn #(Integer. %)] 
+         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 
          ["-h" "--host" "The hostname" :default "localhost"]
          ["-v" "--[no-]verbose" :default true]
          ["-l" "--log-directory" :default "/some/path"])
@@ -34,12 +34,12 @@ and a documentation string to use to provide help:
 
     "Usage:
 
-     Switches                    Default        Required  Desc          
-     --------                    -------        --------  ----          
-     -p, --port                                 Yes       Listen on this port              
-     -h, --host                  localhost      No        The hostname     
-     -v, --no-verbose --verbose  true           No                      
-     -l, --log-directory         /some/path     No"
+     Switches                    Default     Desc          
+     --------                    -------     ----          
+     -p, --port                              Listen on this port              
+     -h, --host                  localhost   The hostname     
+     -v, --no-verbose --verbose  true                      
+     -l, --log-directory         /some/path   
 
 ## Options
 
@@ -62,13 +62,12 @@ This will be printed in the 'Desc' column of the help banner.
 
 Following that are optional parameters, provided in key-value pairs:
 
-    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %) :required true]
+    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %)]
 
 These should be self-explanatory. The defaults if not provided are as follows:
 
     {:default  nil
      :parse-fn identity
-     :required false
      :flag     false}
 
 ### Boolean Flags

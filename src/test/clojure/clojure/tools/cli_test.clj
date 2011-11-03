@@ -52,16 +52,6 @@
              (first (cli ["-s" "localhost"]
                          ["-s" "--server"]))))))
 
-  (testing "required"
-    (deftest should-succeed-when-provided
-      (cli ["--server" "localhost"]
-           ["--server" :required true]))
-
-    (deftest should-raise-when-missing
-      (is (thrown-with-msg? Exception #"server is a required argument"
-            (cli []
-                 ["--server" :required true])))))
-
   (testing "extra arguments"
     (deftest should-provide-access-to-trailing-args
       (let [[options args _] (cli ["--foo" "bar" "a" "b" "c"]

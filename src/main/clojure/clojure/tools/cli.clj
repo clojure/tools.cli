@@ -72,6 +72,12 @@
                 extra-args
                 (rest args))
 
+         (and (opt? opt) (spec :multi))
+         (recur (update-in options [(spec :name)] #(conj (or %1 []) %2)
+                           ((spec :parse-fn) (second args)))
+                extra-args
+                (drop 2 args))
+
          (opt? opt)
          (recur (assoc options (spec :name) ((spec :parse-fn) (second args)))
                 extra-args

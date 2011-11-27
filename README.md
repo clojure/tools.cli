@@ -2,6 +2,20 @@
 
 tools.cli is a command line argument parser for Clojure.
 
+## Installation
+
+To use in your lein project add the following to your dependencies:
+
+    [org.clojure/tools.cli "0.2.1"]
+    
+Or in your maven pom:
+
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>tools.cli</artifactId>
+      <version>0.2.1</version>
+    </dependency>
+
 ## An Example
 
     (cli args

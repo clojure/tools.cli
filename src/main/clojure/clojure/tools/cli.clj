@@ -4,12 +4,12 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
-(defn build-doc [{:keys [switches docs default]}]
+(defn ^:private build-doc [{:keys [switches docs default]}]
   [(apply str (interpose ", " switches))
    (or (str default) "")
    (or docs "")])
 
-(defn banner-for [specs]
+(defn ^:private banner-for [specs]
   (println "Usage:")
   (println)
   (let [docs (into (map build-doc specs)
@@ -24,22 +24,22 @@
       (cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
       (prn))))
 
-(defn name-for [k]
+(defn ^:private name-for [k]
   (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
-(defn flag-for [^String v]
+(defn ^:private flag-for [^String v]
   (not (.startsWith v "--no-")))
 
-(defn opt? [^String x]
+(defn ^:private opt? [^String x]
   (.startsWith x "-"))
 
-(defn flag? [^String x]
+(defn ^:private flag? [^String x]
   (.startsWith x "--[no-]"))
 
-(defn end-of-args? [x]
+(defn ^:private end-of-args? [x]
   (= "--" x))
 
-(defn spec-for
+(defn ^:private spec-for
   [arg specs]
   (->> specs
        (filter (fn [s]
@@ -47,11 +47,11 @@
                      (contains? switches arg))))
        first))
 
-(defn default-values-for
+(defn ^:private default-values-for
   [specs]
   (into {} (for [s specs] [(s :name) (s :default)])))
 
-(defn apply-specs
+(defn ^:private apply-specs
   [specs args]
   (loop [options    (default-values-for specs)
          extra-args []
@@ -80,7 +80,7 @@
          :default
          (recur options (conj extra-args (first args)) (rest args)))))))
 
-(defn switches-for
+(defn ^:private switches-for
   [switches flag]
   (-> (for [^String s switches]
         (cond
@@ -89,7 +89,7 @@
          :default                        [s]))
       flatten))
 
-(defn generate-spec
+(defn ^:private generate-spec
   [raw-spec]
   (let [[switches raw-spec] (split-with #(and (string? %) (opt? %)) raw-spec)
         [docs raw-spec]     (split-with string? raw-spec)
@@ -106,6 +106,21 @@
            options)))
 
 (defn cli
+  "Parse the provided args using the given specs. Specs are vectors
+  describing a command line argument. For example:
+
+  [\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]
+
+  First provide the switches (from least to most specific), then a doc
+  string, and pairs of options.
+
+  Valid options are :default, :parse-fn, and :flag. See
+  https://github.com/clojure/tools.cli/blob/master/README.md for more
+  detailed examples.
+
+  Returns a vector containing a map of the parsed arguments, a vector
+  of extra arguments that did not match known switches, and a
+  documentation banner to provide usage instructions."
   [args & specs]
   (let [specs (map generate-spec specs)]
     (let [[options extra-args] (apply-specs specs args)

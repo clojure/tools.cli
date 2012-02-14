@@ -4,12 +4,12 @@
         [clojure.pprint :only (pprint cl-format)])
   (:refer-clojure :exclude [replace]))
 
-(defn ^:private build-doc [{:keys [switches docs default]}]
+(defn- build-doc [{:keys [switches docs default]}]
   [(apply str (interpose ", " switches))
    (or (str default) "")
    (or docs "")])
 
-(defn ^:private banner-for [specs]
+(defn- banner-for [specs]
   (println "Usage:")
   (println)
   (let [docs (into (map build-doc specs)
@@ -24,22 +24,22 @@
       (cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
       (prn))))
 
-(defn ^:private name-for [k]
+(defn- name-for [k]
   (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
-(defn ^:private flag-for [^String v]
+(defn- flag-for [^String v]
   (not (.startsWith v "--no-")))
 
-(defn ^:private opt? [^String x]
+(defn- opt? [^String x]
   (.startsWith x "-"))
 
-(defn ^:private flag? [^String x]
+(defn- flag? [^String x]
   (.startsWith x "--[no-]"))
 
-(defn ^:private end-of-args? [x]
+(defn- end-of-args? [x]
   (= "--" x))
 
-(defn ^:private spec-for
+(defn- spec-for
   [arg specs]
   (->> specs
        (filter (fn [s]
@@ -47,11 +47,11 @@
                      (contains? switches arg))))
        first))
 
-(defn ^:private default-values-for
+(defn- default-values-for
   [specs]
   (into {} (for [s specs] [(s :name) (s :default)])))
 
-(defn ^:private apply-specs
+(defn- apply-specs
   [specs args]
   (loop [options    (default-values-for specs)
          extra-args []
@@ -80,7 +80,7 @@
          :default
          (recur options (conj extra-args (first args)) (rest args)))))))
 
-(defn ^:private switches-for
+(defn- switches-for
   [switches flag]
   (-> (for [^String s switches]
         (cond
@@ -89,7 +89,7 @@
          :default                        [s]))
       flatten))
 
-(defn ^:private generate-spec
+(defn- generate-spec
   [raw-spec]
   (let [[switches raw-spec] (split-with #(and (string? %) (opt? %)) raw-spec)
         [docs raw-spec]     (split-with string? raw-spec)

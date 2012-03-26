@@ -45,14 +45,25 @@ namespace.
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
   <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0">Overview</a>
+    <a href="#toc0" style="margin-top: 3px;">Overview</a>
     
-    <br />
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#" style="margin-top: 3px;"></a>
+    
+  </div><div style="margin-left: 1em;" class="toc-section">
+    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
+    <div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.tools.cli/cli">cli</a>
+      
+    </div>
   </div>
 </div>
 </div>
-                <div id="content-tag"><h1 id="overview">API for <span id="namespace-name">clojure.tools.cli</span>
-  - <span id="header-project">Command-line processor</span> <span id="header-version">0.2.2</span> (<span id="header-status">in development</span>)
+                <div id="content-tag"><h1 id="overview">API for <span id="clojure.tools.cli">clojure.tools.cli</span>
+  - <span id="header-project">Command-line processor</span> <span id="header-version">0.2.2</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
 <span id="author-line">by <span id="author-name">Gareth Jones</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.tools.cli</span>
@@ -62,8 +73,39 @@ namespace.
 
 
 <br />
-<h2>Public Variables and Functions</h2>
 
+
+
+<div id="var-section">
+  <p></p>
+  <h2>Public Variables and Functions</h2>
+  <div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.tools.cli/cli">cli</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (cli args &amp; specs)
+</pre>
+    <pre id="var-docstr">Parse the provided args using the given specs. Specs are vectors
+describing a command line argument. For example:
+
+["-p" "--port" "Port to listen on" :default 3000 :parse-fn #(Integer/parseInt %)]
+
+First provide the switches (from least to most specific), then a doc
+string, and pairs of options.
+
+Valid options are :default, :parse-fn, and :flag. See
+<a href="https://github.com/clojure/tools.cli/blob/master/README.md">https://github.com/clojure/tools.cli/blob/master/README.md</a> for more
+detailed examples.
+
+Returns a vector containing a map of the parsed arguments, a vector
+of extra arguments that did not match known switches, and a
+documentation banner to provide usage instructions.</pre>
+    
+    
+    <a href="https://github.com/clojure/tools.cli/blob/ec7bdb3b1189db0dfcd7b1c0d92e784eef84f926/src/main/clojure/clojure/tools/cli.clj#L108" id="var-source">Source</a>
+  </div>
+</div>
 
 
 </div>
@@ -72,7 +114,7 @@ namespace.
           </div>
 	</div>
 	<div id="foot">
-	  <div style="text-align: center;" id="copyright">Copyright 2007-2011 by Rich Hickey and the various contributors</div>
+	  <div style="text-align: center;" id="copyright">Copyright 2007-2012 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />

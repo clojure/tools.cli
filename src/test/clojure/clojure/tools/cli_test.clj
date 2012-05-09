@@ -72,6 +72,13 @@
         (is (= {:foo "bar" :verbose true} options))
         (is (= ["file" "-x" "other"] args))))))
 
+(deftest combiner-options
+  (let [[options _ _] (cli ["-a" "bar" "-e" "apple" "-a" "foo" "-e" "banana" "-e" "carrot"]
+                                  ["-a"]
+                                  ["-e" :combine-fn concat :parse-fn vector])]
+        (is (= {:a "foo" :e ["apple" "banana" "carrot"]} options))
+        ))
+
 (deftest all-together-now
   (let [[options args _] (cli ["-p" "8080"
                                "--no-verbose"

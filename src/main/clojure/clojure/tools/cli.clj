@@ -51,6 +51,10 @@
   [specs]
   (into {} (for [s specs] [(s :name) (s :default)])))
 
+(defn- update-options [options spec val]
+  (let [parsed ((spec :parse-fn) val)]
+    (update-in options [(spec :name)] #((spec :combine-fn) % parsed))))
+
 (defn- apply-specs
   [specs args]
   (loop [options    (default-values-for specs)
@@ -73,7 +77,7 @@
                 (rest args))
 
          (opt? opt)
-         (recur (assoc options (spec :name) ((spec :parse-fn) (second args)))
+         (recur (update-options options spec (second args))
                 extra-args
                 (drop 2 args))
 
@@ -102,7 +106,8 @@
             :name     (keyword (last aliases))
             :parse-fn identity
             :default  (if flag false nil)
-            :flag     flag}
+            :flag     flag
+            :combine-fn (fn [old new] new)}
            options)))
 
 (defn cli

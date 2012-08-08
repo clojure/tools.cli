@@ -34,7 +34,13 @@
     (deftest should-override-when-supplied
       (is (= {:server "127.0.0.1"}
              (first (cli ["--server" "127.0.0.1"]
-                         ["--server" :default "10.0.1.10"]))))))
+                         ["--server" :default "10.0.1.10"])))))
+    (deftest should-omit-key-when-no-default
+      (is (= false
+             (contains? (cli ["--server" "127.0.0.1"]
+                             ["--server" :default "10.0.1.10"]
+                             ["--names"])
+                        :server)))))
 
   (deftest should-apply-parse-fn
     (is (= {:names ["john" "jeff" "steve"]}

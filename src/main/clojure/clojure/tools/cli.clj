@@ -49,7 +49,11 @@
 
 (defn- default-values-for
   [specs]
-  (into {} (for [s specs] [(s :name) (s :default)])))
+  (reduce (fn [m s]
+            (if (contains? s :default)
+              (assoc m (:name s) (:default s))
+              m))
+          {} specs))
 
 (defn- apply-specs
   [specs args]
@@ -101,8 +105,8 @@
             :aliases  (set aliases)
             :name     (keyword (last aliases))
             :parse-fn identity
-            :default  (if flag false nil)
             :flag     flag}
+           (when flag {:default false})
            options)))
 
 (defn cli

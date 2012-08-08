@@ -2,13 +2,18 @@
 
 tools.cli is a command line argument parser for Clojure.
 
-## Installation
+## Releases and Dependency Information
 
-To use in your lein project add the following to your dependencies:
+Latest stable release: 0.2.1
+
+* [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
+* [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
+
+[Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
     [org.clojure/tools.cli "0.2.1"]
     
-Or in your maven pom:
+[Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
@@ -16,7 +21,9 @@ Or in your maven pom:
       <version>0.2.1</version>
     </dependency>
 
-## An Example
+## Example Usage
+
+    (use '[clojure.tools.cli :only [cli])
 
     (cli args
          ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 
@@ -31,7 +38,7 @@ with args of:
      "--log-directory" "/tmp"
      "some-file"]
 
-will produce a vector containing three elements:
+will return a vector containing three elements:
 
 a clojure map with the names picked out for you as keywords:
 
@@ -53,7 +60,7 @@ and a documentation string to use to provide help:
      -p, --port                              Listen on this port              
      -h, --host                  localhost   The hostname     
      -v, --no-verbose --verbose  true                      
-     -l, --log-directory         /some/path   
+     -l, --log-directory         /some/path"   
 
 ## Options
 
@@ -148,6 +155,25 @@ providing help to the user:
         (println banner)
         (System/exit 0))
       (println options))
+
+## Developer Information
+
+* [GitHub project](https://github.com/clojure/tools.cli)
+* [Bug Tracker](http://dev.clojure.org/jira/browse/TCLI)
+* [Continuous Integration](http://build.clojure.org/job/tools.cli/)
+* [Compatibility Test Matrix](http://build.clojure.org/job/tools.cli-test-matrix/)
+
+## Change Log
+
+* Release 0.2.1 on 2011-11-03
+  * Removing the :required option. Hangover from when -h and --help were
+    implemented by default, causes problems if you want help and dont
+    provide a :required argument.
+* Release 0.2.0 on 2011-10-31
+  * Remove calls to System/exit
+  * Remove built-in help options
+* Release 0.1.0
+  * Initial import of Clargon codebase
 
 ## License
 

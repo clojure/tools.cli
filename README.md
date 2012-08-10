@@ -4,21 +4,21 @@ tools.cli is a command line argument parser for Clojure.
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.2.1
+Latest stable release: 0.2.2
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.2.1"]
+    [org.clojure/tools.cli "0.2.2"]
     
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.2.1</version>
+      <version>0.2.2</version>
     </dependency>
 
 ## Example Usage
@@ -165,6 +165,9 @@ providing help to the user:
 
 ## Change Log
 
+* Release 0.2.2 on 2012-08-09
+  * Applying patch for [TCLI-1](http://dev.clojure.org/jira/browse/TCLI-1) 
+    (do not include keys when no value provided by :default)
 * Release 0.2.1 on 2011-11-03
   * Removing the :required option. Hangover from when -h and --help were
     implemented by default, causes problems if you want help and dont

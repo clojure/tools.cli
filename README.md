@@ -23,7 +23,7 @@ Latest stable release: 0.2.2
 
 ## Example Usage
 
-    (use '[clojure.tools.cli :only [cli])
+    (use '[clojure.tools.cli :only [cli]])
 
     (cli args
          ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 

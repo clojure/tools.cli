@@ -58,6 +58,17 @@
              (first (cli ["-s" "localhost"]
                          ["-s" "--server"]))))))
 
+  (testing "merging args"
+    (deftest should-merge-identical-arguments
+      (let [assoc-fn (fn [previous key val]
+                       (assoc previous key
+                         (if-let [oldval (get previous key)]
+                           (merge oldval val)
+                           (hash-set val))))
+            [options args _] (cli ["-p" "1" "--port" "2"]
+                                  ["-p" "--port" "description" :assoc-fn assoc-fn])]
+        (is (= {:port #{"1" "2"}} options)))))
+
   (testing "extra arguments"
     (deftest should-provide-access-to-trailing-args
       (let [[options args _] (cli ["--foo" "bar" "a" "b" "c"]

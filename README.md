@@ -133,7 +133,7 @@ in the resulting vector:
 This allows you to deal with parameters such as filenames which are
 commonly provided at the end of an argument list.
 
-If you with to explicitly signal the end of arguments, you can use a
+If you wish to explicitly signal the end of arguments, you can use a
 double-hyphen:
 
     (cli ["--port" "9999" "--" "some" "--extra" "arguments"]

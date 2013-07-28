@@ -62,6 +62,27 @@ and a documentation string to use to provide help:
      -v, --no-verbose --verbose  true                      
      -l, --log-directory         /some/path"   
 
+### Custom description
+
+You can pass an optional description argument that will be shown
+between "Usage:" and the description of the switches. For example:
+
+    (cli args
+         "This program does something extraordinary."
+         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 
+         ["-h" "--host" "The hostname" :default "localhost"])
+
+The documentation string will now look like:
+
+    "Usage:
+
+     This program does something extraordinary.
+
+     Switches                    Default     Desc          
+     --------                    -------     ----          
+     -p, --port                              Listen on this port              
+     -h, --host                  localhost   The hostname"
+
 ## Options
 
 An option is specified by providing a vector of information:

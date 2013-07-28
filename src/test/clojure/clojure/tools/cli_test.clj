@@ -17,7 +17,7 @@
       (is (= {:verbose false}
              (first (cli ["--no-verbose"]
                          ["--[no-]verbose"])))))
-    
+
     (testing "explicit syntax"
       (is (= {:verbose true}
              (first (cli ["--verbose"]
@@ -76,7 +76,18 @@
                                   ["--foo"]
                                   ["--[no-]verbose"])]
         (is (= {:foo "bar" :verbose true} options))
-        (is (= ["file" "-x" "other"] args))))))
+        (is (= ["file" "-x" "other"] args)))))
+
+  (testing "description"
+    (deftest should-be-able-to-supply-description
+      (let [[options args banner]
+            (cli ["-s" "localhost"]
+                 "This program does something awesome."
+                 ["-s" "--server" :description "Server name"])]
+        (is (= {:server "localhost"} options))
+        (is (empty? args))
+        (is (re-find #"This program does something awesome" banner))
+        (println banner)))))
 
 (deftest all-together-now
   (let [[options args _] (cli ["-p" "8080"

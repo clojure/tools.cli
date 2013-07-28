@@ -9,9 +9,10 @@
    (or (str default) "")
    (or docs "")])
 
-(defn- banner-for [specs]
-  (println "Usage:")
-  (println)
+(defn- banner-for [desc specs]
+  (when desc
+    (println desc)
+    (println))
   (let [docs (into (map build-doc specs)
                    [["--------" "-------" "----"]
                     ["Switches" "Default" "Desc"]])
@@ -126,8 +127,11 @@
   of extra arguments that did not match known switches, and a
   documentation banner to provide usage instructions."
   [args & specs]
-  (let [specs (map generate-spec specs)]
+  (let [[desc specs] (if (string? (first specs))
+                       [(first specs) (rest specs)]
+                       [nil specs])
+        specs (map generate-spec specs)]
     (let [[options extra-args] (apply-specs specs args)
-          banner  (with-out-str (banner-for specs))]
+          banner  (with-out-str (banner-for desc specs))]
       [options extra-args banner])))
 

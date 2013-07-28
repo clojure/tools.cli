@@ -53,16 +53,14 @@ a vector of trailing arguments that are not options:
 
 and a documentation string to use to provide help:
 
-    "Usage:
-
-     Switches                    Default     Desc          
+    "Switches                    Default     Desc          
      --------                    -------     ----          
      -p, --port                              Listen on this port              
      -h, --host                  localhost   The hostname     
      -v, --no-verbose --verbose  true                      
      -l, --log-directory         /some/path"   
 
-### Custom description
+### Custom description (upcoming in v0.2.3)
 
 You can pass an optional description argument that will be shown
 between "Usage:" and the description of the switches. For example:
@@ -74,9 +72,7 @@ between "Usage:" and the description of the switches. For example:
 
 The documentation string will now look like:
 
-    "Usage:
-
-     This program does something extraordinary.
+    "This program does something extraordinary.
 
      Switches                    Default     Desc          
      --------                    -------     ----          

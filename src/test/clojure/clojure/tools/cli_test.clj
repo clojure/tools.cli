@@ -86,8 +86,7 @@
                  ["-s" "--server" :description "Server name"])]
         (is (= {:server "localhost"} options))
         (is (empty? args))
-        (is (re-find #"This program does something awesome" banner))
-        (println banner)))))
+        (is (re-find #"This program does something awesome" banner))))))
 
 (deftest all-together-now
   (let [[options args _] (cli ["-p" "8080"

@@ -52,7 +52,7 @@
   [specs]
   (reduce (fn [m s]
             (if (contains? s :default)
-              (assoc m (:name s) (:default s))
+              ((:assoc-fn s) m (:name s) (:default s))
               m))
           {} specs))
 
@@ -73,12 +73,12 @@
          (throw (Exception. (str "'" opt "' is not a valid argument")))
          
          (and (opt? opt) (spec :flag))
-         (recur (assoc options (spec :name) (flag-for opt))
+         (recur ((spec :assoc-fn) options (spec :name) (flag-for opt))
                 extra-args
                 (rest args))
 
          (opt? opt)
-         (recur (assoc options (spec :name) ((spec :parse-fn) (second args)))
+         (recur ((spec :assoc-fn) options (spec :name) ((spec :parse-fn) (second args)))
                 extra-args
                 (drop 2 args))
 
@@ -106,6 +106,7 @@
             :aliases  (set aliases)
             :name     (keyword (last aliases))
             :parse-fn identity
+            :assoc-fn assoc
             :flag     flag}
            (when flag {:default false})
            options)))

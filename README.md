@@ -26,7 +26,12 @@ Latest stable release: 0.2.3
     (use '[clojure.tools.cli :only [cli]])
 
     (cli args
-         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 
+         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)
+          :assoc-fn (fn [previous key val]
+                       (assoc previous key
+                              (if-let [oldval (get previous key)]
+                                (merge oldval val)
+                                (hash-set val))))] 
          ["-h" "--host" "The hostname" :default "localhost"]
          ["-v" "--[no-]verbose" :default true]
          ["-l" "--log-directory" :default "/some/path"])
@@ -34,6 +39,7 @@ Latest stable release: 0.2.3
 with args of:
 
     ["-p" "8080"
+     "-p" "9090"
      "--no-verbose"
      "--log-directory" "/tmp"
      "some-file"]
@@ -42,7 +48,7 @@ will return a vector containing three elements:
 
 a clojure map with the names picked out for you as keywords:
 
-     {:port          8080
+     {:port          #{8080 9090}
       :host          "localhost"
       :verbose       false
       :log-directory "/tmp"}
@@ -100,13 +106,24 @@ This will be printed in the 'Desc' column of the help banner.
 
 Following that are optional parameters, provided in key-value pairs:
 
-    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %)]
+    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %)
+     :assoc-fn (fn [previous key val]
+                 (assoc previous key
+                        (if-let [oldval (get previous key)]
+                          (merge oldval val)
+                          (hash-set val))))]
 
 These should be self-explanatory. The defaults if not provided are as follows:
 
     {:default  nil
      :parse-fn identity
+     :assoc-fn assoc
      :flag     false}
+
+If you provide the same option multiple times, the `assoc-fn` will be
+called for each value after the first. This gives you another way to
+build collections of values (the other being using `parse-fn` to split
+the value).
 
 ### Boolean Flags
 

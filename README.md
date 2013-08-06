@@ -4,21 +4,21 @@ tools.cli is a command line argument parser for Clojure.
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.2.2
+Latest stable release: 0.2.3
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.2.2"]
+    [org.clojure/tools.cli "0.2.3"]
     
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.2.2</version>
+      <version>0.2.3</version>
     </dependency>
 
 ## Example Usage
@@ -60,7 +60,7 @@ and a documentation string to use to provide help:
      -v, --no-verbose --verbose  true                      
      -l, --log-directory         /some/path"   
 
-### Custom description (upcoming in v0.2.3)
+### Custom description
 
 You can pass an optional description argument that will be shown
 between "Usage:" and the description of the switches. For example:
@@ -182,6 +182,8 @@ providing help to the user:
 
 ## Change Log
 
+* Release 0.2.3 on 2013-08-06
+  * Add optional description string to prefix the returned banner
 * Release 0.2.2 on 2012-08-09
   * Applying patch for [TCLI-1](http://dev.clojure.org/jira/browse/TCLI-1) 
     (do not include keys when no value provided by :default)

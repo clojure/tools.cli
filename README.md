@@ -199,6 +199,9 @@ providing help to the user:
 
 ## Change Log
 
+* Release 0.2.4 on 213-08-06
+  * Applying patch for [TCLI-2](http://dev.clojure.org/jira/browse/TCLI-2)
+    (support an assoc-fn option)
 * Release 0.2.3 on 2013-08-06
   * Add optional description string to prefix the returned banner
 * Release 0.2.2 on 2012-08-09

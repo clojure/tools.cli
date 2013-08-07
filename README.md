@@ -4,21 +4,21 @@ tools.cli is a command line argument parser for Clojure.
 
 ## Releases and Dependency Information
 
-Latest stable release: 0.2.3
+Latest stable release: 0.2.4
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.2.3"]
+    [org.clojure/tools.cli "0.2.4"]
     
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.2.3</version>
+      <version>0.2.4</version>
     </dependency>
 
 ## Example Usage

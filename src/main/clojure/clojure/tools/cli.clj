@@ -1,8 +1,64 @@
 (ns ^{:author "Gareth Jones"}
   clojure.tools.cli
-  (:use [clojure.string :only [replace]]
+  (:use [clojure.string :as s :only [replace]]
         [clojure.pprint :only [cl-format]])
   (:refer-clojure :exclude [replace]))
+
+(defn- tokenize-args
+  "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
+  of remaining arguments. Returns as [option-tokens remaining-args].
+
+  Adheres to GNU Program Argument Syntax Conventions:
+  https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+
+  Expands clumped short options like \"-abc\" into:
+  [[:short-opt \"-a\"] [:short-opt \"-b\"] [:short-opt \"-c\"]]
+
+  If \"-b\" were in the set of options that require arguments, \"-abc\" would
+  then be interpreted as: [[:short-opt \"-a\"] [:short-opt \"-b\" \"c\"]]
+
+  Long options with `=` are always parsed as option + optarg, even if nothing
+  follows the `=` sign.
+
+  If the :in-order flag is true, the first non-option, non-optarg argument
+  stops options processing. This is useful for handling subcommand options."
+  [required-set arguments & options]
+  (let [{:keys [in-order]} options]
+    (loop [opts [] args [] [car & cdr] arguments]
+      (if car
+        (condp re-seq car
+          ;; Double dash always ends options processing
+          #"^--$" (recur opts (into args cdr) [])
+          ;; Long options with assignment always passes optarg, required or not
+          #"^--.+=" (recur (conj opts (into [:long-opt] (s/split car #"=" 2)))
+                           args cdr)
+          ;; Long options, consumes cdr head if needed
+          #"^--" (let [[optarg cdr] (if (contains? required-set car)
+                                      [(first cdr) (rest cdr)]
+                                      [nil cdr])]
+                   (recur (conj opts (into [:long-opt car] (if optarg [optarg] [])))
+                          args cdr))
+          ;; Short options, expands clumped opts until an optarg is required
+          #"^-." (let [[os cdr] (loop [os [] [c & cs] (rest car)]
+                                  (let [o (str \- c)]
+                                    (if (contains? required-set o)
+                                      (if (seq cs)
+                                        ;; Get optarg from rest of car
+                                        [(conj os [:short-opt o (s/join cs)]) cdr]
+                                        ;; Get optarg from head of cdr
+                                        [(conj os [:short-opt o (first cdr)]) (rest cdr)])
+                                      (if (seq cs)
+                                        (recur (conj os [:short-opt o]) cs)
+                                        [(conj os [:short-opt o]) cdr]))))]
+                   (recur (into opts os) args cdr))
+          (if in-order
+            (recur opts (into args (cons car cdr)) [])
+            (recur opts (conj args car) cdr)))
+        [opts args]))))
+
+;;
+;; Legacy API
+;;
 
 (defn- build-doc [{:keys [switches docs default]}]
   [(apply str (interpose ", " switches))

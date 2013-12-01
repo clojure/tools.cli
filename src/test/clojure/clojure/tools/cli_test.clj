@@ -1,7 +1,7 @@
 (ns clojure.tools.cli-test
   (:use [clojure.string :only [split]]
         [clojure.test :only [deftest is testing]]
-        [clojure.tools.cli :only [cli]]))
+        [clojure.tools.cli :as cli :only [cli]]))
 
 (testing "syntax"
   (deftest should-handle-simple-strings
@@ -119,3 +119,24 @@
             :log-directory "/tmp"
             :server "localhost"} options))
     (is (= ["filename"] args))))
+
+(def tokenize-args
+  #'cli/tokenize-args)
+
+(deftest test-tokenize-args
+  (testing "expands clumped short options"
+    (is (= (tokenize-args #{"-p"} ["-abcp80"])
+           [[[:short-opt "-a"] [:short-opt "-b"] [:short-opt "-c"] [:short-opt "-p" "80"]] []])))
+  (testing "detects arguments to long options"
+    (is (= (tokenize-args #{"--port" "--host"} ["--port=80" "--host" "example.com"])
+           [[[:long-opt "--port" "80"] [:long-opt "--host" "example.com"]] []]))
+    (is (= (tokenize-args #{} ["--foo=bar" "--noopt="])
+           [[[:long-opt "--foo" "bar"] [:long-opt "--noopt" ""]] []])))
+  (testing "stops option processing on double dash"
+    (is (= (tokenize-args #{} ["-a" "--" "-b"])
+           [[[:short-opt "-a"]] ["-b"]])))
+  (testing "finds trailing options unless :in-order is true"
+    (is (= (tokenize-args #{} ["-a" "foo" "-b"])
+           [[[:short-opt "-a"] [:short-opt "-b"]] ["foo"]]))
+    (is (= (tokenize-args #{} ["-a" "foo" "-b"] :in-order true)
+           [[[:short-opt "-a"]] ["foo" "-b"]]))))

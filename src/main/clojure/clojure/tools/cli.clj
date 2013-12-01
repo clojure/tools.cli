@@ -1,7 +1,7 @@
 (ns ^{:author "Gareth Jones"}
   clojure.tools.cli
-  (:use [clojure.string :only (replace)]
-        [clojure.pprint :only (pprint cl-format)])
+  (:use [clojure.string :only [replace]]
+        [clojure.pprint :only [cl-format]])
   (:refer-clojure :exclude [replace]))
 
 (defn- build-doc [{:keys [switches docs default]}]
@@ -71,7 +71,7 @@
 
          (and (opt? opt) (nil? spec))
          (throw (Exception. (str "'" opt "' is not a valid argument")))
-         
+
          (and (opt? opt) (spec :flag))
          (recur ((spec :assoc-fn) options (spec :name) (flag-for opt))
                 extra-args
@@ -135,4 +135,3 @@
     (let [[options extra-args] (apply-specs specs args)
           banner  (with-out-str (banner-for desc specs))]
       [options extra-args banner])))
-

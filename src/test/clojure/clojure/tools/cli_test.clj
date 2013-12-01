@@ -1,6 +1,7 @@
 (ns clojure.tools.cli-test
-  (:use [clojure.test]
-        [clojure.tools.cli]))
+  (:use [clojure.string :only [split]]
+        [clojure.test :only [deftest is testing]]
+        [clojure.tools.cli :only [cli]]))
 
 (testing "syntax"
   (deftest should-handle-simple-strings
@@ -45,7 +46,7 @@
   (deftest should-apply-parse-fn
     (is (= {:names ["john" "jeff" "steve"]}
            (first (cli ["--names" "john,jeff,steve"]
-                       ["--names" :parse-fn #(vec (.split % ","))])))))
+                       ["--names" :parse-fn #(vec (split % #","))])))))
 
   (testing "aliases"
     (deftest should-support-multiple-aliases
@@ -68,7 +69,7 @@
             [options args _] (cli ["-p" "1" "--port" "2"]
                                   ["-p" "--port" "description"
                                    :assoc-fn assoc-fn
-                                   :parse-fn #(Integer. %)])]
+                                   :parse-fn #(Integer/parseInt %)])]
         (is (= {:port #{1 2}} options)))))
 
   (testing "extra arguments"
@@ -107,7 +108,7 @@
                                "--log-directory" "/tmp"
                                "--server" "localhost"
                                "filename"]
-                              ["-p" "--port" :parse-fn #(Integer. %)]
+                              ["-p" "--port" :parse-fn #(Integer/parseInt %)]
                               ["--host" :default "localhost"]
                               ["--[no-]verbose" :default true]
                               ["--log-directory" :default "/some/path"]

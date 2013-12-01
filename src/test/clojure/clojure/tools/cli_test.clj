@@ -140,3 +140,28 @@
            [[[:short-opt "-a"] [:short-opt "-b"]] ["foo"]]))
     (is (= (tokenize-args #{} ["-a" "foo" "-b"] :in-order true)
            [[[:short-opt "-a"]] ["foo" "-b"]]))))
+
+(def normalize-args
+  #'cli/normalize-args)
+
+(deftest test-normalize-args
+  (testing "expands clumped short options"
+    (is (= (normalize-args [] ["-abc" "foo"])
+           ["-a" "-b" "-c" "foo"]))
+    (is (= (normalize-args [{:switches ["-p"] :flag false}] ["-abcp80" "foo"])
+           ["-a" "-b" "-c" "-p" "80" "foo"])))
+  (testing "expands long options with assignment"
+    (is (= (normalize-args [{:switches ["--port"] :flag false}] ["--port=80" "--noopt=" "foo"])
+           ["--port" "80" "--noopt" "" "foo"])))
+  (testing "preserves double dash"
+    (is (= (normalize-args [] ["-ab" "--" "foo" "-c"])
+           ["-a" "-b" "--" "foo" "-c"])))
+  (testing "hoists all options and optargs to the front"
+    (is (= (normalize-args
+             [{:switches ["-x"] :flag false}
+              {:switches ["-y"] :flag false}
+              {:switches ["--zulu"] :flag false}]
+             ["foo" "-axray" "bar" "-by" "yankee" "-c" "baz" "--zulu" "zebra"
+              "--" "--full" "stop"])
+           ["-a" "-x" "ray" "-b" "-y" "yankee" "-c" "--zulu" "zebra"
+            "foo" "bar" "baz" "--" "--full" "stop"]))))

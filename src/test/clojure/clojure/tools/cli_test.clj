@@ -100,7 +100,19 @@
                  ["-s" "--server" :description "Server name"])]
         (is (= {:server "localhost"} options))
         (is (empty? args))
-        (is (re-find #"This program does something awesome" banner))))))
+        (is (re-find #"This program does something awesome" banner)))))
+
+  (testing "handles GNU option parsing conventions"
+    (deftest should-handle-gnu-option-parsing-conventions
+      (is (= (take 2 (cli ["foo" "-abcp80" "bar" "--host=example.com"]
+                          ["-a" "--alpha" :flag true]
+                          ["-b" "--bravo" :flag true]
+                          ["-c" "--charlie" :flag true]
+                          ["-h" "--host" :flag false]
+                          ["-p" "--port" "Port number"
+                           :flag false :parse-fn #(Integer/parseInt %)]))
+             [{:alpha true :bravo true :charlie true :port 80 :host "example.com"}
+              ["foo" "bar"]])))))
 
 (deftest all-together-now
   (let [[options args _] (cli ["-p" "8080"

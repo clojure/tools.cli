@@ -200,7 +200,8 @@
   (let [[desc specs] (if (string? (first specs))
                        [(first specs) (rest specs)]
                        [nil specs])
-        specs (map generate-spec specs)]
+        specs (map generate-spec specs)
+        args (normalize-args specs args)]
     (let [[options extra-args] (apply-specs specs args)
           banner  (with-out-str (banner-for desc specs))]
       [options extra-args banner])))

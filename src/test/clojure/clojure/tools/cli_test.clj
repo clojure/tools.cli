@@ -177,3 +177,41 @@
               "--" "--full" "stop"])
            ["-a" "-x" "ray" "-b" "-y" "yankee" "-c" "--zulu" "zebra"
             "foo" "bar" "baz" "--" "--full" "stop"]))))
+
+(def compile-option-specs
+  #'cli/compile-option-specs)
+
+(deftest test-compile-option-specs
+  (testing "returns values for all keys in spec-keys"
+    (is (= (set (keys (first (compile-option-specs [["-f" "--foo" "desc"]]))))
+           (set @#'cli/spec-keys))))
+  (testing "interprets first three string arguments as short-opt, long-opt=required, and desc"
+    (is (= (map (juxt :short-opt :long-opt :required :desc)
+                (compile-option-specs [["-a" :id :alpha]
+                                       ["-b" "--beta"]
+                                       [nil nil "DESC" :id :gamma]
+                                       ["-f" "--foo=FOO" "desc"]]))
+           [["-a" nil nil nil]
+            ["-b" "--beta" nil nil]
+            [nil nil nil "DESC"]
+            ["-f" "--foo" "FOO" "desc"]])))
+  (testing "throws AssertionError on unset :id or duplicate :id, :short-opt, :long-opt"
+    (is (thrown? AssertionError (compile-option-specs [["-a" :id nil]])))
+    (is (thrown? AssertionError (compile-option-specs [["-a" "--alpha"] ["-b" :id :alpha]])))
+    (is (thrown? AssertionError (compile-option-specs [{:id :a :short-opt "-a"}
+                                                       {:id :b :short-opt "-a"}])))
+    (is (thrown? AssertionError (compile-option-specs [{:id :alpha :long-opt "--alpha"}
+                                                       {:id :beta :long-opt "--alpha"}]))))
+  (testing "desugars `--long-opt=value`"
+    (is (= (map (juxt :id :long-opt :required)
+                (compile-option-specs [[nil "--foo FOO"] [nil "--bar=BAR"]]))
+           [[:foo "--foo" "FOO"]
+            [:bar "--bar" "BAR"]])))
+  (testing "desugars :validate [fn msg]"
+    (is (= (map (juxt :validate-fn :validate-msg)
+                (compile-option-specs
+                  [[nil "--name NAME" :validate [seq "Must be present"]]]))
+           [[seq "Must be present"]])))
+  (testing "accepts maps as option specs without munging values"
+    (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
+           [{:id ::foo :short-opt "-f" :long-opt "--foo"}]))))

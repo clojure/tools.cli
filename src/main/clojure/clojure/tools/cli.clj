@@ -229,10 +229,6 @@
             :long-opt long-opt
             :required req
             :desc desc
-            :default nil
-            :default-desc nil
-            :parse-fn nil
-            :assoc-fn nil
             :validate-fn validate-fn
             :validate-msg validate-msg}
            (select-keys spec-map spec-keys))))
@@ -263,6 +259,8 @@
 
   The option spec entry `:validate [fn msg]` desugars into the two entries
   :validate-fn and :validate-msg.
+
+  A :default entry will not be included in the compiled spec unless specified.
 
   An option spec may also be passed as a map containing the entries above,
   in which case that subset of the map is transferred directly to the result

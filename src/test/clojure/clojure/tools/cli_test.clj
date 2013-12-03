@@ -182,9 +182,11 @@
   #'cli/compile-option-specs)
 
 (deftest test-compile-option-specs
-  (testing "returns values for all keys in spec-keys"
-    (is (= (set (keys (first (compile-option-specs [["-f" "--foo" "desc"]]))))
-           (set @#'cli/spec-keys))))
+  (testing "does not set values for :default unless specified"
+    (is (= (map #(contains? % :default) (compile-option-specs
+                                          [["-f" "--foo"]
+                                           ["-b" "--bar=ARG" :default 0]]))
+           [false true])))
   (testing "interprets first three string arguments as short-opt, long-opt=required, and desc"
     (is (= (map (juxt :short-opt :long-opt :required :desc)
                 (compile-option-specs [["-a" :id :alpha]

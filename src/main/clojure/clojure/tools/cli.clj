@@ -345,7 +345,7 @@
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
     [(default-option-map specs) []] tokens))
 
-(defn- summarize
+(defn summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [all-boolean? (every? (comp not :required) specs)

@@ -1,7 +1,7 @@
 (ns clojure.tools.cli-test
   (:use [clojure.string :only [join split]]
         [clojure.test :only [deftest is testing]]
-        [clojure.tools.cli :as cli :only [cli parse-opts]]))
+        [clojure.tools.cli :as cli :only [cli parse-opts summarize]]))
 
 (testing "syntax"
   (deftest should-handle-simple-strings
@@ -277,9 +277,6 @@
                                          [:short-opt "-v"]
                                          [:long-opt "--verbose"]])
              [{:alpha true :verbose 3} []])))))
-
-(def summarize
-  #'cli/summarize)
 
 (deftest test-summarize
   (testing "summarizes options"

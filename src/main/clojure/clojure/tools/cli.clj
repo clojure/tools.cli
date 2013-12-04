@@ -1,4 +1,4 @@
-(ns ^{:author "Gareth Jones"}
+(ns ^{:author "Gareth Jones, Sung Pae"}
   clojure.tools.cli
   (:use [clojure.string :as s :only [replace]]
         [clojure.pprint :only [cl-format]])

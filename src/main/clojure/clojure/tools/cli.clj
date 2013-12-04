@@ -278,3 +278,72 @@
            (select-keys spec spec-keys)
            (compile-spec spec)))
        specs))
+
+(defn- default-option-map [specs]
+  (reduce (fn [m s]
+            (if (contains? s :default)
+              (assoc m (:id s) (:default s))
+              m))
+          {} specs))
+
+(defn- find-spec [specs opt-type opt]
+  (first (filter #(= opt (opt-type %)) specs)))
+
+(defn- pr-join [& xs]
+  (pr-str (s/join \space xs)))
+
+(defn- missing-required-error [opt example-required]
+  (str "Missing required argument for " (pr-join opt example-required)))
+
+(defn- parse-error [opt optarg msg]
+  (str "Error while parsing option " (pr-join opt optarg) ": " msg))
+
+(defn- validate-error [opt optarg msg]
+  (str "Failed to validate " (pr-join opt optarg)
+       (if msg (str ": " msg) "")))
+
+(defn- validate [value spec opt optarg]
+  (let [{:keys [validate-fn validate-msg]} spec]
+    (if (or (nil? validate-fn)
+            (try (validate-fn value) (catch Throwable _)))
+      [value nil]
+      [::error (validate-error opt optarg validate-msg)])))
+
+(defn- parse-value [value spec opt optarg]
+  (let [{:keys [parse-fn]} spec
+        [value error] (if parse-fn
+                        (try
+                          [(parse-fn value) nil]
+                          (catch Throwable e
+                            [nil (parse-error opt optarg (str e))]))
+                        [value nil])]
+    (if error
+      [::error error]
+      (validate value spec opt optarg))))
+
+(defn- parse-optarg [spec opt optarg]
+  (let [{:keys [required]} spec]
+    (if (and required (nil? optarg))
+      [::error (missing-required-error opt required)]
+      (parse-value (if required optarg true) spec opt optarg))))
+
+(defn- parse-option-tokens
+  "Reduce sequence of [opt-type opt ?optarg?] tokens into a map of
+  {option-id value} merged over the default values in the option
+  specifications.
+
+  Unknown options, missing required arguments, option argument parsing
+  exceptions, and validation failures are collected into a vector of error
+  message strings.
+
+  Returns [option-map error-messages-vector]."
+  [specs tokens]
+  (reduce
+    (fn [[m errors] [opt-type opt optarg]]
+      (if-let [spec (find-spec specs opt-type opt)]
+        (let [[value error] (parse-optarg spec opt optarg)]
+          (if-not (= value ::error)
+            [((:assoc-fn spec assoc) m (:id spec) value) errors]
+            [m (conj errors error)]))
+        [m (conj errors (str "Unknown option: " (pr-str opt)))]))
+    [(default-option-map specs) []] tokens))

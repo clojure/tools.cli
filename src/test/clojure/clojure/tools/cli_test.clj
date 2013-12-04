@@ -217,3 +217,59 @@
   (testing "accepts maps as option specs without munging values"
     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
            [{:id ::foo :short-opt "-f" :long-opt "--foo"}]))))
+
+(def parse-option-tokens
+  #'cli/parse-option-tokens)
+
+(defn has-error? [re coll]
+  (seq (filter (partial re-seq re) coll)))
+
+(deftest test-parse-option-tokens
+  (testing "parses and validates option arguments"
+    (let [specs (compile-option-specs
+                  [["-p" "--port NUMBER"
+                    :parse-fn #(Integer/parseInt %)
+                    :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
+                   ["-f" "--file PATH"
+                    :validate [#(not= \/ (first %)) "Must be a relative path"]]])]
+      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"]])
+             [{:port (int 80)} []]))
+      (is (has-error? #"Unknown option"
+                      (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
+      (is (has-error? #"Missing required"
+                      (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
+      (is (has-error? #"Must be between"
+                      (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
+      (is (has-error? #"Error while parsing"
+                      (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
+      (is (has-error? #"Must be a relative path"
+                      (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))))
+  (testing "merges values over default option map"
+    (let [specs (compile-option-specs
+                  [["-a" "--alpha"]
+                   ["-b" "--beta" :default false]
+                   ["-g" "--gamma=ARG"]
+                   ["-d" "--delta=ARG" :default "DELTA"]])]
+      (is (= (parse-option-tokens specs [])
+             [{:beta false :delta "DELTA"} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]
+                                         [:short-opt "-b"]
+                                         [:short-opt "-g" "GAMMA"]
+                                         [:short-opt "-d" "delta"]])
+             [{:alpha true :beta true :gamma "GAMMA" :delta "delta"} []]))))
+  (testing "associates :id and value with :assoc-fn"
+    (let [specs (compile-option-specs
+                  [["-a" "--alpha"
+                    :default true
+                    :assoc-fn (fn [m k v] (assoc m k (not v)))]
+                   ["-v" "--verbose"
+                    :default 0
+                    :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])]
+      (is (= (parse-option-tokens specs [])
+             [{:alpha true :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:alpha true :verbose 3} []])))))

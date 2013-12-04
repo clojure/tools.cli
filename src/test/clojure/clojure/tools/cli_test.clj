@@ -1,7 +1,7 @@
 (ns clojure.tools.cli-test
   (:use [clojure.string :only [join split]]
         [clojure.test :only [deftest is testing]]
-        [clojure.tools.cli :as cli :only [cli]]))
+        [clojure.tools.cli :as cli :only [cli parse-opts]]))
 
 (testing "syntax"
   (deftest should-handle-simple-strings
@@ -231,9 +231,13 @@
                     :parse-fn #(Integer/parseInt %)
                     :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
                    ["-f" "--file PATH"
-                    :validate [#(not= \/ (first %)) "Must be a relative path"]]])]
-      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"]])
-             [{:port (int 80)} []]))
+                    :validate [#(not= \/ (first %)) "Must be a relative path"]]
+                   ["-q" "--quiet"
+                    :id :verbose
+                    :default true
+                    :parse-fn not]])]
+      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
+             [{:port (int 80) :verbose false} []]))
       (is (has-error? #"Unknown option"
                       (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
       (is (has-error? #"Missing required"
@@ -301,3 +305,37 @@
   (testing "does not print :default column when all options are boolean"
     (is (= (summarize (compile-option-specs [["-m" "--minimal" "A minimal option summary"]]))
            "  -m, --minimal  A minimal option summary"))))
+
+(deftest test-parse-opts
+  (testing "parses options to :options"
+    (is (= (:options (parse-opts ["-abp80"] [["-a" "--alpha"]
+                                             ["-b" "--beta"]
+                                             ["-p" "--port PORT"
+                                              :parse-fn #(Integer/parseInt %)]]))
+           {:alpha true :beta true :port (int 80)})))
+  (testing "collects error messages into :errors"
+    (let [specs [["-f" "--file PATH"
+                  :validate [#(not= \/ (first %)) "Must be a relative path"]]
+                 ["-p" "--port PORT"
+                  :parse-fn #(Integer/parseInt %)
+                  :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]]
+          errors (:errors (parse-opts ["-f" "/foo/bar" "-p0"] specs))]
+      (is (has-error? #"Must be a relative path" errors))
+      (is (has-error? #"Must be between 0 and 65536" errors))))
+  (testing "collects unprocessed arguments into :arguments"
+    (is (= (:arguments (parse-opts ["foo" "-a" "bar" "--" "-b" "baz"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]))
+           ["foo" "bar" "-b" "baz"])))
+  (testing "provides an option summary at :summary"
+    (is (re-seq #"-a\W+--alpha" (:summary (parse-opts [] [["-a" "--alpha"]])))))
+  (testing "processes arguments in order if :in-order is true"
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]
+                                   :in-order true))
+           ["foo" "-b"])))
+  (testing "accepts optional summary-fn for generating options summary"
+    (is (= (:summary (parse-opts [] [["-a" "--alpha"] ["-b" "--beta"]]
+                                 :summary-fn (fn [specs]
+                                               (format "Usage: myprog [%s] arg1 arg2"
+                                                       (join \| (map :long-opt specs))))))
+           "Usage: myprog [--alpha|--beta] arg1 arg2"))))

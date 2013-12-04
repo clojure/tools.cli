@@ -8,9 +8,6 @@
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
   of remaining arguments. Returns as [option-tokens remaining-args].
 
-  Adheres to GNU Program Argument Syntax Conventions:
-  https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
-
   Expands clumped short options like \"-abc\" into:
   [[:short-opt \"-a\"] [:short-opt \"-b\"] [:short-opt \"-c\"]]
 
@@ -357,7 +354,8 @@
                                      long-opt (str "    " long-opt)
                                      short-opt short-opt)
                            [opt dd] (if required
-                                      [(str opt \space required) (or default-desc (if default (str default) ""))]
+                                      [(str opt \space required)
+                                       (or default-desc (if default (str default) ""))]
                                       [opt ""])]
                        (if all-boolean?
                          [opt (or desc "")]
@@ -370,3 +368,126 @@
         lines (map #(s/trimr (cl-format nil cl-fmt (interleave lens %)))
                    parts)]
     (s/join \newline lines)))
+
+(defn- required-arguments [specs]
+  (reduce
+    (fn [s {:keys [required short-opt long-opt]}]
+      (if required
+        (into s (remove nil? [short-opt long-opt]))
+        s))
+    #{} specs))
+
+(defn parse-opts
+  "Parse arguments sequence according to given option specifications and the
+  GNU Program Argument Syntax Conventions:
+
+    https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+
+  Option specifications are a sequence of vectors with the following format:
+
+    [short-opt long-opt-with-required-description description
+     :property value]
+
+  The first three string parameters in an option spec are positional and
+  optional, and may be nil in order to specify a later parameter.
+
+  By default, options are boolean flags that are set to true when toggled, but
+  the second string parameter may be used to specify that an option requires
+  an argument.
+
+    e.g. [\"-p\" \"--port PORT\"] specifies that --port requires an argument,
+         of which PORT is a short description.
+
+  The :property value pairs are optional and take precedence over the
+  positional string arguments. The valid properties are:
+
+    :id           The key for this option in the resulting option map. This
+                  is normally set to the keywordized name of the long option
+                  without the leading dashes.
+
+                  Must be a unique truthy value.
+
+    :short-opt    The short format for this option, normally set by the first
+                  positional string parameter: e.g. \"-p\". Must be unique.
+
+    :long-opt     The long format for this option, normally set by the second
+                  positional string parameter; e.g. \"--port\". Must be unique.
+
+    :required     A description of the required argument for this option if
+                  one is required; normally set in the second positional
+                  string parameter after the long option: \"--port PORT\".
+
+                  The absence of this entry indicates that the option is a
+                  boolean toggle that is set to true when specified on the
+                  command line.
+
+    :desc         A optional short description of this option.
+
+    :default      The default value of this option. If none is specified, the
+                  resulting option map will not contain an entry for this
+                  option unless set on the command line.
+
+    :default-desc An optional description of the default value. This should be
+                  used when the string representation of the default value is
+                  too ugly to be printed on the command line.
+
+    :parse-fn     A function that receives the required option argument and
+                  returns the option value.
+
+                  If this is a boolean option, parse-fn will receive the value
+                  true. This may be used to invert the logic of this option:
+
+                  [\"-q\" \"--quiet\"
+                   :id :verbose
+                   :default true
+                   :parse-fn not]
+
+    :assoc-fn     A function that receives the current option map, the current
+                  option :id, and the current parsed option value, and returns
+                  a new option map.
+
+                  This may be used to create non-idempotent options, like
+                  setting a verbosity level by specifying an option multiple
+                  times. (\"-vvv\" -> 3)
+
+                  [\"-v\" \"--verbose\"
+                   :default 0
+                   :assoc-fn (fn [m k _] (update-in m [k] inc))]
+
+    :validate     A vector of [validate-fn validate-msg].
+
+    :validate-fn  A function that receives the parsed option value and returns
+                  a falsy value when the value is invalid.
+
+    :validate-msg An optional message that will be added to the :errors vector
+                  on validation failure.
+
+  parse-opts returns a map with four entries:
+
+    {:options     The options map, keyed by :id, mapped to the parsed value
+     :arguments   A vector of unprocessed arguments
+     :summary     A string containing a minimal options summary
+     :errors      A vector of error message strings generated during parsing
+     }
+
+  A few function options may be specified to influence the behavior of
+  parse-opts:
+
+    :in-order     Stop option processing at the first unknown argument. Useful
+                  for building programs with subcommands that have their own
+                  option specs.
+
+    :summary-fn   A function that receives the sequence of compiled option specs
+                  ( documented at #'clojure.tools.cli/compile-option-specs ), and
+                  returns a custom option summary string.
+  "
+  [arguments option-specs & options]
+  (let [{:keys [in-order summary-fn]} options
+        specs (compile-option-specs option-specs)
+        req (required-arguments specs)
+        [tokens rest-args] (tokenize-args req arguments :in-order in-order)
+        [opts errors] (parse-option-tokens specs tokens)]
+    {:options opts
+     :arguments rest-args
+     :summary ((or summary-fn summarize) specs)
+     :errors (when (seq errors) errors)}))

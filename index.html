@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
-    <title>clojure.tools.cli - Command-line processor 0.2.4 API documentation</title>
+    <title>clojure.tools.cli - Command-line processor 0.3.0 API documentation</title>
     <link href="static/favicon.png" rel="icon" />
     <link href="static/favicon.png" rel="shortcut icon" />
     <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
@@ -25,7 +25,7 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Command-line processor</span> <span id="version">0.2.4</span> API</span><br />
+    <span class="toc-header"><span id="project-name">Command-line processor</span> <span id="version">0.3.0</span> API</span><br />
     <ul>
       <li><a class="wiki_link" href="index.html">Overview</a></li>
       <li><a class="wiki_link" href="api-index.html">API Index</a></li>
@@ -56,14 +56,20 @@ namespace.
     <div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.tools.cli/cli">cli</a>
       
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.tools.cli/parse-opts">parse-opts</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.tools.cli/summarize">summarize</a>
+      
     </div>
   </div>
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.tools.cli">clojure.tools.cli</span>
-  - <span id="header-project">Command-line processor</span> <span id="header-version">0.2.4</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
+  - <span id="header-project">Command-line processor</span> <span id="header-version">0.3.0</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
-<span id="author-line">by <span id="author-name">Gareth Jones</span><br /></span>
+<span id="author-line">by <span id="author-name">Gareth Jones, Sung Pae</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.tools.cli</span>
 <p></p>
 <h2>Overview</h2>
@@ -102,7 +108,131 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/2ffb519737b6c02bd4bcf87cf7c87102dc0f6ee5/src/main/clojure/clojure/tools/cli.clj#L114" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.tools.cli/parse-opts">parse-opts</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (parse-opts arguments option-specs &amp; options)
+</pre>
+    <pre id="var-docstr">Parse arguments sequence according to given option specifications and the
+GNU Program Argument Syntax Conventions:
+
+  <a href="https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html">https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html</a>
+
+Option specifications are a sequence of vectors with the following format:
+
+  [short-opt long-opt-with-required-description description
+   :property value]
+
+The first three string parameters in an option spec are positional and
+optional, and may be nil in order to specify a later parameter.
+
+By default, options are boolean flags that are set to true when toggled, but
+the second string parameter may be used to specify that an option requires
+an argument.
+
+  e.g. ["-p" "--port PORT"] specifies that --port requires an argument,
+       of which PORT is a short description.
+
+The :property value pairs are optional and take precedence over the
+positional string arguments. The valid properties are:
+
+  :id           The key for this option in the resulting option map. This
+                is normally set to the keywordized name of the long option
+                without the leading dashes.
+
+                Must be a unique truthy value.
+
+  :short-opt    The short format for this option, normally set by the first
+                positional string parameter: e.g. "-p". Must be unique.
+
+  :long-opt     The long format for this option, normally set by the second
+                positional string parameter; e.g. "--port". Must be unique.
+
+  :required     A description of the required argument for this option if
+                one is required; normally set in the second positional
+                string parameter after the long option: "--port PORT".
+
+                The absence of this entry indicates that the option is a
+                boolean toggle that is set to true when specified on the
+                command line.
+
+  :desc         A optional short description of this option.
+
+  :default      The default value of this option. If none is specified, the
+                resulting option map will not contain an entry for this
+                option unless set on the command line.
+
+  :default-desc An optional description of the default value. This should be
+                used when the string representation of the default value is
+                too ugly to be printed on the command line.
+
+  :parse-fn     A function that receives the required option argument and
+                returns the option value.
+
+                If this is a boolean option, parse-fn will receive the value
+                true. This may be used to invert the logic of this option:
+
+                ["-q" "--quiet"
+                 :id :verbose
+                 :default true
+                 :parse-fn not]
+
+  :assoc-fn     A function that receives the current option map, the current
+                option :id, and the current parsed option value, and returns
+                a new option map.
+
+                This may be used to create non-idempotent options, like
+                setting a verbosity level by specifying an option multiple
+                times. ("-vvv" -&gt; 3)
+
+                ["-v" "--verbose"
+                 :default 0
+                 :assoc-fn (fn [m k _] (update-in m [k] inc))]
+
+  :validate     A vector of [validate-fn validate-msg].
+
+  :validate-fn  A function that receives the parsed option value and returns
+                a falsy value when the value is invalid.
+
+  :validate-msg An optional message that will be added to the :errors vector
+                on validation failure.
+
+parse-opts returns a map with four entries:
+
+  {:options     The options map, keyed by :id, mapped to the parsed value
+   :arguments   A vector of unprocessed arguments
+   :summary     A string containing a minimal options summary
+   :errors      A vector of error message strings generated during parsing
+   }
+
+A few function options may be specified to influence the behavior of
+parse-opts:
+
+  :in-order     Stop option processing at the first unknown argument. Useful
+                for building programs with subcommands that have their own
+                option specs.
+
+  :summary-fn   A function that receives the sequence of compiled option specs
+                ( documented at #'clojure.tools.cli/compile-option-specs ), and
+                returns a custom option summary string.
+</pre>
+    
+    
+    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L380" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.tools.cli/summarize">summarize</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (summarize specs)
+</pre>
+    <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
+    
+    
+    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L348" id="var-source">Source</a>
   </div>
 </div>
 

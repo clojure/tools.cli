@@ -1,5 +1,5 @@
 (ns clojure.tools.cli-test
-  (:use [clojure.string :only [split]]
+  (:use [clojure.string :only [join split]]
         [clojure.test :only [deftest is testing]]
         [clojure.tools.cli :as cli :only [cli]]))
 
@@ -273,3 +273,31 @@
                                          [:short-opt "-v"]
                                          [:long-opt "--verbose"]])
              [{:alpha true :verbose 3} []])))))
+
+(def summarize
+  #'cli/summarize)
+
+(deftest test-summarize
+  (testing "summarizes options"
+    (is (= (summarize (compile-option-specs
+                        [["-s" "--server HOST" "Upstream server"
+                          :default :some-object-whose-string-representation-is-awful
+                          :default-desc "example.com"]
+                         ["-p" "--port=PORT" "Upstream port number"
+                          :default 80]
+                         ["-o" nil "Output file"
+                          :id :output
+                          :required "PATH"]
+                         ["-v" nil "Verbosity level; may be specified more than once"
+                          :id :verbose
+                          :default 0]
+                         [nil "--help"]]))
+           (join \newline
+                 ["  -s, --server HOST  example.com  Upstream server"
+                  "  -p, --port PORT    80           Upstream port number"
+                  "  -o PATH                         Output file"
+                  "  -v                              Verbosity level; may be specified more than once"
+                  "      --help"]))))
+  (testing "does not print :default column when all options are boolean"
+    (is (= (summarize (compile-option-specs [["-m" "--minimal" "A minimal option summary"]]))
+           "  -m, --minimal  A minimal option summary"))))

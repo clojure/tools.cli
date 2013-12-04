@@ -347,3 +347,26 @@
             [m (conj errors error)]))
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
     [(default-option-map specs) []] tokens))
+
+(defn- summarize
+  "Reduce options specs into a options summary for printing at a terminal."
+  [specs]
+  (let [all-boolean? (every? (comp not :required) specs)
+        parts (map (fn [{:keys [short-opt long-opt required default default-desc desc]}]
+                     (let [opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
+                                     long-opt (str "    " long-opt)
+                                     short-opt short-opt)
+                           [opt dd] (if required
+                                      [(str opt \space required) (or default-desc (if default (str default) ""))]
+                                      [opt ""])]
+                       (if all-boolean?
+                         [opt (or desc "")]
+                         [opt dd (or desc "")])))
+                   specs)
+        cl-fmt (if all-boolean?
+                 "~{  ~vA  ~vA~}"
+                 "~{  ~vA  ~vA  ~vA~}")
+        lens (apply map (fn [& cols] (apply max (map count cols))) parts)
+        lines (map #(s/trimr (cl-format nil cl-fmt (interleave lens %)))
+                   parts)]
+    (s/join \newline lines)))

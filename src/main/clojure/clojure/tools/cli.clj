@@ -345,22 +345,24 @@
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
     [(default-option-map specs) []] tokens))
 
+(defn- make-summary-parts [all-boolean? specs]
+  (let [{:keys [short-opt long-opt required default default-desc desc]} specs
+        opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
+                  long-opt (str "    " long-opt)
+                  short-opt short-opt)
+        [opt dd] (if required
+                   [(str opt \space required)
+                    (or default-desc (if default (str default) ""))]
+                   [opt ""])]
+    (if all-boolean?
+      [opt (or desc "")]
+      [opt dd (or desc "")])))
+
 (defn summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [all-boolean? (every? (comp not :required) specs)
-        parts (map (fn [{:keys [short-opt long-opt required default default-desc desc]}]
-                     (let [opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
-                                     long-opt (str "    " long-opt)
-                                     short-opt short-opt)
-                           [opt dd] (if required
-                                      [(str opt \space required)
-                                       (or default-desc (if default (str default) ""))]
-                                      [opt ""])]
-                       (if all-boolean?
-                         [opt (or desc "")]
-                         [opt dd (or desc "")])))
-                   specs)
+        parts (map (partial make-summary-parts all-boolean?) specs)
         cl-fmt (if all-boolean?
                  "~{  ~vA  ~vA~}"
                  "~{  ~vA  ~vA  ~vA~}")

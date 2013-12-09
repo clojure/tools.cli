@@ -19,22 +19,22 @@
 
   If the :in-order flag is true, the first non-option, non-optarg argument
   stops options processing. This is useful for handling subcommand options."
-  [required-set arguments & options]
+  [required-set args & options]
   (let [{:keys [in-order]} options]
-    (loop [opts [] args [] [car & cdr] arguments]
+    (loop [opts [] argv [] [car & cdr] args]
       (if car
         (condp re-seq car
           ;; Double dash always ends options processing
-          #"^--$" (recur opts (into args cdr) [])
+          #"^--$" (recur opts (into argv cdr) [])
           ;; Long options with assignment always passes optarg, required or not
           #"^--.+=" (recur (conj opts (into [:long-opt] (s/split car #"=" 2)))
-                           args cdr)
+                           argv cdr)
           ;; Long options, consumes cdr head if needed
           #"^--" (let [[optarg cdr] (if (contains? required-set car)
                                       [(first cdr) (rest cdr)]
                                       [nil cdr])]
                    (recur (conj opts (into [:long-opt car] (if optarg [optarg] [])))
-                          args cdr))
+                          argv cdr))
           ;; Short options, expands clumped opts until an optarg is required
           #"^-." (let [[os cdr] (loop [os [] [c & cs] (rest car)]
                                   (let [o (str \- c)]
@@ -47,11 +47,11 @@
                                       (if (seq cs)
                                         (recur (conj os [:short-opt o]) cs)
                                         [(conj os [:short-opt o]) cdr]))))]
-                   (recur (into opts os) args cdr))
+                   (recur (into opts os) argv cdr))
           (if in-order
-            (recur opts (into args (cons car cdr)) [])
-            (recur opts (conj args car) cdr)))
-        [opts args]))))
+            (recur opts (into argv (cons car cdr)) [])
+            (recur opts (conj argv car) cdr)))
+        [opts argv]))))
 
 (defn- normalize-args
   "Rewrite arguments sequence into a normalized form that is parsable by cli."

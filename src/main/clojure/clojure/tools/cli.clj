@@ -486,11 +486,11 @@
                   (documented at #'clojure.tools.cli/compile-option-specs), and
                   returns a custom option summary string.
   "
-  [arguments option-specs & options]
+  [args option-specs & options]
   (let [{:keys [in-order summary-fn]} options
         specs (compile-option-specs option-specs)
         req (required-arguments specs)
-        [tokens rest-args] (tokenize-args req arguments :in-order in-order)
+        [tokens rest-args] (tokenize-args req args :in-order in-order)
         [opts errors] (parse-option-tokens specs tokens)]
     {:options opts
      :arguments rest-args

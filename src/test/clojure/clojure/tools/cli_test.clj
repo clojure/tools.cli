@@ -70,13 +70,16 @@
 (defn has-error? [re coll]
   (seq (filter (partial re-seq re) coll)))
 
+(defn parse-int [x]
+  ^:clj (Integer/parseInt x)
+  #_(:cljs (do (assert (re-seq #"^\d" x))
+               (js/parseInt x))))
+
 (deftest test-parse-option-tokens
   (testing "parses and validates option arguments"
     (let [specs (compile-option-specs
                   [["-p" "--port NUMBER"
-                    :parse-fn (fn [x]
-                                ^:clj (Integer/parseInt x)
-                                #_(:cljs (do (assert (re-seq #"^\d" x)) (js/parseInt x))))
+                    :parse-fn parse-int
                     :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
                    ["-f" "--file PATH"
                     :validate [#(not= \/ (first %)) "Must be a relative path"]]
@@ -151,40 +154,42 @@
     (is (= (summarize (compile-option-specs [["-m" "--minimal" "A minimal option summary"]]))
            "  -m, --minimal  A minimal option summary"))))
 
-; (deftest test-parse-opts
-;   (testing "parses options to :options"
-;     (is (= (:options (parse-opts ["-abp80"] [["-a" "--alpha"]
-;                                              ["-b" "--beta"]
-;                                              ["-p" "--port PORT"
-;                                               :parse-fn #(Integer/parseInt %)]]))
-;            {:alpha true :beta true :port (int 80)})))
-;   (testing "collects error messages into :errors"
-;     (let [specs [["-f" "--file PATH"
-;                   :validate [#(not= \/ (first %)) "Must be a relative path"]]
-;                  ["-p" "--port PORT"
-;                   :parse-fn #(Integer/parseInt %)
-;                   :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]]
-;           errors (:errors (parse-opts ["-f" "/foo/bar" "-p0"] specs))]
-;       (is (has-error? #"Must be a relative path" errors))
-;       (is (has-error? #"Must be between 0 and 65536" errors))))
-;   (testing "collects unprocessed arguments into :arguments"
-;     (is (= (:arguments (parse-opts ["foo" "-a" "bar" "--" "-b" "baz"]
-;                                    [["-a" "--alpha"] ["-b" "--beta"]]))
-;            ["foo" "bar" "-b" "baz"])))
-;   (testing "provides an option summary at :summary"
-;     (is (re-seq #"-a\W+--alpha" (:summary (parse-opts [] [["-a" "--alpha"]])))))
-;   (testing "processes arguments in order if :in-order is true"
-;     (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
-;                                    [["-a" "--alpha"] ["-b" "--beta"]]
-;                                    :in-order true))
-;            ["foo" "-b"])))
-;   (testing "accepts optional summary-fn for generating options summary"
-;     (is (= (:summary (parse-opts [] [["-a" "--alpha"] ["-b" "--beta"]]
-;                                  :summary-fn (fn [specs]
-;                                                (str "Usage: myprog ["
-;                                                     (join \| (map :long-opt specs))
-;                                                     "] arg1 arg2"))))
-;            "Usage: myprog [--alpha|--beta] arg1 arg2"))))
+(deftest test-parse-opts
+  (testing "parses options to :options"
+    (is (= (:options (parse-opts ["-abp80"] [["-a" "--alpha"]
+                                             ["-b" "--beta"]
+                                             ["-p" "--port PORT"
+                                              :parse-fn parse-int]]))
+           {:alpha true :beta true :port (int 80)})))
+  (testing "collects error messages into :errors"
+    (let [specs [["-f" "--file PATH"
+                  :validate [#(not= \/ (first %)) "Must be a relative path"]]
+                 ["-p" "--port PORT"
+                  :parse-fn (fn [x]
+                              ^:clj parse-int
+                              #_(:cljs (do (assert (re-seq #"^\d" x)) (js/parseInt x))))
+                  :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]]
+          errors (:errors (parse-opts ["-f" "/foo/bar" "-p0"] specs))]
+      (is (has-error? #"Must be a relative path" errors))
+      (is (has-error? #"Must be between 0 and 65536" errors))))
+  (testing "collects unprocessed arguments into :arguments"
+    (is (= (:arguments (parse-opts ["foo" "-a" "bar" "--" "-b" "baz"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]))
+           ["foo" "bar" "-b" "baz"])))
+  (testing "provides an option summary at :summary"
+    (is (re-seq #"-a\W+--alpha" (:summary (parse-opts [] [["-a" "--alpha"]])))))
+  (testing "processes arguments in order if :in-order is true"
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]
+                                   :in-order true))
+           ["foo" "-b"])))
+  (testing "accepts optional summary-fn for generating options summary"
+    (is (= (:summary (parse-opts [] [["-a" "--alpha"] ["-b" "--beta"]]
+                                 :summary-fn (fn [specs]
+                                               (str "Usage: myprog ["
+                                                    (join \| (map :long-opt specs))
+                                                    "] arg1 arg2"))))
+           "Usage: myprog [--alpha|--beta] arg1 arg2"))))
 
 (comment
   ;; Chas Emerick's PhantomJS test runner

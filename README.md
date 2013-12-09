@@ -12,7 +12,7 @@ Latest stable release: 0.2.4
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
     [org.clojure/tools.cli "0.2.4"]
-    
+
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
@@ -31,11 +31,11 @@ Latest stable release: 0.2.4
                        (assoc previous key
                               (if-let [oldval (get previous key)]
                                 (merge oldval val)
-                                (hash-set val))))] 
+                                (hash-set val))))]
          ["-h" "--host" "The hostname" :default "localhost"]
          ["-v" "--[no-]verbose" :default true]
          ["-l" "--log-directory" :default "/some/path"])
-         
+
 with args of:
 
     ["-p" "8080"
@@ -59,12 +59,12 @@ a vector of trailing arguments that are not options:
 
 and a documentation string to use to provide help:
 
-    "Switches                    Default     Desc          
-     --------                    -------     ----          
-     -p, --port                              Listen on this port              
-     -h, --host                  localhost   The hostname     
-     -v, --no-verbose --verbose  true                      
-     -l, --log-directory         /some/path"   
+    "Switches                    Default     Desc
+     --------                    -------     ----
+     -p, --port                              Listen on this port
+     -h, --host                  localhost   The hostname
+     -v, --no-verbose --verbose  true
+     -l, --log-directory         /some/path"
 
 ### Custom description
 
@@ -73,16 +73,16 @@ between "Usage:" and the description of the switches. For example:
 
     (cli args
          "This program does something extraordinary."
-         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)] 
+         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)]
          ["-h" "--host" "The hostname" :default "localhost"])
 
 The documentation string will now look like:
 
     "This program does something extraordinary.
 
-     Switches                    Default     Desc          
-     --------                    -------     ----          
-     -p, --port                              Listen on this port              
+     Switches                    Default     Desc
+     --------                    -------     ----
+     -p, --port                              Listen on this port
      -h, --host                  localhost   The hostname"
 
 ## Options
@@ -102,7 +102,7 @@ Next is an optional doc string:
 
     ["-p" "--port" "The port to listen on"]
 
-This will be printed in the 'Desc' column of the help banner. 
+This will be printed in the 'Desc' column of the help banner.
 
 Following that are optional parameters, provided in key-value pairs:
 
@@ -143,7 +143,7 @@ set the argument to false:
 
     (cli ["-v"]
          ["-v" "--[no-]verbose"])
-  
+
     => [{:verbose true}, ...]
 
     (cli ["--no-verbose"]
@@ -152,7 +152,7 @@ set the argument to false:
     => [{:verbose false}, ...]
 
 Note: there is no short-form to set the flag to false (-no-v will not
-work!). 
+work!).
 
 ## Trailing Arguments
 
@@ -199,13 +199,13 @@ providing help to the user:
 
 ## Change Log
 
-* Release 0.2.4 on 213-08-06
+* Release 0.2.4 on 2013-08-06
   * Applying patch for [TCLI-2](http://dev.clojure.org/jira/browse/TCLI-2)
     (support an assoc-fn option)
 * Release 0.2.3 on 2013-08-06
   * Add optional description string to prefix the returned banner
 * Release 0.2.2 on 2012-08-09
-  * Applying patch for [TCLI-1](http://dev.clojure.org/jira/browse/TCLI-1) 
+  * Applying patch for [TCLI-1](http://dev.clojure.org/jira/browse/TCLI-1)
     (do not include keys when no value provided by :default)
 * Release 0.2.1 on 2011-11-03
   * Removing the :required option. Hangover from when -h and --help were
@@ -227,5 +227,3 @@ which can be found in the file epl.html at the root of this distribution.
 By using this software in any fashion, you are agreeing to be bound by
 the terms of this license.
 You must not remove this notice, or any other, from this software.
-
-

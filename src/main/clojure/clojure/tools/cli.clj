@@ -469,7 +469,8 @@
     {:options     The options map, keyed by :id, mapped to the parsed value
      :arguments   A vector of unprocessed arguments
      :summary     A string containing a minimal options summary
-     :errors      A vector of error message strings generated during parsing
+     :errors      A possible vector of error message strings generated during
+                  parsing; nil when no errors exist
      }
 
   A few function options may be specified to influence the behavior of
@@ -480,7 +481,7 @@
                   option specs.
 
     :summary-fn   A function that receives the sequence of compiled option specs
-                  ( documented at #'clojure.tools.cli/compile-option-specs ), and
+                  (documented at #'clojure.tools.cli/compile-option-specs), and
                   returns a custom option summary string.
   "
   [arguments option-specs & options]

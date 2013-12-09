@@ -358,17 +358,19 @@
       [opt (or desc "")]
       [opt dd (or desc "")])))
 
+(defn- format-lines [lens parts]
+  (let [cl-fmt (case (count lens)
+                 2 "~{  ~vA  ~vA~}"
+                 3 "~{  ~vA  ~vA  ~vA~}")]
+    (map #(s/trimr (cl-format nil cl-fmt (interleave lens %))) parts)))
+
 (defn summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [all-boolean? (every? (comp not :required) specs)
         parts (map (partial make-summary-parts all-boolean?) specs)
-        cl-fmt (if all-boolean?
-                 "~{  ~vA  ~vA~}"
-                 "~{  ~vA  ~vA  ~vA~}")
         lens (apply map (fn [& cols] (apply max (map count cols))) parts)
-        lines (map #(s/trimr (cl-format nil cl-fmt (interleave lens %)))
-                   parts)]
+        lines (format-lines lens parts)]
     (s/join \newline lines)))
 
 (defn- required-arguments [specs]

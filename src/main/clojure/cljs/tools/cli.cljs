@@ -1,6 +1,8 @@
 (ns clojure.tools.cli
   {:author "Sung Pae"}
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            goog.string.format
+            [goog.string :as gs]))
 
 (defn- tokenize-args
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
@@ -188,3 +190,32 @@
             [m (conj errors error)]))
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
     [(default-option-map specs) []] tokens))
+
+(defn- make-summary-parts [all-boolean? specs]
+  (let [{:keys [short-opt long-opt required default default-desc desc]} specs
+        opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
+                  long-opt (str "    " long-opt)
+                  short-opt short-opt)
+        [opt dd] (if required
+                   [(str opt \space required)
+                    (or default-desc (if default (str default) ""))]
+                   [opt ""])]
+    (if all-boolean?
+      [opt (or desc "")]
+      [opt dd (or desc "")])))
+
+(defn- format-lines [lens parts]
+  (let [fmt (case (count lens)
+              2 "  %%-%ds  %%-%ds"
+              3 "  %%-%ds  %%-%ds  %%-%ds")
+        fmt (apply gs/format fmt lens)]
+    (map #(s/trimr (apply gs/format fmt %)) parts)))
+
+(defn summarize
+  "Reduce options specs into a options summary for printing at a terminal."
+  [specs]
+  (let [all-boolean? (every? (comp not :required) specs)
+        parts (map (partial make-summary-parts all-boolean?) specs)
+        lens (apply map (fn [& cols] (apply max (map count cols))) parts)
+        lines (format-lines lens parts)]
+    (s/join \newline lines)))

@@ -28,99 +28,103 @@
     (is (= (tokenize-args #{} ["-a" "foo" "-b"] :in-order true)
            [[[:short-opt "-a"]] ["foo" "-b"]]))))
 
-; (deftest test-compile-option-specs
-;   (testing "does not set values for :default unless specified"
-;     (is (= (map #(contains? % :default) (compile-option-specs
-;                                           [["-f" "--foo"]
-;                                            ["-b" "--bar=ARG" :default 0]]))
-;            [false true])))
-;   (testing "interprets first three string arguments as short-opt, long-opt=required, and desc"
-;     (is (= (map (juxt :short-opt :long-opt :required :desc)
-;                 (compile-option-specs [["-a" :id :alpha]
-;                                        ["-b" "--beta"]
-;                                        [nil nil "DESC" :id :gamma]
-;                                        ["-f" "--foo=FOO" "desc"]]))
-;            [["-a" nil nil nil]
-;             ["-b" "--beta" nil nil]
-;             [nil nil nil "DESC"]
-;             ["-f" "--foo" "FOO" "desc"]])))
-;   (testing "throws AssertionError on unset :id or duplicate :id, :short-opt, :long-opt"
-;     (is (thrown? AssertionError (compile-option-specs [["-a" :id nil]])))
-;     (is (thrown? AssertionError (compile-option-specs [["-a" "--alpha"] ["-b" :id :alpha]])))
-;     (is (thrown? AssertionError (compile-option-specs [{:id :a :short-opt "-a"}
-;                                                        {:id :b :short-opt "-a"}])))
-;     (is (thrown? AssertionError (compile-option-specs [{:id :alpha :long-opt "--alpha"}
-;                                                        {:id :beta :long-opt "--alpha"}]))))
-;   (testing "desugars `--long-opt=value`"
-;     (is (= (map (juxt :id :long-opt :required)
-;                 (compile-option-specs [[nil "--foo FOO"] [nil "--bar=BAR"]]))
-;            [[:foo "--foo" "FOO"]
-;             [:bar "--bar" "BAR"]])))
-;   (testing "desugars :validate [fn msg]"
-;     (is (= (map (juxt :validate-fn :validate-msg)
-;                 (compile-option-specs
-;                   [[nil "--name NAME" :validate [seq "Must be present"]]]))
-;            [[seq "Must be present"]])))
-;   (testing "accepts maps as option specs without munging values"
-;     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
-;            [{:id ::foo :short-opt "-f" :long-opt "--foo"}]))))
+(deftest test-compile-option-specs
+  (testing "does not set values for :default unless specified"
+    (is (= (map #(contains? % :default) (compile-option-specs
+                                          [["-f" "--foo"]
+                                           ["-b" "--bar=ARG" :default 0]]))
+           [false true])))
+  (testing "interprets first three string arguments as short-opt, long-opt=required, and desc"
+    (is (= (map (juxt :short-opt :long-opt :required :desc)
+                (compile-option-specs [["-a" :id :alpha]
+                                       ["-b" "--beta"]
+                                       [nil nil "DESC" :id :gamma]
+                                       ["-f" "--foo=FOO" "desc"]]))
+           [["-a" nil nil nil]
+            ["-b" "--beta" nil nil]
+            [nil nil nil "DESC"]
+            ["-f" "--foo" "FOO" "desc"]])))
+  (testing "throws AssertionError on unset :id or duplicate :id, :short-opt, :long-opt"
+    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+                 (compile-option-specs [["-a" :id nil]])))
+    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+                 (compile-option-specs [["-a" "--alpha"] ["-b" :id :alpha]])))
+    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+                 (compile-option-specs [{:id :a :short-opt "-a"} {:id :b :short-opt "-a"}])))
+    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+                 (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}]))))
+  (testing "desugars `--long-opt=value`"
+    (is (= (map (juxt :id :long-opt :required)
+                (compile-option-specs [[nil "--foo FOO"] [nil "--bar=BAR"]]))
+           [[:foo "--foo" "FOO"]
+            [:bar "--bar" "BAR"]])))
+  (testing "desugars :validate [fn msg]"
+    (is (= (map (juxt :validate-fn :validate-msg)
+                (compile-option-specs
+                  [[nil "--name NAME" :validate [seq "Must be present"]]]))
+           [[seq "Must be present"]])))
+  (testing "accepts maps as option specs without munging values"
+    (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
+           [{:id ::foo :short-opt "-f" :long-opt "--foo"}]))))
 
-; (defn has-error? [re coll]
-;   (seq (filter (partial re-seq re) coll)))
+(defn has-error? [re coll]
+  (seq (filter (partial re-seq re) coll)))
 
-; (deftest test-parse-option-tokens
-;   (testing "parses and validates option arguments"
-;     (let [specs (compile-option-specs
-;                   [["-p" "--port NUMBER"
-;                     :parse-fn #(Integer/parseInt %)
-;                     :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
-;                    ["-f" "--file PATH"
-;                     :validate [#(not= \/ (first %)) "Must be a relative path"]]
-;                    ["-q" "--quiet"
-;                     :id :verbose
-;                     :default true
-;                     :parse-fn not]])]
-;       (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
-;              [{:port (int 80) :verbose false} []]))
-;       (is (has-error? #"Unknown option"
-;                       (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
-;       (is (has-error? #"Missing required"
-;                       (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
-;       (is (has-error? #"Must be between"
-;                       (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
-;       (is (has-error? #"Error while parsing"
-;                       (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
-;       (is (has-error? #"Must be a relative path"
-;                       (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))))
-;   (testing "merges values over default option map"
-;     (let [specs (compile-option-specs
-;                   [["-a" "--alpha"]
-;                    ["-b" "--beta" :default false]
-;                    ["-g" "--gamma=ARG"]
-;                    ["-d" "--delta=ARG" :default "DELTA"]])]
-;       (is (= (parse-option-tokens specs [])
-;              [{:beta false :delta "DELTA"} []]))
-;       (is (= (parse-option-tokens specs [[:short-opt "-a"]
-;                                          [:short-opt "-b"]
-;                                          [:short-opt "-g" "GAMMA"]
-;                                          [:short-opt "-d" "delta"]])
-;              [{:alpha true :beta true :gamma "GAMMA" :delta "delta"} []]))))
-;   (testing "associates :id and value with :assoc-fn"
-;     (let [specs (compile-option-specs
-;                   [["-a" "--alpha"
-;                     :default true
-;                     :assoc-fn (fn [m k v] (assoc m k (not v)))]
-;                    ["-v" "--verbose"
-;                     :default 0
-;                     :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])]
-;       (is (= (parse-option-tokens specs [])
-;              [{:alpha true :verbose 0} []]))
-;       (is (= (parse-option-tokens specs [[:short-opt "-a"]])
-;              [{:alpha false :verbose 0} []]))
-;       (is (= (parse-option-tokens specs [[:short-opt "-v"]
-;                                          [:short-opt "-v"]
-;                                          [:long-opt "--verbose"]])
-;              [{:alpha true :verbose 3} []])))))
+(deftest test-parse-option-tokens
+  (testing "parses and validates option arguments"
+    (let [specs (compile-option-specs
+                  [["-p" "--port NUMBER"
+                    :parse-fn (fn [x]
+                                ^:clj (Integer/parseInt x)
+                                #_(:cljs (do (assert (re-seq #"^\d" x)) (js/parseInt x))))
+                    :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
+                   ["-f" "--file PATH"
+                    :validate [#(not= \/ (first %)) "Must be a relative path"]]
+                   ["-q" "--quiet"
+                    :id :verbose
+                    :default true
+                    :parse-fn not]])]
+      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
+             [{:port (int 80) :verbose false} []]))
+      (is (has-error? #"Unknown option"
+                      (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
+      (is (has-error? #"Missing required"
+                      (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
+      (is (has-error? #"Must be between"
+                      (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
+      (is (has-error? #"Error while parsing"
+                      (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
+      (is (has-error? #"Must be a relative path"
+                      (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))))
+  (testing "merges values over default option map"
+    (let [specs (compile-option-specs
+                  [["-a" "--alpha"]
+                   ["-b" "--beta" :default false]
+                   ["-g" "--gamma=ARG"]
+                   ["-d" "--delta=ARG" :default "DELTA"]])]
+      (is (= (parse-option-tokens specs [])
+             [{:beta false :delta "DELTA"} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]
+                                         [:short-opt "-b"]
+                                         [:short-opt "-g" "GAMMA"]
+                                         [:short-opt "-d" "delta"]])
+             [{:alpha true :beta true :gamma "GAMMA" :delta "delta"} []]))))
+  (testing "associates :id and value with :assoc-fn"
+    (let [specs (compile-option-specs
+                  [["-a" "--alpha"
+                    :default true
+                    :assoc-fn (fn [m k v] (assoc m k (not v)))]
+                   ["-v" "--verbose"
+                    :default 0
+                    :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])]
+      (is (= (parse-option-tokens specs [])
+             [{:alpha true :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:alpha true :verbose 3} []])))))
 
 ; (deftest test-summarize
 ;   (testing "summarizes options"

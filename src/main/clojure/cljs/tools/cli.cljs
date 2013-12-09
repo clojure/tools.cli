@@ -50,3 +50,141 @@
             (recur opts (into argv (cons car cdr)) [])
             (recur opts (conj argv car) cdr)))
         [opts argv]))))
+
+(def ^{:private true} spec-keys
+  [:id :short-opt :long-opt :required :desc :default :default-desc :parse-fn
+   :assoc-fn :validate-fn :validate-msg])
+
+(defn- compile-spec [spec]
+  (let [sopt-lopt-desc (take-while #(or (string? %) (nil? %)) spec)
+        spec-map (apply hash-map (drop (count sopt-lopt-desc) spec))
+        [short-opt long-opt desc] sopt-lopt-desc
+        long-opt (or long-opt (:long-opt spec-map))
+        [long-opt req] (when long-opt
+                         (rest (re-find #"^(--[^ =]+)(?:[ =](.*))?" long-opt)))
+        id (when long-opt
+             (keyword (subs long-opt 2)))
+        [validate-fn validate-msg] (:validate spec-map)]
+    (merge {:id id
+            :short-opt short-opt
+            :long-opt long-opt
+            :required req
+            :desc desc
+            :validate-fn validate-fn
+            :validate-msg validate-msg}
+           (select-keys spec-map spec-keys))))
+
+(defn- distinct?* [coll]
+  (if (seq coll)
+    (apply distinct? coll)
+    true))
+
+(defn- compile-option-specs
+  "Map a sequence of option specification vectors to a sequence of:
+
+  {:id           Keyword  ; :server
+   :short-opt    String   ; \"-s\"
+   :long-opt     String   ; \"--server\"
+   :required     String   ; \"HOSTNAME\"
+   :desc         String   ; \"Remote server\"
+   :default      Object   ; #<Inet4Address example.com/93.184.216.119>
+   :default-desc String   ; \"example.com\"
+   :parse-fn     IFn      ; #(InetAddress/getByName %)
+   :assoc-fn     IFn      ; assoc
+   :validate-fn  IFn      ; (partial instance? Inet4Address)
+   :validate-msg String   ; \"Must be an IPv4 host\"
+   }
+
+  :id defaults to the keywordized name of long-opt without leading dashes, but
+  may be overridden in the option spec.
+
+  The option spec entry `:validate [fn msg]` desugars into the two entries
+  :validate-fn and :validate-msg.
+
+  A :default entry will not be included in the compiled spec unless specified.
+
+  An option spec may also be passed as a map containing the entries above,
+  in which case that subset of the map is transferred directly to the result
+  vector.
+
+  An assertion error is thrown if any :id values are unset, or if there exist
+  any duplicate :id, :short-opt, or :long-opt values."
+  [specs]
+  {:post [(every? (comp identity :id) %)
+          (distinct?* (map :id %))
+          (distinct?* (remove nil? (map :short-opt %)))
+          (distinct?* (remove nil? (map :long-opt %)))]}
+  (map (fn [spec]
+         (if (map? spec)
+           (select-keys spec spec-keys)
+           (compile-spec spec)))
+       specs))
+
+(defn- default-option-map [specs]
+  (reduce (fn [m s]
+            (if (contains? s :default)
+              (assoc m (:id s) (:default s))
+              m))
+          {} specs))
+
+(defn- find-spec [specs opt-type opt]
+  (first (filter #(= opt (opt-type %)) specs)))
+
+(defn- pr-join [& xs]
+  (pr-str (s/join \space xs)))
+
+(defn- missing-required-error [opt example-required]
+  (str "Missing required argument for " (pr-join opt example-required)))
+
+(defn- parse-error [opt optarg msg]
+  (str "Error while parsing option " (pr-join opt optarg) ": " msg))
+
+(defn- validate-error [opt optarg msg]
+  (str "Failed to validate " (pr-join opt optarg)
+       (if msg (str ": " msg) "")))
+
+(defn- validate [value spec opt optarg]
+  (let [{:keys [validate-fn validate-msg]} spec]
+    (if (or (nil? validate-fn)
+            (try (validate-fn value) (catch js/Error _)))
+      [value nil]
+      [::error (validate-error opt optarg validate-msg)])))
+
+(defn- parse-value [value spec opt optarg]
+  (let [{:keys [parse-fn]} spec
+        [value error] (if parse-fn
+                        (try
+                          [(parse-fn value) nil]
+                          (catch js/Error e
+                            [nil (parse-error opt optarg (str e))]))
+                        [value nil])]
+    (if error
+      [::error error]
+      (validate value spec opt optarg))))
+
+(defn- parse-optarg [spec opt optarg]
+  (let [{:keys [required]} spec]
+    (if (and required (nil? optarg))
+      [::error (missing-required-error opt required)]
+      (parse-value (if required optarg true) spec opt optarg))))
+
+(defn- parse-option-tokens
+  "Reduce sequence of [opt-type opt ?optarg?] tokens into a map of
+  {option-id value} merged over the default values in the option
+  specifications.
+
+  Unknown options, missing required arguments, option argument parsing
+  exceptions, and validation failures are collected into a vector of error
+  message strings.
+
+  Returns [option-map error-messages-vector]."
+  [specs tokens]
+  (reduce
+    (fn [[m errors] [opt-type opt optarg]]
+      (if-let [spec (find-spec specs opt-type opt)]
+        (let [[value error] (parse-optarg spec opt optarg)]
+          (if-not (= value ::error)
+            [((:assoc-fn spec assoc) m (:id spec) value) errors]
+            [m (conj errors error)]))
+        [m (conj errors (str "Unknown option: " (pr-str opt)))]))
+    [(default-option-map specs) []] tokens))

@@ -108,13 +108,13 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
     <h2 id="clojure.tools.cli/parse-opts">parse-opts</h2>
     <span id="var-type">function</span><br />
-    <pre id="var-usage">Usage: (parse-opts arguments option-specs &amp; options)
+    <pre id="var-usage">Usage: (parse-opts args option-specs &amp; options)
 </pre>
     <pre id="var-docstr">Parse arguments sequence according to given option specifications and the
 GNU Program Argument Syntax Conventions:
@@ -205,7 +205,8 @@ parse-opts returns a map with four entries:
   {:options     The options map, keyed by :id, mapped to the parsed value
    :arguments   A vector of unprocessed arguments
    :summary     A string containing a minimal options summary
-   :errors      A vector of error message strings generated during parsing
+   :errors      A possible vector of error message strings generated during
+                parsing; nil when no errors exist
    }
 
 A few function options may be specified to influence the behavior of
@@ -216,12 +217,12 @@ parse-opts:
                 option specs.
 
   :summary-fn   A function that receives the sequence of compiled option specs
-                ( documented at #'clojure.tools.cli/compile-option-specs ), and
+                (documented at #'clojure.tools.cli/compile-option-specs), and
                 returns a custom option summary string.
 </pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L380" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L384" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -232,7 +233,7 @@ parse-opts:
     <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/b5c656ceab26bf6e29f178ad5baee11fae81a072/src/main/clojure/clojure/tools/cli.clj#L348" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L367" id="var-source">Source</a>
   </div>
 </div>
 

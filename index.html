@@ -91,7 +91,10 @@ namespace.
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (cli args &amp; specs)
 </pre>
-    <pre id="var-docstr">Parse the provided args using the given specs. Specs are vectors
+    <pre id="var-docstr">THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use
+clojure.tools.cli/parse-opts in new applications.
+
+Parse the provided args using the given specs. Specs are vectors
 describing a command line argument. For example:
 
 ["-p" "--port" "Port to listen on" :default 3000 :parse-fn #(Integer/parseInt %)]
@@ -108,7 +111,7 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -222,7 +225,7 @@ parse-opts:
 </pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L384" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L387" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -233,7 +236,7 @@ parse-opts:
     <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/e9816bf3361b9a2de5601daf402a3cc435034dd9/src/main/clojure/clojure/tools/cli.clj#L367" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L370" id="var-source">Source</a>
   </div>
 </div>
 

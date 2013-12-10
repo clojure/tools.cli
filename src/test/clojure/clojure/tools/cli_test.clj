@@ -29,7 +29,9 @@
     (is (= (tokenize-args #{} ["-a" "foo" "-b"])
            [[[:short-opt "-a"] [:short-opt "-b"]] ["foo"]]))
     (is (= (tokenize-args #{} ["-a" "foo" "-b"] :in-order true)
-           [[[:short-opt "-a"]] ["foo" "-b"]]))))
+           [[[:short-opt "-a"]] ["foo" "-b"]])))
+  (testing "does not interpret single dash as an option"
+    (is (= (tokenize-args #{} ["-"]) [[] ["-"]]))))
 
 (deftest test-compile-option-specs
   (testing "does not set values for :default unless specified"

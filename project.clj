@@ -19,6 +19,7 @@
                    :plugins [[lein-cljsbuild "1.0.0"]
                              [com.birdseye-sw/lein-dalap "0.1.1"]
                              [com.cemerick/clojurescript.test "0.2.1"]]
+                   :hooks [leiningen.dalap]
                    :cljsbuild {:builds [{:source-paths ["src/main/clojure/cljs"
                                                         "src/test/clojure/cljs"]
                                          :compiler {:output-to "target/cli_test.js"

@@ -1,14 +1,18 @@
-(ns clojure.tools.cli-test (:require [clojure.tools.cli :as cli]
-            #_(:cljs cemerick.cljs.test))
-  (:use [clojure.string :only [join]]
-        [clojure.tools.cli :only [parse-opts summarize]]
-        ^:clj [clojure.test :only [deftest is testing]])
+(ns ^{:cljs 'cljs.tools.cli-test}
+  clojure.tools.cli-test
+  ^{:cljs
+    '(:require [cljs.tools.cli :as cli :refer [parse-opts summarize]]
+               [clojure.string :refer [join]]
+               cemerick.cljs.test)}
+  (:use [clojure.tools.cli :as cli :only [parse-opts summarize]]
+        [clojure.string :only [join]]
+        [clojure.test :only [deftest is testing]])
   #_(:cljs (:require-macros [cemerick.cljs.test :refer [deftest is testing]])))
 
 ;; Refer private vars
-(def tokenize-args        ^:clj #'cli/tokenize-args        #_(:cljs cli/tokenize-args))
-(def compile-option-specs ^:clj #'cli/compile-option-specs #_(:cljs cli/compile-option-specs))
-(def parse-option-tokens  ^:clj #'cli/parse-option-tokens  #_(:cljs cli/parse-option-tokens))
+(def tokenize-args        ^{:cljs cli/tokenize-args}        #'cli/tokenize-args)
+(def compile-option-specs ^{:cljs cli/compile-option-specs} #'cli/compile-option-specs)
+(def parse-option-tokens  ^{:cljs cli/parse-option-tokens}  #'cli/parse-option-tokens)
 
 (deftest test-tokenize-args
   (testing "expands clumped short options"
@@ -45,13 +49,13 @@
             [nil nil nil "DESC"]
             ["-f" "--foo" "FOO" "desc"]])))
   (testing "throws AssertionError on unset :id or duplicate :id, :short-opt, :long-opt"
-    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+    (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [["-a" :id nil]])))
-    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+    (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [["-a" "--alpha"] ["-b" :id :alpha]])))
-    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+    (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [{:id :a :short-opt "-a"} {:id :b :short-opt "-a"}])))
-    (is (thrown? ^:clj AssertionError #_(:cljs js/Error)
+    (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}]))))
   (testing "desugars `--long-opt=value`"
     (is (= (map (juxt :id :long-opt :required)
@@ -71,9 +75,9 @@
   (seq (filter (partial re-seq re) coll)))
 
 (defn parse-int [x]
-  ^:clj (Integer/parseInt x)
-  #_(:cljs (do (assert (re-seq #"^\d" x))
-               (js/parseInt x))))
+  ^{:cljs (do (assert (re-seq #"^\d" x))
+              (js/parseInt x))}
+  (Integer/parseInt x))
 
 (deftest test-parse-option-tokens
   (testing "parses and validates option arguments"
@@ -165,9 +169,7 @@
     (let [specs [["-f" "--file PATH"
                   :validate [#(not= \/ (first %)) "Must be a relative path"]]
                  ["-p" "--port PORT"
-                  :parse-fn (fn [x]
-                              ^:clj parse-int
-                              #_(:cljs (do (assert (re-seq #"^\d" x)) (js/parseInt x))))
+                  :parse-fn parse-int
                   :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]]
           errors (:errors (parse-opts ["-f" "/foo/bar" "-p0"] specs))]
       (is (has-error? #"Must be a relative path" errors))

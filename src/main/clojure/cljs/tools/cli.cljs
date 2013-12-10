@@ -1,4 +1,4 @@
-(ns clojure.tools.cli
+(ns cljs.tools.cli
   {:author "Sung Pae"}
   (:require [clojure.string :as s]
             goog.string.format

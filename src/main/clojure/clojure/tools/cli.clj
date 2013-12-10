@@ -178,7 +178,10 @@
            options)))
 
 (defn cli
-  "Parse the provided args using the given specs. Specs are vectors
+  "THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use
+  clojure.tools.cli/parse-opts in new applications.
+
+  Parse the provided args using the given specs. Specs are vectors
   describing a command line argument. For example:
 
   [\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]
@@ -359,10 +362,10 @@
       [opt (or desc "")])))
 
 (defn- format-lines [lens parts]
-  (let [cl-fmt (case (count lens)
-                 2 "~{  ~vA  ~vA~}"
-                 3 "~{  ~vA  ~vA  ~vA~}")]
-    (map #(s/trimr (cl-format nil cl-fmt (interleave lens %))) parts)))
+  (let [fmt (case (count lens)
+              2 "~{  ~vA  ~vA~}"
+              3 "~{  ~vA  ~vA  ~vA~}")]
+    (map #(s/trimr (cl-format nil fmt (interleave lens %))) parts)))
 
 (defn summarize
   "Reduce options specs into a options summary for printing at a terminal."

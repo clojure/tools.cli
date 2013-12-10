@@ -1,5 +1,4 @@
-(ns ^{:cljs 'cljs.tools.cli-test}
-  clojure.tools.cli-test
+(ns ^{:cljs 'cljs.tools.cli-test} clojure.tools.cli-test
   ^{:cljs
     '(:require [cljs.tools.cli :as cli :refer [parse-opts summarize]]
                [clojure.string :refer [join]]

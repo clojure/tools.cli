@@ -1,8 +1,218 @@
 # tools.cli
 
-tools.cli is a command line argument parser for Clojure.
+tools.cli contains a command line options parser for Clojure.
 
-## Releases and Dependency Information
+## Next Release: 0.3.0-beta1
+
+The next release of tools.cli features a new flexible API, better adherence to
+GNU option parsing conventions, and ClojureScript support.
+
+[Leiningen](https://github.com/technomancy/leiningen) dependency information:
+
+    [org.clojure/tools.cli "0.3.0-beta1"]
+
+[Maven](http://maven.apache.org/) dependency information:
+
+    <dependency>
+      <groupId>org.clojure</groupId>
+      <artifactId>tools.cli</artifactId>
+      <version>0.3.0-beta1</version>
+    </dependency>
+
+The function `clojure.tools.cli/cli` has been superseded by
+`clojure.tools.cli/parse-opts`, and should not be used in new programs.
+
+The previous function will remain for the forseeable future. It has also been
+adapted to use the new tokenizer, so upgrading is still worthwhile even if you
+are not ready to migrate to `clojure.tools.cli/parse-opts`.
+
+## New Features
+
+### Better Option Tokenization
+
+In accordance with the [GNU Program Argument Syntax Conventions][GNU], two
+features have been added to the options tokenizer:
+
+* Short options may be grouped together.
+
+  For instance, `-abc` is equivalent to `-a -b -c`. If the `-b` option
+  requires an argument, the same `-abc` is interpreted as `-a -b "c"`.
+
+* Long option arguments may be specified with an equals sign.
+
+  `--long-opt=ARG` is equivalent to `--long-opt "ARG"`.
+
+  If the argument is omitted, it is interpreted as the empty string.
+  e.g. `--long-opt=` is equivalent to `--long-opt ""`
+
+[GNU]: https://www.gnu.org/software/libc/manual/html_node/Argument-Syntax.html
+
+### In-order Processing for Subcommands
+
+Large programs are often divided into subcommands with their own sets of
+options. To aid in designing such programs, `clojure.tools.cli/parse-opts`
+accepts an `:in-order` option that directs it to stop processing arguments at
+the first unrecognized token.
+
+For instance, the `git` program has a set of top-level options that are
+unrecognized by subcommands and vice-versa:
+
+    git --git-dir=/other/proj/.git log --oneline --graph
+
+By default, `clojure.tools.cli/parse-opts` interprets this command line as:
+
+    options:   [[--git-dir /other/proj/.git]
+                [--oneline]
+                [--graph]]
+    arguments: [log]
+
+When :in-order is true however, the arguments are interpreted as:
+
+    options:   [[--git-dir /other/proj/.git]]
+    arguments: [log --oneline --graph]
+
+Note that the options to `log` are not parsed, but remain in the unprocessed
+arguments vector. These options could be handled by another call to
+`parse-opts` from within the function that handles the `log` subcommand.
+
+### Options Summary
+
+`parse-opts` returns a minimal options summary string:
+
+      -p, --port NUMBER  8080       Required option with default
+          --host HOST    localhost  Short and long options may be omitted
+      -d, --detach                  Boolean option
+      -h, --help
+
+This may be inserted into a larger usage summary, but it is up to the caller.
+
+If the default formatting of the summary is unsatisfactory, a `:summary-fn`
+may be supplied to `parse-opts`. This function will be passed the sequence
+of compiled option specification maps and is expected to return an options
+summary.
+
+The default summary function `clojure.tools.cli/summarize` is public and may
+be useful within your own `:summary-fn` for generating the default summary.
+
+### Option Argument Validation
+
+There is a new option entry `:validate`, which takes a tuple of
+`[validation-fn validation-msg]`. The validation-fn receives an option's
+argument *after* being parsed by `:parse-fn` if it exists.
+
+    ["-p" "--port PORT" "A port number"
+     :parse-fn #(Integer/parseInt %)
+     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+
+If the validation-fn returns a falsy value, the validation-msg is added to the
+errors vector.
+
+### Error Handling and Return Values
+
+Instead of throwing errors, `parse-opts` now collects error messages into
+a vector and returns them to the caller. Unknown options, missing required
+arguments, validation errors, and exceptions thrown during `:parse-fn` are all
+added to the errors vector.
+
+Correspondingly, `parse-opts` returns the following map of values:
+
+    {:options     The map of options -> parsed values
+     :arguments   A vector of unprocessed arguments
+     :summary     An options summary string
+     :errors      A vector of error messages, nil if no errors
+     }
+
+During development, parse-opts asserts the uniqueness of option `:id`,
+`:short-opt`, and `:long-opt` values and throws an error on failure.
+
+### ClojureScript Support
+
+The `cljs.tools.cli` namespace is now available for use in ClojureScript
+programs! Both `parse-opts` and `summarize` have been ported, and have
+complete feature parity with their Clojure counterparts.
+
+### API documentation
+
+Detailed documentation for `parse-opts` and `summarize` is available in their
+respective docstrings:
+
+http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
+
+### Example Usage
+
+```clojure
+(ns cli-example.core
+  (:require [cli-example.server :as server]
+            [clojure.string :as string]
+            [clojure.tools.cli :refer [parse-opts]])
+  (:import (java.net InetAddress))
+  (:gen-class))
+
+(def cli-options
+  [;; First three strings describe a short-option, long-option with optional
+   ;; example argument description, and a description. All three are optional
+   ;; and positional.
+   ["-p" "--port PORT" "Port number"
+    :default 80
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+   ["-H" "--hostname HOST" "Remote host"
+    :default (InetAddress/getByName "localhost")
+    ;; Specify a string to output in the default column in the options summary
+    ;; if the default value's string representation is very ugly
+    :default-desc "localhost"
+    :parse-fn #(InetAddress/getByName %)]
+   ;; If no required argument description is given, the option is assumed to
+   ;; be a boolean option defaulting to nil
+   [nil "--detach" "Detach from controlling process"]
+   ["-v" nil "Verbosity level; may be specified multiple times to increase value"
+    ;; If no long-option is specified, an option :id must be given
+    :id :verbosity
+    :default 0
+    ;; Use assoc-fn to create non-idempotent options
+    :assoc-fn (fn [m k _] (update-in m [k] inc))]
+   ["-h" "--help"]])
+
+(defn usage [options-summary]
+  (->> ["This is my program. There are many like it, but this one is mine."
+        ""
+        "Usage: program-name [options] action"
+        ""
+        "Options:"
+        options-summary
+        ""
+        "Actions:"
+        "  start    Start a new server"
+        "  stop     Stop an existing server"
+        "  status   Print a server's status"
+        ""
+        "Please refer to the manual page for more information."]
+       (string/join \newline)))
+
+(defn error-msg [errors]
+  (str "The following errors occurred while parsing your command:\n\n"
+       (string/join \newline errors)))
+
+(defn exit [status msg]
+  (println msg)
+  (System/exit status))
+
+(defn -main [& args]
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+    ;; Handle help and error conditions
+    (cond
+      (:help options) (exit 0 (usage summary))
+      (not= (count arguments) 1) (exit 1 (usage summary))
+      errors (exit 1 (error-msg errors)))
+    ;; Execute program with options
+    (case (first arguments)
+      "start" (server/start! options)
+      "stop" (server/stop! options)
+      "status" (server/status! options)
+      (exit 1 (usage summary)))))
+```
+
+## Stable Releases and Dependency Information
 
 Latest stable release: 0.2.4
 

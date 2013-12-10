@@ -27,8 +27,8 @@
           ;; Double dash always ends options processing
           #"^--$" (recur opts (into argv cdr) [])
           ;; Long options with assignment always passes optarg, required or not
-          #"^--.+=" (recur (conj opts (into [:long-opt] (s/split car #"=" 2)))
-                           argv cdr)
+          #"^--\S+=" (recur (conj opts (into [:long-opt] (s/split car #"=" 2)))
+                            argv cdr)
           ;; Long options, consumes cdr head if needed
           #"^--" (let [[optarg cdr] (if (contains? required-set car)
                                       [(first cdr) (rest cdr)]

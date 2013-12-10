@@ -21,8 +21,8 @@
   (testing "detects arguments to long options"
     (is (= (tokenize-args #{"--port" "--host"} ["--port=80" "--host" "example.com"])
            [[[:long-opt "--port" "80"] [:long-opt "--host" "example.com"]] []]))
-    (is (= (tokenize-args #{} ["--foo=bar" "--noopt="])
-           [[[:long-opt "--foo" "bar"] [:long-opt "--noopt" ""]] []])))
+    (is (= (tokenize-args #{} ["--foo=bar" "--noarg=" "--bad =opt"])
+           [[[:long-opt "--foo" "bar"] [:long-opt "--noarg" ""] [:long-opt "--bad =opt"]] []])))
   (testing "stops option processing on double dash"
     (is (= (tokenize-args #{} ["-a" "--" "-b"])
            [[[:short-opt "-a"]] ["-b"]])))

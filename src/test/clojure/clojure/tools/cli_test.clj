@@ -154,9 +154,12 @@
                   "  -o PATH                         Output file"
                   "  -v                              Verbosity level; may be specified more than once"
                   "      --help"]))))
-  (testing "does not print :default column when all options are boolean"
-    (is (= (summarize (compile-option-specs [["-m" "--minimal" "A minimal option summary"]]))
-           "  -m, --minimal  A minimal option summary"))))
+  (testing "does not print :default column when no defaults will be shown"
+    (is (= (summarize (compile-option-specs [["-b" "--boolean" "A boolean option with a hidden default"
+                                              :default true]
+                                             ["-o" "--option ARG" "An option without a default"]]))
+           (join \newline ["  -b, --boolean     A boolean option with a hidden default"
+                           "  -o, --option ARG  An option without a default"])))))
 
 (deftest test-parse-opts
   (testing "parses options to :options"

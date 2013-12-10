@@ -345,7 +345,7 @@
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
     [(default-option-map specs) []] tokens))
 
-(defn- make-summary-parts [all-boolean? specs]
+(defn- make-summary-parts [show-defaults? specs]
   (let [{:keys [short-opt long-opt required default default-desc desc]} specs
         opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
                   long-opt (str "    " long-opt)
@@ -354,9 +354,9 @@
                    [(str opt \space required)
                     (or default-desc (if default (str default) ""))]
                    [opt ""])]
-    (if all-boolean?
-      [opt (or desc "")]
-      [opt dd (or desc "")])))
+    (if show-defaults?
+      [opt dd (or desc "")]
+      [opt (or desc "")])))
 
 (defn- format-lines [lens parts]
   (let [cl-fmt (case (count lens)
@@ -367,8 +367,8 @@
 (defn summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
-  (let [all-boolean? (every? (comp not :required) specs)
-        parts (map (partial make-summary-parts all-boolean?) specs)
+  (let [show-defaults? (some #(and (:required %) (:default %)) specs)
+        parts (map (partial make-summary-parts show-defaults?) specs)
         lens (apply map (fn [& cols] (apply max (map count cols))) parts)
         lines (format-lines lens parts)]
     (s/join \newline lines)))

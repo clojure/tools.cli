@@ -2,21 +2,21 @@
 
 tools.cli contains a command line options parser for Clojure.
 
-## Next Release: 0.3.0-beta1
+## Stable Releases and Dependency Information
 
-The next release of tools.cli features a new flexible API, better adherence to
-GNU option parsing conventions, and ClojureScript support.
+The 0.3.0 release of tools.cli features a new flexible API, better adherence
+to GNU option parsing conventions, and ClojureScript support.
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.3.0-beta1"]
+    [org.clojure/tools.cli "0.3.0"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.3.0-beta1</version>
+      <version>0.3.0</version>
     </dependency>
 
 The function `clojure.tools.cli/cli` has been superseded by
@@ -24,9 +24,59 @@ The function `clojure.tools.cli/cli` has been superseded by
 
 The previous function will remain for the forseeable future. It has also been
 adapted to use the new tokenizer, so upgrading is still worthwhile even if you
-are not ready to migrate to `clojure.tools.cli/parse-opts`.
+are not ready to migrate to `parse-opts`.
 
-## New Features
+## Quick Start
+
+```clojure
+(ns my.program
+  (:require [clojure.tools.cli :refer [parse-opts]])
+  (:gen-class))
+
+(def cli-options
+  ;; An option with a required argument
+  [["-p" "--port PORT" "Port number"
+    :default 80
+    :parse-fn #(Integer/parseInt %)
+    :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+   ;; A non-idempotent option
+   ["-v" nil "Verbosity level"
+    :id :verbosity
+    :default 0
+    :assoc-fn (fn [m k _] (update-in m [k] inc))]
+   ;; A boolean option defaulting to nil
+   ["-h" "--help"]])
+
+(defn -main [& args]
+  (parse-opts args cli-options))
+```
+
+Execute the command line:
+
+    my-program -vvvp8080 foo --help --invalid-opt
+
+to produce the map:
+
+```clojure
+{:options   {:help true
+             :port 8080
+             :verbosity 3}
+
+ :arguments ["foo"]
+
+ :summary   "  -p, --port PORT  80  Port number
+               -v                   Verbosity level
+               -h, --help"
+
+ :errors    ["Unknown option: \"--invalid-opt\""]}
+```
+
+Please see the [example program](#example-usage) for a more detailed example
+and refer to the docstring of `parse-opts` for comprehensive documentation:
+
+http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
+
+## New Features in 0.3.0
 
 ### Better Option Tokenization
 
@@ -109,36 +159,31 @@ errors vector.
 
 ### Error Handling and Return Values
 
-Instead of throwing errors, `parse-opts` now collects error messages into
-a vector and returns them to the caller. Unknown options, missing required
-arguments, validation errors, and exceptions thrown during `:parse-fn` are all
-added to the errors vector.
+Instead of throwing errors, `parse-opts` collects error messages into a vector
+and returns them to the caller. Unknown options, missing required arguments,
+validation errors, and exceptions thrown during `:parse-fn` are all added to
+the errors vector.
 
 Correspondingly, `parse-opts` returns the following map of values:
 
-    {:options     The map of options -> parsed values
+    {:options     A map of default options merged with parsed values from the command line
      :arguments   A vector of unprocessed arguments
      :summary     An options summary string
-     :errors      A vector of error messages, nil if no errors
-     }
+     :errors      A vector of error messages, or nil if no errors}
 
 During development, parse-opts asserts the uniqueness of option `:id`,
 `:short-opt`, and `:long-opt` values and throws an error on failure.
 
 ### ClojureScript Support
 
-The `cljs.tools.cli` namespace is now available for use in ClojureScript
-programs! Both `parse-opts` and `summarize` have been ported, and have
-complete feature parity with their Clojure counterparts.
+The `cljs.tools.cli` namespace is available for use in ClojureScript programs!
+Both `parse-opts` and `summarize` have been ported, and have complete feature
+parity with their Clojure counterparts.
 
-### API documentation
+ClojureScript Versions `0.0-2080` and above are supported, but earlier
+versions are likely to work as well.
 
-Detailed documentation for `parse-opts` and `summarize` is available in their
-respective docstrings:
-
-http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
-
-### Example Usage
+## Example Usage
 
 ```clojure
 (ns cli-example.core
@@ -212,194 +257,6 @@ http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
       (exit 1 (usage summary)))))
 ```
 
-## Stable Releases and Dependency Information
-
-Latest stable release: 0.2.4
-
-* [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
-* [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
-
-[Leiningen](https://github.com/technomancy/leiningen) dependency information:
-
-    [org.clojure/tools.cli "0.2.4"]
-
-[Maven](http://maven.apache.org/) dependency information:
-
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.cli</artifactId>
-      <version>0.2.4</version>
-    </dependency>
-
-## Example Usage
-
-    (use '[clojure.tools.cli :only [cli]])
-
-    (cli args
-         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)
-          :assoc-fn (fn [previous key val]
-                       (assoc previous key
-                              (if-let [oldval (get previous key)]
-                                (merge oldval val)
-                                (hash-set val))))]
-         ["-h" "--host" "The hostname" :default "localhost"]
-         ["-v" "--[no-]verbose" :default true]
-         ["-l" "--log-directory" :default "/some/path"])
-
-with args of:
-
-    ["-p" "8080"
-     "-p" "9090"
-     "--no-verbose"
-     "--log-directory" "/tmp"
-     "some-file"]
-
-will return a vector containing three elements:
-
-a clojure map with the names picked out for you as keywords:
-
-     {:port          #{8080 9090}
-      :host          "localhost"
-      :verbose       false
-      :log-directory "/tmp"}
-
-a vector of trailing arguments that are not options:
-
-    ["some-file"]
-
-and a documentation string to use to provide help:
-
-    "Switches                    Default     Desc
-     --------                    -------     ----
-     -p, --port                              Listen on this port
-     -h, --host                  localhost   The hostname
-     -v, --no-verbose --verbose  true
-     -l, --log-directory         /some/path"
-
-### Custom description
-
-You can pass an optional description argument that will be shown
-between "Usage:" and the description of the switches. For example:
-
-    (cli args
-         "This program does something extraordinary."
-         ["-p" "--port" "Listen on this port" :parse-fn #(Integer. %)]
-         ["-h" "--host" "The hostname" :default "localhost"])
-
-The documentation string will now look like:
-
-    "This program does something extraordinary.
-
-     Switches                    Default     Desc
-     --------                    -------     ----
-     -p, --port                              Listen on this port
-     -h, --host                  localhost   The hostname"
-
-## Options
-
-An option is specified by providing a vector of information:
-
-Switches should be provided first, from least to most specific. The
-last switch you provide will be used as the name for the argument in
-the resulting hash-map. The following:
-
-    ["-p" "--port"]
-
-defines an argument with two possible switches, the name of which will
-be :port in the resulting hash-map.
-
-Next is an optional doc string:
-
-    ["-p" "--port" "The port to listen on"]
-
-This will be printed in the 'Desc' column of the help banner.
-
-Following that are optional parameters, provided in key-value pairs:
-
-    ["-p" "--port" "The port to listen on" :default 8080 :parse-fn #(Integer. %)
-     :assoc-fn (fn [previous key val]
-                 (assoc previous key
-                        (if-let [oldval (get previous key)]
-                          (merge oldval val)
-                          (hash-set val))))]
-
-These should be self-explanatory. The defaults if not provided are as follows:
-
-    {:default  nil
-     :parse-fn identity
-     :assoc-fn assoc
-     :flag     false}
-
-If you provide the same option multiple times, the `assoc-fn` will be
-called for each value after the first. This gives you another way to
-build collections of values (the other being using `parse-fn` to split
-the value).
-
-### Boolean Flags
-
-Flags are indicated either through naming convention:
-
-    ["-v" "--[no-]verbose" "Be chatty"]
-
-(note the [no-] in the argument name).
-
-Or you can explicitly mark them as flags:
-
-    ["-v" "--verbose" "Be chatty" :flag true]
-
-Either way, when providing them on the command line, using the name
-itself will set to true, and using the name prefixed with 'no-' will
-set the argument to false:
-
-    (cli ["-v"]
-         ["-v" "--[no-]verbose"])
-
-    => [{:verbose true}, ...]
-
-    (cli ["--no-verbose"]
-         ["-v" "--[no-]verbose"])
-
-    => [{:verbose false}, ...]
-
-Note: there is no short-form to set the flag to false (-no-v will not
-work!).
-
-## Trailing Arguments
-
-Any trailing arguments given to `cli` are returned as the second item
-in the resulting vector:
-
-    (cli ["--port" "9999" "some" "extra" "arguments"]
-         ["--port" :parse-fn #(Integer. %)])
-
-    => [{:port 9999}, ["some" "extra" "arguments"], ...]
-
-This allows you to deal with parameters such as filenames which are
-commonly provided at the end of an argument list.
-
-If you wish to explicitly signal the end of arguments, you can use a
-double-hyphen:
-
-    (cli ["--port" "9999" "--" "some" "--extra" "arguments"]
-         ["--port" :parse-fn #(Integer. %)])
-
-    => [{:port 9999}, ["some" "--extra" "arguments"], ...]
-
-This is useful when your extra arguments look like switches.
-
-## Banner
-
-The third item in the resulting vector is a banner useful for
-providing help to the user:
-
-    (let [[options args banner] (cli ["--faux" "bar"]
-                                     ["-h" "--help" "Show help" :default false :flag true]
-                                     ["-f" "--faux" "The faux du fafa"])]
-      (when (:help options)
-        (println banner)
-        (System/exit 0))
-      (println options))
-
 ## Developer Information
 
 * [GitHub project](https://github.com/clojure/tools.cli)
@@ -409,6 +266,15 @@ providing help to the user:
 
 ## Change Log
 
+* Release 0.3.0 on 2013-12-15
+  * Add public functions `parse-opts` and `summarize` to supersede `cli`,
+    addressing [TCLI-3](http://dev.clojure.org/jira/browse/TCLI-3),
+    [TCLI-4](http://dev.clojure.org/jira/browse/TCLI-4), and
+    [TCLI-6](http://dev.clojure.org/jira/browse/TCLI-6)
+  * Add ClojureScript port of `parse-opts` and `summarize`, available in
+    `cljs.tools.cli`.
+  * Move extra documentation of `cli` function to
+    https://github.com/clojure/tools.cli/wiki/Documentation-for-0.2.4
 * Release 0.2.4 on 2013-08-06
   * Applying patch for [TCLI-2](http://dev.clojure.org/jira/browse/TCLI-2)
     (support an assoc-fn option)
@@ -436,4 +302,5 @@ Eclipse Public License 1.0 (http://opensource.org/licenses/eclipse-1.0.php)
 which can be found in the file epl.html at the root of this distribution.
 By using this software in any fashion, you are agreeing to be bound by
 the terms of this license.
+
 You must not remove this notice, or any other, from this software.

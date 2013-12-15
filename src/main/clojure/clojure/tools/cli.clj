@@ -190,7 +190,7 @@
   string, and pairs of options.
 
   Valid options are :default, :parse-fn, and :flag. See
-  https://github.com/clojure/tools.cli/blob/master/README.md for more
+  https://github.com/clojure/tools.cli/wiki/Documentation-for-0.2.4 for more
   detailed examples.
 
   Returns a vector containing a map of the parsed arguments, a vector
@@ -367,7 +367,7 @@
               3 "~{  ~vA  ~vA  ~vA~}")]
     (map #(s/trimr (cl-format nil fmt (interleave lens %))) parts)))
 
-(defn summarize
+(defn ^{:added "0.3.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [show-defaults? (some #(and (:required %) (:default %)) specs)
@@ -384,7 +384,7 @@
         s))
     #{} specs))
 
-(defn parse-opts
+(defn ^{:added "0.3.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the
   GNU Program Argument Syntax Conventions:
 

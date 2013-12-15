@@ -1,6 +1,6 @@
 {:namespaces
  ({:source-url
-   "https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/blob/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli/clojure.tools.cli-api.html",
    :name "clojure.tools.cli",
@@ -11,13 +11,13 @@
    :name "cli",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L180",
+   "https://github.com/clojure/tools.cli/blob/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj#L180",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/cli",
    :doc
-   "THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use\nclojure.tools.cli/parse-opts in new applications.\n\nParse the provided args using the given specs. Specs are vectors\ndescribing a command line argument. For example:\n\n[\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]\n\nFirst provide the switches (from least to most specific), then a doc\nstring, and pairs of options.\n\nValid options are :default, :parse-fn, and :flag. See\nhttps://github.com/clojure/tools.cli/blob/master/README.md for more\ndetailed examples.\n\nReturns a vector containing a map of the parsed arguments, a vector\nof extra arguments that did not match known switches, and a\ndocumentation banner to provide usage instructions.",
+   "THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use\nclojure.tools.cli/parse-opts in new applications.\n\nParse the provided args using the given specs. Specs are vectors\ndescribing a command line argument. For example:\n\n[\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]\n\nFirst provide the switches (from least to most specific), then a doc\nstring, and pairs of options.\n\nValid options are :default, :parse-fn, and :flag. See\nhttps://github.com/clojure/tools.cli/wiki/Documentation-for-0.2.4 for more\ndetailed examples.\n\nReturns a vector containing a map of the parsed arguments, a vector\nof extra arguments that did not match known switches, and a\ndocumentation banner to provide usage instructions.",
    :var-type "function",
    :line 180,
    :file "src/main/clojure/clojure/tools/cli.clj"}
@@ -25,9 +25,10 @@
    :name "parse-opts",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L387",
+   "https://github.com/clojure/tools.cli/blob/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj#L387",
+   :added "0.3.0",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/parse-opts",
    :doc
@@ -39,9 +40,10 @@
    :name "summarize",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj#L370",
+   "https://github.com/clojure/tools.cli/blob/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj#L370",
+   :added "0.3.0",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/c73193b9589bcdfbfd926f4b1c80594fa66f5c10/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/86e9f9db6d513b3ddb1bf1cdff9d3f776014b487/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/summarize",
    :doc

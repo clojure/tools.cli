@@ -363,6 +363,7 @@
 
 (defn- format-lines [lens parts]
   (let [fmt (case (count lens)
+              0 nil
               2 "~{  ~vA  ~vA~}"
               3 "~{  ~vA  ~vA  ~vA~}")]
     (map #(s/trimr (cl-format nil fmt (interleave lens %))) parts)))
@@ -372,7 +373,8 @@
   [specs]
   (let [show-defaults? (some #(and (:required %) (:default %)) specs)
         parts (map (partial make-summary-parts show-defaults?) specs)
-        lens (apply map (fn [& cols] (apply max (map count cols))) parts)
+        lens (when (seq parts)
+               (apply map (fn [& cols] (apply max (map count cols))) parts))
         lines (format-lines lens parts)]
     (s/join \newline lines)))
 

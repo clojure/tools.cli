@@ -160,7 +160,10 @@
                                               :default true]
                                              ["-o" "--option ARG" "An option without a default"]]))
            (join \newline ["  -b, --boolean     A boolean option with a hidden default"
-                           "  -o, --option ARG  An option without a default"])))))
+                           "  -o, --option ARG  An option without a default"]))))
+  (testing "works with no options"
+    (is (= (summarize (compile-option-specs []))
+           ""))))
 
 (deftest test-parse-opts
   (testing "parses options to :options"

@@ -58,9 +58,9 @@ Execute the command line:
 to produce the map:
 
 ```clojure
-{:options   {:help true
-             :port 8080
-             :verbosity 3}
+{:options   {:port 8080
+             :verbosity 3
+             :help true}
 
  :arguments ["foo"]
 
@@ -70,6 +70,9 @@ to produce the map:
 
  :errors    ["Unknown option: \"--invalid-opt\""]}
 ```
+
+**Note** that exceptions are _not_ thrown on parse errors, so errors must be
+handled explicitly after checking the `:errors` entry for a truthy value.
 
 Please see the [example program](#example-usage) for a more detailed example
 and refer to the docstring of `parse-opts` for comprehensive documentation:

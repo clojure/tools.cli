@@ -82,7 +82,7 @@
     (deftest should-work-with-trailing-boolean-args
       (let [[options args _] (cli ["--no-verbose" "some-file"]
                                   ["--[no-]verbose"])]
-        (is (= {:verbose false}))
+        (is (= {:verbose false} options))
         (is (= ["some-file"] args))))
 
     (deftest should-accept-double-hyphen-as-end-of-args

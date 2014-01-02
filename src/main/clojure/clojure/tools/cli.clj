@@ -363,7 +363,6 @@
 
 (defn- format-lines [lens parts]
   (let [fmt (case (count lens)
-              0 nil
               2 "~{  ~vA  ~vA~}"
               3 "~{  ~vA  ~vA  ~vA~}")]
     (map #(s/trimr (cl-format nil fmt (interleave lens %))) parts)))
@@ -372,11 +371,12 @@
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [show-defaults? (some #(and (:required %) (:default %)) specs)
-        parts (map (partial make-summary-parts show-defaults?) specs)
-        lens (when (seq parts)
-               (apply map (fn [& cols] (apply max (map count cols))) parts))
-        lines (format-lines lens parts)]
-    (s/join \newline lines)))
+        parts (map (partial make-summary-parts show-defaults?) specs)]
+    (if (seq parts)
+      (let [lens (apply map (fn [& cols] (apply max (map count cols))) parts)
+            lines (format-lines lens parts)]
+        (s/join \newline lines))
+      "")))
 
 (defn- required-arguments [specs]
   (reduce

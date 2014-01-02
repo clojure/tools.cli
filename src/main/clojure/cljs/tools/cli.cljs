@@ -215,10 +215,12 @@
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (let [show-defaults? (some #(and (:required %) (:default %)) specs)
-        parts (map (partial make-summary-parts show-defaults?) specs)
-        lens (apply map (fn [& cols] (apply max (map count cols))) parts)
-        lines (format-lines lens parts)]
-    (s/join \newline lines)))
+        parts (map (partial make-summary-parts show-defaults?) specs)]
+    (if (seq parts)
+      (let [lens (apply map (fn [& cols] (apply max (map count cols))) parts)
+            lines (format-lines lens parts)]
+        (s/join \newline lines))
+      "")))
 
 (defn- required-arguments [specs]
   (reduce

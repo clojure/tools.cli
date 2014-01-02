@@ -23,7 +23,7 @@
                    :cljsbuild {:builds [{:source-paths ["src/main/clojure/cljs"
                                                         "src/test/clojure/cljs"]
                                          :compiler {:output-to "target/cli_test.js"
-                                                    :optimizations :simple
+                                                    :optimizations :whitespace
                                                     :pretty-print true}}]
                                :test-commands {"phantomjs" ["phantomjs"
                                                             :runner

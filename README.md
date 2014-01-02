@@ -269,6 +269,11 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.1 on 2014-01-02
+  * Apply patch for [TCLI-8](http://dev.clojure.org/jira/browse/TCLI-8):
+    Correct test that trivially always passes
+  * Apply patch for [TCLI-7](http://dev.clojure.org/jira/browse/TCLI-7):
+    summarize throws when called with an empty sequence of options
 * Release 0.3.0 on 2013-12-15
   * Add public functions `parse-opts` and `summarize` to supersede `cli`,
     addressing [TCLI-3](http://dev.clojure.org/jira/browse/TCLI-3),

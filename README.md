@@ -4,19 +4,19 @@ tools.cli contains a command line options parser for Clojure.
 
 ## Stable Releases and Dependency Information
 
-The 0.3.0 release of tools.cli features a new flexible API, better adherence
+The 0.3.x series of tools.cli features a new flexible API, better adherence
 to GNU option parsing conventions, and ClojureScript support.
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.3.0"]
+    [org.clojure/tools.cli "0.3.1"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.3.0</version>
+      <version>0.3.1</version>
     </dependency>
 
 The function `clojure.tools.cli/cli` has been superseded by
@@ -79,7 +79,7 @@ and refer to the docstring of `parse-opts` for comprehensive documentation:
 
 http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
 
-## New Features in 0.3.0
+## New Features in 0.3.x
 
 ### Better Option Tokenization
 

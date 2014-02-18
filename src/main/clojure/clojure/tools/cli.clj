@@ -1,8 +1,7 @@
 (ns ^{:author "Gareth Jones, Sung Pae"}
   clojure.tools.cli
-  (:use [clojure.string :as s :only [replace]]
-        [clojure.pprint :only [cl-format]])
-  (:refer-clojure :exclude [replace]))
+  (:require [clojure.pprint :as pp]
+            [clojure.string :as s]))
 
 (defn- tokenize-args
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
@@ -88,11 +87,11 @@
         vs (for [d docs]
              (mapcat (fn [& x] (apply vector x)) max-cols d))]
     (doseq [v vs]
-      (cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
+      (pp/cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
       (prn))))
 
 (defn- name-for [k]
-  (replace k #"^--no-|^--\[no-\]|^--|^-" ""))
+  (s/replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
 (defn- flag-for [^String v]
   (not (.startsWith v "--no-")))
@@ -155,8 +154,8 @@
   [switches flag]
   (-> (for [^String s switches]
         (cond
-         (and flag (flag? s))            [(replace s #"\[no-\]" "no-") (replace s #"\[no-\]" "")]
-         (and flag (.startsWith s "--")) [(replace s #"--" "--no-") s]
+         (and flag (flag? s))            [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
+         (and flag (.startsWith s "--")) [(s/replace s #"--" "--no-") s]
          :default                        [s]))
       flatten))
 
@@ -365,7 +364,7 @@
   (let [fmt (case (count lens)
               2 "~{  ~vA  ~vA~}"
               3 "~{  ~vA  ~vA  ~vA~}")]
-    (map #(s/trimr (cl-format nil fmt (interleave lens %))) parts)))
+    (map #(s/trimr (pp/cl-format nil fmt (interleave lens %))) parts)))
 
 (defn ^{:added "0.3.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal."
@@ -463,7 +462,8 @@
                    :default 0
                    :assoc-fn (fn [m k _] (update-in m [k] inc))]
 
-    :validate     A vector of [validate-fn validate-msg].
+    :validate     A vector of [validate-fn validate-msg]; the validation
+                  message is optional.
 
     :validate-fn  A function that receives the parsed option value and returns
                   a falsy value when the value is invalid.
@@ -477,8 +477,7 @@
      :arguments   A vector of unprocessed arguments
      :summary     A string containing a minimal options summary
      :errors      A possible vector of error message strings generated during
-                  parsing; nil when no errors exist
-     }
+                  parsing; nil when no errors exist}
 
   A few function options may be specified to influence the behavior of
   parse-opts:

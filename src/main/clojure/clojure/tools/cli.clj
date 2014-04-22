@@ -236,7 +236,10 @@
                          (rest (re-find #"^(--[^ =]+)(?:[ =](.*))?" long-opt)))
         id (when long-opt
              (keyword (subs long-opt 2)))
-        [validate-fn validate-msg] (:validate spec-map)]
+        validate (:validate spec-map)
+        [validate-fn validate-msg] (when (seq validate)
+                                     (->> (partition 2 2 (repeat nil) validate)
+                                          (apply map vector)))]
     (merge {:id id
             :short-opt short-opt
             :long-opt long-opt
@@ -251,6 +254,13 @@
     (apply distinct? coll)
     true))
 
+(defn- wrap-val [map key]
+  (if (contains? map key)
+    (update-in map [key] #(cond (nil? %) nil
+                                (coll? %) %
+                                :else [%]))
+    map))
+
 (defn- compile-option-specs
   "Map a sequence of option specification vectors to a sequence of:
 
@@ -263,15 +273,18 @@
    :default-desc String   ; \"example.com\"
    :parse-fn     IFn      ; #(InetAddress/getByName %)
    :assoc-fn     IFn      ; assoc
-   :validate-fn  IFn      ; (partial instance? Inet4Address)
-   :validate-msg String   ; \"Must be an IPv4 host\"
+   :validate-fn  [IFn]    ; [#(instance? Inet4Address %)
+                          ;  #(not (.isMulticastAddress %)]
+   :validate-msg [String] ; [\"Must be an IPv4 host\"
+                          ;  \"Must not be a multicast address\"]
    }
 
   :id defaults to the keywordized name of long-opt without leading dashes, but
   may be overridden in the option spec.
 
-  The option spec entry `:validate [fn msg]` desugars into the two entries
-  :validate-fn and :validate-msg.
+  The option spec entry `:validate [fn msg ...]` desugars into the two vector
+  entries :validate-fn and :validate-msg. Multiple pairs of validation
+  functions and error messages may be provided.
 
   A :default entry will not be included in the compiled spec unless specified.
 
@@ -287,9 +300,11 @@
           (distinct?* (remove nil? (map :short-opt %)))
           (distinct?* (remove nil? (map :long-opt %)))]}
   (map (fn [spec]
-         (if (map? spec)
-           (select-spec-keys spec)
-           (compile-spec spec)))
+         (-> (if (map? spec)
+               (select-spec-keys spec)
+               (compile-spec spec))
+             (wrap-val :validate-fn)
+             (wrap-val :validate-msg)))
        specs))
 
 (defn- default-option-map [specs]
@@ -311,16 +326,18 @@
 (defn- parse-error [opt optarg msg]
   (str "Error while parsing option " (pr-join opt optarg) ": " msg))
 
-(defn- validate-error [opt optarg msg]
+(defn- validation-error [opt optarg msg]
   (str "Failed to validate " (pr-join opt optarg)
        (if msg (str ": " msg) "")))
 
 (defn- validate [value spec opt optarg]
   (let [{:keys [validate-fn validate-msg]} spec]
-    (if (or (nil? validate-fn)
-            (try (validate-fn value) (catch Throwable _)))
-      [value nil]
-      [::error (validate-error opt optarg validate-msg)])))
+    (or (loop [[vfn & vfns] validate-fn [msg & msgs] validate-msg]
+          (when vfn
+            (if (try (vfn value) (catch Throwable e))
+              (recur vfns msgs)
+              [::error (validation-error opt optarg msg)])))
+        [value nil])))
 
 (defn- parse-value [value spec opt optarg]
   (let [{:keys [parse-fn]} spec
@@ -476,14 +493,17 @@
                    :default 0
                    :assoc-fn (fn [m k _] (update-in m [k] inc))]
 
-    :validate     A vector of [validate-fn validate-msg]; the validation
-                  message is optional.
+    :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
+                  of validation functions and error messages may be provided.
 
-    :validate-fn  A function that receives the parsed option value and returns
-                  a falsy value when the value is invalid.
+    :validate-fn  A vector of functions that receives the parsed option value
+                  and returns a falsy value or throws an exception when the
+                  value is invalid. The validations are tried in the given
+                  order.
 
-    :validate-msg An optional message that will be added to the :errors vector
-                  on validation failure.
+    :validate-msg A vector of error messages corresponding to :validate-fn
+                  that will be added to the :errors vector on validation
+                  failure.
 
   parse-opts returns a map with four entries:
 

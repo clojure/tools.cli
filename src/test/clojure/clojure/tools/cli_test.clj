@@ -64,10 +64,18 @@
            [[:foo "--foo" "FOO"]
             [:bar "--bar" "BAR"]])))
   (testing "desugars :validate [fn msg]"
-    (is (= (map (juxt :validate-fn :validate-msg)
-                (compile-option-specs
-                  [[nil "--name NAME" :validate [seq "Must be present"]]]))
-           [[seq "Must be present"]])))
+    (let [port? #(< 0 % 0x10000)]
+      (is (= (map (juxt :validate-fn :validate-msg)
+                  (compile-option-specs
+                    [[nil "--name NAME" :validate [seq "Must be present"]]
+                     [nil "--port PORT" :validate [integer? "Must be an integer"
+                                                   port? "Must be between 0 and 65536"]]
+                     [:id :back-compat
+                      :validate-fn identity
+                      :validate-msg "Should be backwards compatible"]]))
+             [[[seq] ["Must be present"]]
+              [[integer? port?] ["Must be an integer" "Must be between 0 and 65536"]]
+              [[identity] ["Should be backwards compatible"]]]))))
   (testing "accepts maps as option specs without munging values"
     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
            [{:id ::foo :short-opt "-f" :long-opt "--foo"}])))
@@ -97,7 +105,9 @@
                     :parse-fn parse-int
                     :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
                    ["-f" "--file PATH"
-                    :validate [#(not= \/ (first %)) "Must be a relative path"]]
+                    :validate [#(not= \/ (first %)) "Must be a relative path"
+                               ;; N.B. This is a poor way to prevent path traversal
+                               #(not (re-find #"\.\." %)) "No path traversal allowed"]]
                    ["-q" "--quiet"
                     :id :verbose
                     :default true
@@ -113,7 +123,9 @@
       (is (has-error? #"Error while parsing"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
       (is (has-error? #"Must be a relative path"
-                      (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))))
+                      (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))
+      (is (has-error? #"No path traversal allowed"
+                      (peek (parse-option-tokens specs [[:long-opt "--file" "../../../etc/passwd"]]))))))
   (testing "merges values over default option map"
     (let [specs (compile-option-specs
                   [["-a" "--alpha"]

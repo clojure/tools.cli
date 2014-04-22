@@ -70,7 +70,17 @@
            [[seq "Must be present"]])))
   (testing "accepts maps as option specs without munging values"
     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
-           [{:id ::foo :short-opt "-f" :long-opt "--foo"}]))))
+           [{:id ::foo :short-opt "-f" :long-opt "--foo"}])))
+  (testing "warns about unknown keys"
+    (^{:cljs 'do} when ^:clj *assert*
+      (is (re-find #"Warning:.* :flag"
+                   (with-out-str
+                     (binding ^{:cljs []} [*err* *out*]
+                       (compile-option-specs [[nil "--alpha" :validate nil :flag true]])))))
+      (is (re-find #"Warning:.* :validate"
+                   (with-out-str
+                     (binding ^{:cljs []} [*err* *out*]
+                       (compile-option-specs [{:id :alpha :validate nil}]))))))))
 
 (defn has-error? [re coll]
   (seq (filter (partial re-seq re) coll)))
@@ -206,7 +216,7 @@
         (slurp (clojure.java.io/resource "cemerick/cljs/test/runner.js")))
 
   ;; CLJS test runner; same as `lein cljsbuild test`
-  (defn run-tests []
+  (defn run-cljs-tests []
     (println
       (clojure.java.shell/sh
         "phantomjs"

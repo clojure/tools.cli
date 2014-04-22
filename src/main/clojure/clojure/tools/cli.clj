@@ -213,6 +213,20 @@
   [:id :short-opt :long-opt :required :desc :default :default-desc :parse-fn
    :assoc-fn :validate-fn :validate-msg])
 
+(defn- select-spec-keys
+  "Select only known spec entries from map and warn the user about unknown
+   entries at development time."
+  [map]
+  ;; The following is formatted strangely for better manual diffing
+  (when *assert*
+    (let [unknown-keys (keys (apply dissoc map spec-keys))]
+      (when (seq unknown-keys)
+        (binding [*out* *err*]
+          (println (str "Warning: The following cli options are unrecognized: "
+                        (s/join ", " unknown-keys)))))
+      ))
+  (select-keys map spec-keys))
+
 (defn- compile-spec [spec]
   (let [sopt-lopt-desc (take-while #(or (string? %) (nil? %)) spec)
         spec-map (apply hash-map (drop (count sopt-lopt-desc) spec))
@@ -230,7 +244,7 @@
             :desc desc
             :validate-fn validate-fn
             :validate-msg validate-msg}
-           (select-keys spec-map spec-keys))))
+           (select-spec-keys (dissoc spec-map :validate)))))
 
 (defn- distinct?* [coll]
   (if (seq coll)
@@ -274,7 +288,7 @@
           (distinct?* (remove nil? (map :long-opt %)))]}
   (map (fn [spec]
          (if (map? spec)
-           (select-keys spec spec-keys)
+           (select-spec-keys spec)
            (compile-spec spec)))
        specs))
 

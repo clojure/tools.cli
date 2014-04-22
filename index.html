@@ -111,7 +111,7 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/56ecd5f305d444bbf6dcd28f4f4adce58ebc0de4/src/main/clojure/clojure/tools/cli.clj#L179" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L179" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -146,7 +146,11 @@ positional string arguments. The valid properties are:
                 is normally set to the keywordized name of the long option
                 without the leading dashes.
 
-                Must be a unique truthy value.
+                Multiple option entries can share the same :id in order to
+                transform a value in different ways, but only one of these
+                option entries may contain a :default entry.
+
+                This option is mandatory.
 
   :short-opt    The short format for this option, normally set by the first
                 positional string parameter: e.g. "-p". Must be unique.
@@ -228,7 +232,7 @@ parse-opts:
 </pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/56ecd5f305d444bbf6dcd28f4f4adce58ebc0de4/src/main/clojure/clojure/tools/cli.clj#L419" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L419" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -239,7 +243,7 @@ parse-opts:
     <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/56ecd5f305d444bbf6dcd28f4f4adce58ebc0de4/src/main/clojure/clojure/tools/cli.clj#L400" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L400" id="var-source">Source</a>
   </div>
 </div>
 

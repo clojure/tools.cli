@@ -296,7 +296,7 @@
   any duplicate :id, :short-opt, or :long-opt values."
   [specs]
   {:post [(every? (comp identity :id) %)
-          (distinct?* (map :id %))
+          (distinct?* (map :id (filter :default %)))
           (distinct?* (remove nil? (map :short-opt %)))
           (distinct?* (remove nil? (map :long-opt %)))]}
   (map (fn [spec]
@@ -444,7 +444,11 @@
                   is normally set to the keywordized name of the long option
                   without the leading dashes.
 
-                  Must be a unique truthy value.
+                  Multiple option entries can share the same :id in order to
+                  transform a value in different ways, but only one of these
+                  option entries may contain a :default entry.
+
+                  This option is mandatory.
 
     :short-opt    The short format for this option, normally set by the first
                   positional string parameter: e.g. \"-p\". Must be unique.

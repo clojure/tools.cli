@@ -49,15 +49,16 @@
             ["-b" "--beta" nil nil]
             [nil nil nil "DESC"]
             ["-f" "--foo" "FOO" "desc"]])))
-  (testing "throws AssertionError on unset :id or duplicate :id, :short-opt, :long-opt"
+  (testing "throws AssertionError on unset :id, duplicate :short-opt or :long-opt,
+            or multiple :default entries per :id"
     (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [["-a" :id nil]])))
     (is (thrown? ^{:cljs js/Error} AssertionError
-                 (compile-option-specs [["-a" "--alpha"] ["-b" :id :alpha]])))
-    (is (thrown? ^{:cljs js/Error} AssertionError
                  (compile-option-specs [{:id :a :short-opt "-a"} {:id :b :short-opt "-a"}])))
     (is (thrown? ^{:cljs js/Error} AssertionError
-                 (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}]))))
+                 (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}])))
+    (is (thrown? ^{:cljs js/Error} AssertionError
+                 (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}]))))
   (testing "desugars `--long-opt=value`"
     (is (= (map (juxt :id :long-opt :required)
                 (compile-option-specs [[nil "--foo FOO"] [nil "--bar=BAR"]]))

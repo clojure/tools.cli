@@ -64,7 +64,7 @@
   ;; The following is formatted strangely for better manual diffing
     (let [unknown-keys (keys (apply dissoc map spec-keys))]
       (when (seq unknown-keys)
-          (println (str "Warning: The following cli options are unrecognized: "
+          (println (str "Warning: The following options to parse-opts are unrecognized: "
                         (s/join ", " unknown-keys)))))
   (select-keys map spec-keys))
 

@@ -21,7 +21,7 @@
   If the :in-order flag is true, the first non-option, non-optarg argument
   stops options processing. This is useful for handling subcommand options."
   [required-set args & options]
-  (let [{:keys [in-order]} options]
+  (let [{:keys [in-order]} (apply hash-map options)]
     (loop [opts [] argv [] [car & cdr] args]
       (if car
         (condp re-seq car
@@ -380,7 +380,7 @@
                   returns a custom option summary string.
   "
   [args option-specs & options]
-  (let [{:keys [in-order no-defaults summary-fn]} options
+  (let [{:keys [in-order no-defaults summary-fn]} (apply hash-map options)
         specs (compile-option-specs option-specs)
         defaults (if no-defaults {} (default-option-map specs))
         req (required-arguments specs)

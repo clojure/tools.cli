@@ -113,32 +113,33 @@
                     :id :verbose
                     :default true
                     :parse-fn not]])]
-      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
+      (is (= (parse-option-tokens specs {} [[:long-opt "--port" "80"] [:short-opt "-q"]])
              [{:port (int 80) :verbose false} []]))
       (is (has-error? #"Unknown option"
-                      (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--unrecognized"]]))))
       (is (has-error? #"Missing required"
-                      (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--port"]]))))
       (is (has-error? #"Must be between"
-                      (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--port" "0"]]))))
       (is (has-error? #"Error while parsing"
-                      (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--port" "FOO"]]))))
       (is (has-error? #"Must be a relative path"
-                      (peek (parse-option-tokens specs [[:long-opt "--file" "/foo"]]))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--file" "/foo"]]))))
       (is (has-error? #"No path traversal allowed"
-                      (peek (parse-option-tokens specs [[:long-opt "--file" "../../../etc/passwd"]]))))))
+                      (peek (parse-option-tokens specs {} [[:long-opt "--file" "../../../etc/passwd"]]))))))
   (testing "merges values over default option map"
     (let [specs (compile-option-specs
                   [["-a" "--alpha"]
                    ["-b" "--beta" :default false]
                    ["-g" "--gamma=ARG"]
-                   ["-d" "--delta=ARG" :default "DELTA"]])]
-      (is (= (parse-option-tokens specs [])
+                   ["-d" "--delta=ARG" :default "DELTA"]])
+          defaults {:beta false :delta "DELTA"}]
+      (is (= (parse-option-tokens specs defaults [])
              [{:beta false :delta "DELTA"} []]))
-      (is (= (parse-option-tokens specs [[:short-opt "-a"]
-                                         [:short-opt "-b"]
-                                         [:short-opt "-g" "GAMMA"]
-                                         [:short-opt "-d" "delta"]])
+      (is (= (parse-option-tokens specs defaults [[:short-opt "-a"]
+                                                  [:short-opt "-b"]
+                                                  [:short-opt "-g" "GAMMA"]
+                                                  [:short-opt "-d" "delta"]])
              [{:alpha true :beta true :gamma "GAMMA" :delta "delta"} []]))))
   (testing "associates :id and value with :assoc-fn"
     (let [specs (compile-option-specs
@@ -147,14 +148,15 @@
                     :assoc-fn (fn [m k v] (assoc m k (not v)))]
                    ["-v" "--verbose"
                     :default 0
-                    :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])]
-      (is (= (parse-option-tokens specs [])
+                    :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])
+          defaults {:alpha true :verbose 0}]
+      (is (= (parse-option-tokens specs defaults [])
              [{:alpha true :verbose 0} []]))
-      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+      (is (= (parse-option-tokens specs defaults [[:short-opt "-a"]])
              [{:alpha false :verbose 0} []]))
-      (is (= (parse-option-tokens specs [[:short-opt "-v"]
-                                         [:short-opt "-v"]
-                                         [:long-opt "--verbose"]])
+      (is (= (parse-option-tokens specs defaults [[:short-opt "-v"]
+                                                  [:short-opt "-v"]
+                                                  [:long-opt "--verbose"]])
              [{:alpha true :verbose 3} []])))))
 
 (deftest test-summarize
@@ -217,11 +219,20 @@
            ["foo" "bar" "-b" "baz"])))
   (testing "provides an option summary at :summary"
     (is (re-seq #"-a\W+--alpha" (:summary (parse-opts [] [["-a" "--alpha"]])))))
-  (testing "processes arguments in order if :in-order is true"
+  (testing "processes arguments in order when :in-order is true"
     (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
                                    [["-a" "--alpha"] ["-b" "--beta"]]
                                    :in-order true))
            ["foo" "-b"])))
+  (testing "does not merge over default values when :no-defaults is true"
+    (let [option-specs [["-p" "--port PORT" :default 80]
+                         ["-H" "--host HOST" :default "example.com"]
+                         ["-q" "--quiet" :default true]
+                         ["-n" "--noop"]]]
+      (is (= (:options (parse-opts ["-n"] option-specs))
+             {:port 80 :host "example.com" :quiet true :noop true}))
+      (is (= (:options (parse-opts ["-n"] option-specs :no-defaults true))
+             {:noop true}))))
   (testing "accepts optional summary-fn for generating options summary"
     (is (= (:summary (parse-opts [] [["-a" "--alpha"] ["-b" "--beta"]]
                                  :summary-fn (fn [specs]

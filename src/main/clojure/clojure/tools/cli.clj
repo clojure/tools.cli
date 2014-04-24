@@ -360,15 +360,14 @@
 
 (defn- parse-option-tokens
   "Reduce sequence of [opt-type opt ?optarg?] tokens into a map of
-  {option-id value} merged over the default values in the option
-  specifications.
+  {option-id value} merged over a map of default values.
 
   Unknown options, missing required arguments, option argument parsing
   exceptions, and validation failures are collected into a vector of error
   message strings.
 
   Returns [option-map error-messages-vector]."
-  [specs tokens]
+  [specs default-map tokens]
   (reduce
     (fn [[m errors] [opt-type opt optarg]]
       (if-let [spec (find-spec specs opt-type opt)]
@@ -377,7 +376,7 @@
             [((:assoc-fn spec assoc) m (:id spec) value) errors]
             [m (conj errors error)]))
         [m (conj errors (str "Unknown option: " (pr-str opt)))]))
-    [(default-option-map specs) []] tokens))
+    [default-map []] tokens))
 
 (defn- make-summary-parts [show-defaults? specs]
   (let [{:keys [short-opt long-opt required default default-desc desc]} specs
@@ -436,9 +435,8 @@
   The first three string parameters in an option spec are positional and
   optional, and may be nil in order to specify a later parameter.
 
-  By default, options are boolean flags that are set to true when toggled, but
-  the second string parameter may be used to specify that an option requires
-  an argument.
+  By default, options are toggles that default to nil, but the second string
+  parameter may be used to specify that an option requires an argument.
 
     e.g. [\"-p\" \"--port PORT\"] specifies that --port requires an argument,
          of which PORT is a short description.
@@ -530,16 +528,22 @@
                   for building programs with subcommands that have their own
                   option specs.
 
+    :no-defaults  Only include option values specified in arguments and do not
+                  include any default values in the resulting options map.
+                  Useful for parsing options from multiple sources; i.e. from a
+                  config file and from the command line.
+
     :summary-fn   A function that receives the sequence of compiled option specs
                   (documented at #'clojure.tools.cli/compile-option-specs), and
                   returns a custom option summary string.
   "
   [args option-specs & options]
-  (let [{:keys [in-order summary-fn]} options
+  (let [{:keys [in-order no-defaults summary-fn]} options
         specs (compile-option-specs option-specs)
+        defaults (if no-defaults {} (default-option-map specs))
         req (required-arguments specs)
         [tokens rest-args] (tokenize-args req args :in-order in-order)
-        [opts errors] (parse-option-tokens specs tokens)]
+        [opts errors] (parse-option-tokens specs defaults tokens)]
     {:options opts
      :arguments rest-args
      :summary ((or summary-fn summarize) specs)

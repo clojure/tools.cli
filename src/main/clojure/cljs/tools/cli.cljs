@@ -201,23 +201,34 @@
 
 (defn- parse-option-tokens
   "Reduce sequence of [opt-type opt ?optarg?] tokens into a map of
-  {option-id value} merged over a map of default values.
+  {option-id value} merged over the default values in the option
+  specifications.
+
+  If the :no-defaults flag is true, only options specified in the tokens are
+  included in the option-map.
 
   Unknown options, missing required arguments, option argument parsing
   exceptions, and validation failures are collected into a vector of error
   message strings.
 
   Returns [option-map error-messages-vector]."
-  [specs default-map tokens]
-  (reduce
-    (fn [[m errors] [opt-type opt optarg]]
-      (if-let [spec (find-spec specs opt-type opt)]
-        (let [[value error] (parse-optarg spec opt optarg)]
-          (if-not (= value ::error)
-            [((:assoc-fn spec assoc) m (:id spec) value) errors]
-            [m (conj errors error)]))
-        [m (conj errors (str "Unknown option: " (pr-str opt)))]))
-    [default-map []] tokens))
+  [specs tokens & options]
+  (let [{:keys [no-defaults]} (apply hash-map options)
+        defaults (default-option-map specs)]
+    (-> (reduce
+          (fn [[m ids errors] [opt-type opt optarg]]
+            (if-let [spec (find-spec specs opt-type opt)]
+              (let [[value error] (parse-optarg spec opt optarg)
+                    id (:id spec)]
+                (if-not (= value ::error)
+                  [((:assoc-fn spec assoc) m id value) (conj ids id) errors]
+                  [m ids (conj errors error)]))
+              [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
+          [defaults [] []] tokens)
+        (#(let [[m ids errors] %]
+            (if no-defaults
+              [(select-keys m ids) errors]
+              [m errors]))))))
 
 (defn- make-summary-parts [show-defaults? specs]
   (let [{:keys [short-opt long-opt required default default-desc desc]} specs
@@ -382,10 +393,10 @@
   [args option-specs & options]
   (let [{:keys [in-order no-defaults summary-fn]} (apply hash-map options)
         specs (compile-option-specs option-specs)
-        defaults (if no-defaults {} (default-option-map specs))
         req (required-arguments specs)
         [tokens rest-args] (tokenize-args req args :in-order in-order)
-        [opts errors] (parse-option-tokens specs defaults tokens)]
+        [opts errors] (parse-option-tokens
+                        specs tokens :no-defaults no-defaults)]
     {:options opts
      :arguments rest-args
      :summary ((or summary-fn summarize) specs)

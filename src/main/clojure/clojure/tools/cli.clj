@@ -295,7 +295,7 @@
 
   An assertion error is thrown if any :id values are unset, or if there exist
   any duplicate :id, :short-opt, or :long-opt values."
-  [specs]
+  [option-specs]
   {:post [(every? (comp identity :id) %)
           (distinct?* (map :id (filter :default %)))
           (distinct?* (remove nil? (map :short-opt %)))
@@ -306,7 +306,7 @@
                (compile-spec spec))
              (wrap-val :validate-fn)
              (wrap-val :validate-msg)))
-       specs))
+       option-specs))
 
 (defn- default-option-map [specs]
   (reduce (fn [m s]

@@ -9,9 +9,9 @@
   #_(:cljs (:require-macros [cemerick.cljs.test :refer [deftest is testing]])))
 
 ;; Refer private vars
-(def tokenize-args        ^{:cljs cli/tokenize-args}        #'cli/tokenize-args)
-(def compile-option-specs ^{:cljs cli/compile-option-specs} #'cli/compile-option-specs)
-(def parse-option-tokens  ^{:cljs cli/parse-option-tokens}  #'cli/parse-option-tokens)
+(def tokenize-args        (^{:cljs 'do} var cli/tokenize-args))
+(def compile-option-specs (^{:cljs 'do} var cli/compile-option-specs))
+(def parse-option-tokens  (^{:cljs 'do} var cli/parse-option-tokens))
 
 (deftest test-tokenize-args
   (testing "expands clumped short options"
@@ -81,7 +81,7 @@
     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo"}])
            [{:id ::foo :short-opt "-f" :long-opt "--foo"}])))
   (testing "warns about unknown keys"
-    (^{:cljs 'do} when ^:clj *assert*
+    (^{:cljs 'do} when ^{:clj true} *assert*
       (is (re-find #"Warning:.* :flag"
                    (with-out-str
                      (binding ^{:cljs []} [*err* *out*]

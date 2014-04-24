@@ -53,19 +53,6 @@
             (recur opts (conj argv car) cdr)))
         [opts argv]))))
 
-(defn- normalize-args
-  "Rewrite arguments sequence into a normalized form that is parsable by cli."
-  [specs args]
-  (let [required-opts (->> specs
-                           (filter (complement :flag))
-                           (mapcat :switches)
-                           (into #{}))
-        ;; Preserve double-dash since this is a pre-processing step
-        largs (take-while (partial not= "--") args)
-        rargs (drop (count largs) args)
-        [opts largs] (tokenize-args required-opts largs)]
-    (concat (mapcat rest opts) largs rargs)))
-
 ;;
 ;; Legacy API
 ;;
@@ -176,6 +163,19 @@
             :flag     flag}
            (when flag {:default false})
            options)))
+
+(defn- normalize-args
+  "Rewrite arguments sequence into a normalized form that is parsable by cli."
+  [specs args]
+  (let [required-opts (->> specs
+                           (filter (complement :flag))
+                           (mapcat :switches)
+                           (into #{}))
+        ;; Preserve double-dash since this is a pre-processing step
+        largs (take-while (partial not= "--") args)
+        rargs (drop (count largs) args)
+        [opts largs] (tokenize-args required-opts largs)]
+    (concat (mapcat rest opts) largs rargs)))
 
 (defn cli
   "THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use

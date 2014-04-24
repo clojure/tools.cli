@@ -57,6 +57,9 @@ namespace.
       <a class="toc-entry-anchor" href="#clojure.tools.cli/cli">cli</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
+      <a class="toc-entry-anchor" href="#clojure.tools.cli/get-default-options">get-default-options</a>
+      
+    </div><div style="margin-left: 1em;" class="toc-entry">
       <a class="toc-entry-anchor" href="#clojure.tools.cli/parse-opts">parse-opts</a>
       
     </div><div style="margin-left: 1em;" class="toc-entry">
@@ -74,7 +77,7 @@ namespace.
 <p></p>
 <h2>Overview</h2>
 <div id="home-page">Project home page is <a href="http://github.com/clojure/tools.cli/">http://github.com/clojure/tools.cli/</a></div>
-<pre id="namespace-docstr"></pre>
+<pre id="namespace-docstr">Tools for working with command line arguments.</pre>
 
 
 <br />
@@ -111,7 +114,18 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L179" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/3c8956096444d5d6f81d46401a00ac2e2e216aa0/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+  </div><div id="var-entry">
+    <br />
+    <hr />
+    <h2 id="clojure.tools.cli/get-default-options">get-default-options</h2>
+    <span id="var-type">function</span><br />
+    <pre id="var-usage">Usage: (get-default-options option-specs)
+</pre>
+    <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.</pre>
+    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.2</span><br /></span>
+    
+    <a href="https://github.com/clojure/tools.cli/blob/3c8956096444d5d6f81d46401a00ac2e2e216aa0/src/main/clojure/clojure/tools/cli.clj#L419" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -132,9 +146,8 @@ Option specifications are a sequence of vectors with the following format:
 The first three string parameters in an option spec are positional and
 optional, and may be nil in order to specify a later parameter.
 
-By default, options are boolean flags that are set to true when toggled, but
-the second string parameter may be used to specify that an option requires
-an argument.
+By default, options are toggles that default to nil, but the second string
+parameter may be used to specify that an option requires an argument.
 
   e.g. ["-p" "--port PORT"] specifies that --port requires an argument,
        of which PORT is a short description.
@@ -226,13 +239,18 @@ parse-opts:
                 for building programs with subcommands that have their own
                 option specs.
 
+  :no-defaults  Only include option values specified in arguments and do not
+                include any default values in the resulting options map.
+                Useful for parsing options from multiple sources; i.e. from a
+                config file and from the command line.
+
   :summary-fn   A function that receives the sequence of compiled option specs
                 (documented at #'clojure.tools.cli/compile-option-specs), and
                 returns a custom option summary string.
 </pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L419" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/3c8956096444d5d6f81d46401a00ac2e2e216aa0/src/main/clojure/clojure/tools/cli.clj#L424" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -243,7 +261,7 @@ parse-opts:
     <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/ee7f1cc054689070a768c89d22713a02e3e34f6a/src/main/clojure/clojure/tools/cli.clj#L400" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/3c8956096444d5d6f81d46401a00ac2e2e216aa0/src/main/clojure/clojure/tools/cli.clj#L408" id="var-source">Source</a>
   </div>
 </div>
 

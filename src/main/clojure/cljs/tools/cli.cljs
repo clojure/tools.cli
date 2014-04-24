@@ -239,7 +239,7 @@
         fmt (apply gs/format fmt lens)]
     (map #(s/trimr (apply gs/format fmt %)) parts)))
 
-(defn summarize
+(defn ^{:added "0.3.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (if (seq specs)
@@ -258,7 +258,7 @@
         s))
     #{} specs))
 
-(defn parse-opts
+(defn ^{:added "0.3.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the
   GNU Program Argument Syntax Conventions:
 

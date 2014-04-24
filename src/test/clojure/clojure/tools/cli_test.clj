@@ -1,9 +1,9 @@
 (ns ^{:cljs 'cljs.tools.cli-test} clojure.tools.cli-test
   ^{:cljs
-    '(:require [cljs.tools.cli :as cli :refer [parse-opts summarize]]
+    '(:require [cljs.tools.cli :as cli :refer [get-default-options parse-opts summarize]]
                [clojure.string :refer [join]]
                cemerick.cljs.test)}
-  (:use [clojure.tools.cli :as cli :only [parse-opts summarize]]
+  (:use [clojure.tools.cli :as cli :only [get-default-options parse-opts summarize]]
         [clojure.string :only [join]]
         [clojure.test :only [deftest is testing]])
   #_(:cljs (:require-macros [cemerick.cljs.test :refer [deftest is testing]])))
@@ -187,6 +187,13 @@
   (testing "works with no options"
     (is (= (summarize (compile-option-specs []))
            ""))))
+
+(deftest test-get-default-options
+  (testing "Extracts map of default options from a sequence of option vectors."
+    (is (= (get-default-options [[:id :a :default "a"]
+                                 [:id :b :default 98]
+                                 [:id :c]])
+           {:a "a" :b 98}))))
 
 (deftest test-parse-opts
   (testing "parses options to :options"

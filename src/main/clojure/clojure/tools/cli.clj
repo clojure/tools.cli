@@ -398,6 +398,14 @@
               3 "~{  ~vA  ~vA  ~vA~}")]
     (map #(s/trimr (pp/cl-format nil fmt (interleave lens %))) parts)))
 
+(defn- required-arguments [specs]
+  (reduce
+    (fn [s {:keys [required short-opt long-opt]}]
+      (if required
+        (into s (remove nil? [short-opt long-opt]))
+        s))
+    #{} specs))
+
 (defn ^{:added "0.3.0"} summarize
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
@@ -409,13 +417,10 @@
       (s/join \newline lines))
     ""))
 
-(defn- required-arguments [specs]
-  (reduce
-    (fn [s {:keys [required short-opt long-opt]}]
-      (if required
-        (into s (remove nil? [short-opt long-opt]))
-        s))
-    #{} specs))
+(defn ^{:added "0.3.2"} get-default-options
+  "Extract the map of default options from a sequence of option vectors."
+  [option-specs]
+  (default-option-map (compile-option-specs option-specs)))
 
 (defn ^{:added "0.3.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the

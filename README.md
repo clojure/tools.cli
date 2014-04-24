@@ -1,6 +1,6 @@
 # tools.cli
 
-tools.cli contains a command line options parser for Clojure.
+Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 

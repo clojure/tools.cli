@@ -1,4 +1,5 @@
 (ns cljs.tools.cli
+  "Tools for working with command line arguments."
   {:author "Sung Pae"}
   (:require [clojure.string :as s]
             goog.string.format

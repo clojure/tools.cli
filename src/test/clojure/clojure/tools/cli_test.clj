@@ -78,7 +78,7 @@
               [[integer? port?] ["Must be an integer" "Must be between 0 and 65536"]]
               [[identity] ["Should be backwards compatible"]]]))))
   (testing "accepts maps as option specs without munging values"
-    (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo" :bad-key nil}])
+    (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo"}])
            [{:id ::foo :short-opt "-f" :long-opt "--foo"}])))
   (testing "warns about unknown keys"
     (^{:cljs 'do} when ^:clj *assert*

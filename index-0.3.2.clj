@@ -1,6 +1,6 @@
 {:namespaces
  ({:source-url
-   "https://github.com/clojure/tools.cli/blob/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli/clojure.tools.cli-api.html",
    :name "clojure.tools.cli",
@@ -11,9 +11,9 @@
    :name "cli",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj#L180",
+   "https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L180",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/cli",
    :doc
@@ -25,10 +25,10 @@
    :name "get-default-options",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj#L430",
+   "https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L430",
    :added "0.3.2",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/get-default-options",
    :doc
@@ -40,10 +40,10 @@
    :name "parse-opts",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj#L435",
+   "https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L435",
    :added "0.3.0",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/parse-opts",
    :doc
@@ -55,10 +55,10 @@
    :name "summarize",
    :namespace "clojure.tools.cli",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj#L419",
+   "https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L419",
    :added "0.3.0",
    :raw-source-url
-   "https://github.com/clojure/tools.cli/raw/35b0d6958d653fdae6e2d7abb726c7292f74dff1/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj",
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/summarize",
    :doc

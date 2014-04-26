@@ -396,7 +396,7 @@
                   short-opt short-opt)
         [opt dd] (if required
                    [(str opt \space required)
-                    (or default-desc (if default (str default) ""))]
+                    (or default-desc (str default))]
                    [opt ""])]
     (if show-defaults?
       [opt dd (or desc "")]
@@ -420,7 +420,7 @@
   "Reduce options specs into a options summary for printing at a terminal."
   [specs]
   (if (seq specs)
-    (let [show-defaults? (some #(and (:required %) (:default %)) specs)
+    (let [show-defaults? (some #(and (:required %) (contains? % :default)) specs)
           parts (map (partial make-summary-parts show-defaults?) specs)
           lens (apply map (fn [& cols] (apply max (map count cols))) parts)
           lines (format-lines lens parts)]

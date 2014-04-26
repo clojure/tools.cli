@@ -173,12 +173,19 @@
                          ["-v" nil "Verbosity level; may be specified more than once"
                           :id :verbose
                           :default 0]
+                         [nil "--ternary t|f|?" "A ternary option defaulting to false"
+                          :default false
+                          :parse-fn #(case %
+                                       "t" true
+                                       "f" false
+                                       "?" :maybe)]
                          [nil "--help"]]))
            (join \newline
-                 ["  -s, --server HOST  example.com  Upstream server"
-                  "  -p, --port PORT    80           Upstream port number"
-                  "  -o PATH                         Output file"
-                  "  -v                              Verbosity level; may be specified more than once"
+                 ["  -s, --server HOST    example.com  Upstream server"
+                  "  -p, --port PORT      80           Upstream port number"
+                  "  -o PATH                           Output file"
+                  "  -v                                Verbosity level; may be specified more than once"
+                  "      --ternary t|f|?  false        A ternary option defaulting to false"
                   "      --help"]))))
   (testing "does not print :default column when no defaults will be shown"
     (is (= (summarize (compile-option-specs [["-b" "--boolean" "A boolean option with a hidden default"

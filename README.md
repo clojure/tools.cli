@@ -9,14 +9,14 @@ to GNU option parsing conventions, and ClojureScript support.
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.3.1"]
+    [org.clojure/tools.cli "0.3.2"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.3.1</version>
+      <version>0.3.2</version>
     </dependency>
 
 The function `clojure.tools.cli/cli` has been superseded by
@@ -269,6 +269,16 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.2 on 2015-07-28
+  * Add `:no-defaults` to `parse-opts`:
+    Returns sequence of options that excludes defaulted ones. This helps
+    support constructing options from multiple sources (command line, config file).
+  * Add `get-default-options`:
+    Returns sequence of options that have defaults specified.
+  * Support multiple validations [TCLI-9](http://dev.clojure.org/jira/browse/TCLI-9)
+  * Support in-order arguments [TCLI-5](http://dev.clojure.org/jira/browse/TCLI-5):
+    `:in-order` processes arguments up to the first unknown option;
+    A warning is displayed when unknown options are encountered.
 * Release 0.3.1 on 2014-01-02
   * Apply patch for [TCLI-8](http://dev.clojure.org/jira/browse/TCLI-8):
     Correct test that trivially always passes

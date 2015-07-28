@@ -13,6 +13,8 @@
              :1.4 {:dependencies [[org.clojure/clojure "1.4.0"]]}
              :1.5 {:dependencies [[org.clojure/clojure "1.5.1"]]}
              :1.6 {:dependencies [[org.clojure/clojure "1.6.0"]]}
+             :1.7 {:dependencies [[org.clojure/clojure "1.7.0"]]}
+             :1.8 {:dependencies [[org.clojure/clojure "1.8.0-master-SNAPSHOT"]]}
 
              ;; Local CLJS development; not in pom.xml
              :dev {:dependencies [[org.clojure/clojurescript "0.0-2080"]]
@@ -29,6 +31,6 @@
                                                             :runner
                                                             "target/cli_test.js"]}}}}
 
-  :aliases {"test-all" ["with-profile" "test,1.2:test,1.3:test,1.4:test,1.5:test,1.6" "test"]
-            "check-all" ["with-profile" "1.2:1.3:1.4:1.5:1.6" "check"]}
+  :aliases {"test-all" ["with-profile" "test,1.2:test,1.3:test,1.4:test,1.5:test,1.6:test,1.7:test,1.8" "test"]
+            "check-all" ["with-profile" "1.2:1.3:1.4:1.5:1.6:1.7:1.8" "check"]}
   :min-lein-version "2.0.0")

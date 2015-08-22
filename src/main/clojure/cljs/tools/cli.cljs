@@ -56,7 +56,7 @@
 
 (def ^{:private true} spec-keys
   [:id :short-opt :long-opt :required :desc :default :default-desc :parse-fn
-   :assoc-fn :validate-fn :validate-msg])
+   :assoc-fn :validate-fn :validate-msg :missing])
 
 (defn- select-spec-keys
   "Select only known spec entries from map and warn the user about unknown
@@ -119,6 +119,7 @@
                           ;  #(not (.isMulticastAddress %)]
    :validate-msg [String] ; [\"Must be an IPv4 host\"
                           ;  \"Must not be a multicast address\"]
+   :missing      String   ; \"server must be specified\"
    }
 
   :id defaults to the keywordized name of long-opt without leading dashes, but
@@ -153,6 +154,15 @@
   (reduce (fn [m s]
             (if (contains? s :default)
               (assoc m (:id s) (:default s))
+              m))
+          {} specs))
+
+(defn- missing-errors
+  "Given specs, returns a map of spec id to error message if missing."
+  [specs]
+  (reduce (fn [m s]
+            (if (:missing s)
+              (assoc m (:id s) (:missing s))
               m))
           {} specs))
 
@@ -207,9 +217,9 @@
   If the :no-defaults flag is true, only options specified in the tokens are
   included in the option-map.
 
-  Unknown options, missing required arguments, option argument parsing
-  exceptions, and validation failures are collected into a vector of error
-  message strings.
+  Unknown options, missing options, missing required arguments, option
+  argument parsing exceptions, and validation failures are collected into
+  a vector of error message strings.
 
   If the :strict flag is true, required arguments that match other options
   are treated as missing, instead of a literal value beginning with - or --.
@@ -217,7 +227,8 @@
   Returns [option-map error-messages-vector]."
   [specs tokens & options]
   (let [{:keys [no-defaults strict]} (apply hash-map options)
-        defaults (default-option-map specs)]
+        defaults (default-option-map specs)
+        requireds (missing-errors specs)]
     (-> (reduce
           (fn [[m ids errors] [opt-type opt optarg]]
             (if-let [spec (find-spec specs opt-type opt)]
@@ -232,6 +243,12 @@
                   [m ids (conj errors error)]))
               [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
           [defaults [] []] tokens)
+        (#(reduce
+           (fn [[m ids errors] [id error]]
+             (if (contains? m id)
+               [m ids errors]
+               [m ids (conj errors error)]))
+           % requireds))
         (#(let [[m ids errors] %]
             (if no-defaults
               [(select-keys m ids) errors]

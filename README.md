@@ -272,9 +272,11 @@ versions are likely to work as well.
 * Release 0.3.3 on 2015-08-21
   * Add `:missing` to option specification to produce the given error message
     if the option is not provided (and has no default value).
+    [TCLI-12](http://dev.clojure.org/jira/browse/TCLI-12)
   * Add `:strict` to `parse-opts`:
     If true, treats required option arguments that match other options as a
     parse error (missing required argument).
+    [TCLI-10](http://dev.clojure.org/jira/browse/TCLI-10)
 * Release 0.3.2 on 2015-07-28
   * Add `:no-defaults` to `parse-opts`:
     Returns sequence of options that excludes defaulted ones. This helps

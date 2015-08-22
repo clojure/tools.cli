@@ -106,6 +106,7 @@
                     :parse-fn parse-int
                     :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
                    ["-f" "--file PATH"
+                    :missing "--file is required"
                     :validate [#(not= \/ (first %)) "Must be a relative path"
                                ;; N.B. This is a poor way to prevent path traversal
                                #(not (re-find #"\.\." %)) "No path traversal allowed"]]
@@ -113,8 +114,8 @@
                     :id :verbose
                     :default true
                     :parse-fn not]])]
-      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
-             [{:port (int 80) :verbose false} []]))
+      (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"] [:short-opt "-f" "FILE"]])
+             [{:port (int 80) :verbose false :file "FILE"} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-f" "-p"]])
              [{:file "-p" :verbose true} []]))
       (is (has-error? #"Unknown option"
@@ -123,6 +124,8 @@
                       (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
       (is (has-error? #"Missing required"
                       (peek (parse-option-tokens specs [[:short-opt "-f" "-p"]] :strict true))))
+      (is (has-error? #"--file is required"
+                      (peek (parse-option-tokens specs []))))
       (is (has-error? #"Must be between"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
       (is (has-error? #"Error while parsing"

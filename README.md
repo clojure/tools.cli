@@ -270,6 +270,8 @@ versions are likely to work as well.
 ## Change Log
 
 * Release 0.3.3-SNAPSHOT
+  * Add `:missing` to option specification to produce the given error message
+    if the option is not provided (and has no default value).
   * Add `:strict` to `parse-opts`:
     If true, treats required option arguments that match other options as a
     parse error (missing required argument).

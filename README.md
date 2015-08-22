@@ -9,14 +9,14 @@ to GNU option parsing conventions, and ClojureScript support.
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.3.2"]
+    [org.clojure/tools.cli "0.3.3"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.3.2</version>
+      <version>0.3.3</version>
     </dependency>
 
 The function `clojure.tools.cli/cli` has been superseded by
@@ -269,7 +269,7 @@ versions are likely to work as well.
 
 ## Change Log
 
-* Release 0.3.3-SNAPSHOT
+* Release 0.3.3 on 2015-08-21
   * Add `:missing` to option specification to produce the given error message
     if the option is not provided (and has no default value).
   * Add `:strict` to `parse-opts`:

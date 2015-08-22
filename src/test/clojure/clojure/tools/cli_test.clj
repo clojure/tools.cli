@@ -115,10 +115,14 @@
                     :parse-fn not]])]
       (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"]])
              [{:port (int 80) :verbose false} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-f" "-p"]])
+             [{:file "-p" :verbose true} []]))
       (is (has-error? #"Unknown option"
                       (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
       (is (has-error? #"Missing required"
                       (peek (parse-option-tokens specs [[:long-opt "--port"]]))))
+      (is (has-error? #"Missing required"
+                      (peek (parse-option-tokens specs [[:short-opt "-f" "-p"]] :strict true))))
       (is (has-error? #"Must be between"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
       (is (has-error? #"Error while parsing"

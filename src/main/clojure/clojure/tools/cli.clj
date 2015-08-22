@@ -370,9 +370,12 @@
   exceptions, and validation failures are collected into a vector of error
   message strings.
 
+  If the :strict flag is true, required arguments that match other options
+  are treated as missing, instead of a literal value beginning with - or --.
+
   Returns [option-map error-messages-vector]."
   [specs tokens & options]
-  (let [{:keys [no-defaults]} (apply hash-map options)
+  (let [{:keys [no-defaults strict]} (apply hash-map options)
         defaults (default-option-map specs)]
     (-> (reduce
           (fn [[m ids errors] [opt-type opt optarg]]
@@ -380,7 +383,11 @@
               (let [[value error] (parse-optarg spec opt optarg)
                     id (:id spec)]
                 (if-not (= value ::error)
-                  [((:assoc-fn spec assoc) m id value) (conj ids id) errors]
+                  (if-let [matched-spec (and strict
+                                             (or (find-spec specs :short-opt optarg)
+                                                 (find-spec specs :long-opt optarg)))]
+                    [m ids (conj errors (missing-required-error opt (:required spec)))]
+                    [((:assoc-fn spec assoc) m id value) (conj ids id) errors])
                   [m ids (conj errors error)]))
               [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
           [defaults [] []] tokens)
@@ -544,17 +551,21 @@
                   Useful for parsing options from multiple sources; i.e. from a
                   config file and from the command line.
 
+    :strict       Parse required arguments strictly: if a required argument value
+                  matches any other option, it is considered to be missing (and
+                  you have a parse error).
+
     :summary-fn   A function that receives the sequence of compiled option specs
                   (documented at #'clojure.tools.cli/compile-option-specs), and
                   returns a custom option summary string.
   "
   [args option-specs & options]
-  (let [{:keys [in-order no-defaults summary-fn]} (apply hash-map options)
+  (let [{:keys [in-order no-defaults strict summary-fn]} (apply hash-map options)
         specs (compile-option-specs option-specs)
         req (required-arguments specs)
         [tokens rest-args] (tokenize-args req args :in-order in-order)
-        [opts errors] (parse-option-tokens
-                        specs tokens :no-defaults no-defaults)]
+        [opts errors] (parse-option-tokens specs tokens
+                                           :no-defaults no-defaults :strict strict)]
     {:options opts
      :arguments rest-args
      :summary ((or summary-fn summarize) specs)

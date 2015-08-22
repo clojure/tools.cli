@@ -269,6 +269,10 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.3-SNAPSHOT
+  * Add `:strict` to `parse-opts`:
+    If true, treats required option arguments that match other options as a
+    parse error (missing required argument).
 * Release 0.3.2 on 2015-07-28
   * Add `:no-defaults` to `parse-opts`:
     Returns sequence of options that excludes defaulted ones. This helps

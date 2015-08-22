@@ -114,7 +114,7 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/58f87b3ec8ec57291d0c58999dd5213fb93eb104/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -125,7 +125,7 @@ documentation banner to provide usage instructions.</pre>
     <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.2</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L430" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/58f87b3ec8ec57291d0c58999dd5213fb93eb104/src/main/clojure/clojure/tools/cli.clj#L437" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -244,13 +244,17 @@ parse-opts:
                 Useful for parsing options from multiple sources; i.e. from a
                 config file and from the command line.
 
+  :strict       Parse required arguments strictly: if a required argument value
+                matches any other option, it is considered to be missing (and
+                you have a parse error).
+
   :summary-fn   A function that receives the sequence of compiled option specs
                 (documented at #'clojure.tools.cli/compile-option-specs), and
                 returns a custom option summary string.
 </pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L435" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/58f87b3ec8ec57291d0c58999dd5213fb93eb104/src/main/clojure/clojure/tools/cli.clj#L442" id="var-source">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -261,7 +265,7 @@ parse-opts:
     <pre id="var-docstr">Reduce options specs into a options summary for printing at a terminal.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/ac2c5cc24eff7662c19e9f79c1cec4bfeebe15f7/src/main/clojure/clojure/tools/cli.clj#L419" id="var-source">Source</a>
+    <a href="https://github.com/clojure/tools.cli/blob/58f87b3ec8ec57291d0c58999dd5213fb93eb104/src/main/clojure/clojure/tools/cli.clj#L426" id="var-source">Source</a>
   </div>
 </div>
 

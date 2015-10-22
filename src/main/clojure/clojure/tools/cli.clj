@@ -441,7 +441,11 @@
     #{} specs))
 
 (defn ^{:added "0.3.0"} summarize
-  "Reduce options specs into a options summary for printing at a terminal."
+  "Reduce options specs into a options summary for printing at a terminal.
+  Note that the specs argument should be the compiled version. That effectively
+  means that you shouldn't call summarize directly. When you call parse-opts
+  you get back a :summary key which is the result of calling summarize (or
+  your user-supplied :summary-fn option) on the compiled option specs."
   [specs]
   (if (seq specs)
     (let [show-defaults? (some #(and (:required %) (contains? % :default)) specs)

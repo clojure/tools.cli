@@ -1,12 +1,12 @@
 <html>
   <head>
-    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <title>clojure.tools.cli - Command-line processor 0.3.4 API documentation</title>
-    <link href="static/favicon.png" rel="icon" />
-    <link href="static/favicon.png" rel="shortcut icon" />
-    <link media="all" type="text/css" href="static/clojure.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/wiki.css" rel="stylesheet" />
-    <link media="all" type="text/css" href="static/internal.css" rel="stylesheet" />
+    <link rel="icon" href="static/favicon.png" />
+    <link rel="shortcut icon" href="static/favicon.png" />
+    <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="static/wiki.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="static/internal.css" type="text/css" media="all" />
     <style>.menuWrapper{height: 36px;}</style>
   </head>
 <!--
@@ -19,51 +19,51 @@ namespace.
   <body>
     <div id="AllContentContainer">
       <div id="Header">
-	<a id="Logo" href="index.html"><img alt="Clojure" height="100" width="100" src="static/clojure-icon.gif" /></a>
-	<h1><a title="page header title" id="page-header" href="index.html">tools.cli API Reference</a></h1>
+	<a href="index.html" id="Logo"><img src="static/clojure-icon.gif" width="100" height="100" alt="Clojure" /></a>
+	<h1><a href="index.html" id="page-header" title="page header title">tools.cli API Reference</a></h1>
       </div>
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
     <span class="toc-header"><span id="project-name">Command-line processor</span> <span id="version">0.3.4</span> API</span><br />
     <ul>
-      <li><a class="wiki_link" href="index.html">Overview</a></li>
-      <li><a class="wiki_link" href="api-index.html">API Index</a></li>
+      <li><a href="index.html" class="wiki_link">Overview</a></li>
+      <li><a href="api-index.html" class="wiki_link">API Index</a></li>
     </ul>
     
     
-    <a href="http://clojure.org" class="wiki_link">Clojure Home</a>
+    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
       <div id="rightcolumn">
 	<div id="Content">
 	  <div class="contentBox"><div class="innerContentBox">
-              <div id="content_view" class="wiki wikiPage">
+              <div class="wiki wikiPage" id="content_view">
                 <div id="right-sidebar"><div id="toc">
   <h1 class="nopad">Table of Contents</h1>
-  <div style="margin-left: 1em;" class="toc-section">
-    <a href="#toc0" style="margin-top: 3px;">Overview</a>
+  <div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#toc0">Overview</a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#" style="margin-top: 3px;"></a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#" style="margin-top: 3px;"></a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
     
-  </div><div style="margin-left: 1em;" class="toc-section">
-    <a href="#var-section" style="margin-top: 3px;">Vars and Functions</a>
-    <div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.tools.cli/cli">cli</a>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#var-section">Vars and Functions</a>
+    <div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.tools.cli/cli" class="toc-entry-anchor">cli</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.tools.cli/get-default-options">get-default-options</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.tools.cli/get-default-options" class="toc-entry-anchor">get-default-options</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.tools.cli/parse-opts">parse-opts</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.tools.cli/parse-opts" class="toc-entry-anchor">parse-opts</a>
       
-    </div><div style="margin-left: 1em;" class="toc-entry">
-      <a class="toc-entry-anchor" href="#clojure.tools.cli/summarize">summarize</a>
+    </div><div class="toc-entry" style="margin-left: 1em;">
+      <a href="#clojure.tools.cli/summarize" class="toc-entry-anchor">summarize</a>
       
     </div>
   </div>
@@ -114,7 +114,7 @@ of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
     
     
-    <a href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L180" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L180">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -125,7 +125,7 @@ documentation banner to provide usage instructions.</pre>
     <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.2</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L458" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L458">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -254,7 +254,7 @@ parse-opts:
 </pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L463" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L463">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -269,7 +269,7 @@ you get back a :summary key which is the result of calling summarize (or
 your user-supplied :summary-fn option) on the compiled option specs.</pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
-    <a href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L443" id="var-source">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L443">Source</a>
   </div>
 </div>
 
@@ -280,10 +280,10 @@ your user-supplied :summary-fn option) on the compiled option specs.</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div style="text-align: center;" id="copyright">Copyright 2007-2014 by Rich Hickey and the various contributors</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2015 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
-      <div id="DesignedBy">Logo &amp; site design by <a title="Visit Tom Hickey's website." href="http://www.tomhickey.com">Tom Hickey</a>.<br />
+      <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />
       Clojure auto-documentation system by Tom Faulhaber.</div>
     </div>
     <!-- /AllContentContainer -->

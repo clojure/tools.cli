@@ -9,14 +9,14 @@ to GNU option parsing conventions, and ClojureScript support.
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 
-    [org.clojure/tools.cli "0.3.3"]
+    [org.clojure/tools.cli "0.3.4"]
 
 [Maven](http://maven.apache.org/) dependency information:
 
     <dependency>
       <groupId>org.clojure</groupId>
       <artifactId>tools.cli</artifactId>
-      <version>0.3.3</version>
+      <version>0.3.4</version>
     </dependency>
 
 The function `clojure.tools.cli/cli` has been superseded by

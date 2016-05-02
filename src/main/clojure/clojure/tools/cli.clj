@@ -413,7 +413,7 @@
               [(select-keys m ids) errors]
               [m errors]))))))
 
-(defn- make-summary-parts [show-defaults? specs]
+(defn ^{:added "0.3.0"} make-summary-parts [show-defaults? specs]
   (let [{:keys [short-opt long-opt required default default-desc desc]} specs
         opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
                   long-opt (str "    " long-opt)
@@ -426,7 +426,7 @@
       [opt dd (or desc "")]
       [opt (or desc "")])))
 
-(defn- format-lines [lens parts]
+(defn ^{:added "0.3.0"} format-lines [lens parts]
   (let [fmt (case (count lens)
               2 "~{  ~vA  ~vA~}"
               3 "~{  ~vA  ~vA  ~vA~}")]

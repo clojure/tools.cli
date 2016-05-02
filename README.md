@@ -4,20 +4,26 @@ Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 
-The 0.3.x series of tools.cli features a new flexible API, better adherence
-to GNU option parsing conventions, and ClojureScript support.
+Latest stable release: 0.3.4
+
+* [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
+
+* [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
-
-    [org.clojure/tools.cli "0.3.4"]
-
+```clojure
+[org.clojure/tools.cli "0.3.4"]
+```
 [Maven](http://maven.apache.org/) dependency information:
-
-    <dependency>
-      <groupId>org.clojure</groupId>
-      <artifactId>tools.cli</artifactId>
-      <version>0.3.4</version>
-    </dependency>
+```xml
+<dependency>
+  <groupId>org.clojure</groupId>
+  <artifactId>tools.cli</artifactId>
+  <version>0.3.4</version>
+ </dependency>
+```
+The 0.3.x series of tools.cli features a new flexible API, better adherence
+to GNU option parsing conventions, and ClojureScript support.
 
 The function `clojure.tools.cli/cli` has been superseded by
 `clojure.tools.cli/parse-opts`, and should not be used in new programs.
@@ -263,8 +269,11 @@ versions are likely to work as well.
 ## Developer Information
 
 * [GitHub project](https://github.com/clojure/tools.cli)
+
 * [Bug Tracker](http://dev.clojure.org/jira/browse/TCLI)
+
 * [Continuous Integration](http://build.clojure.org/job/tools.cli/)
+
 * [Compatibility Test Matrix](http://build.clojure.org/job/tools.cli-test-matrix/)
 
 ## Change Log

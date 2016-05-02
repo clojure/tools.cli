@@ -269,6 +269,10 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.4 on 2016-05-01
+  * Clarify use of `summarize` via expanded docstring and make both of the
+    functions it calls public so it is easier to build your own `:summary-fn`.
+    [TCLI-36](http://dev.clojure.org/jira/browse/TCLI-36).
 * Release 0.3.3 on 2015-08-21
   * Add `:missing` to option specification to produce the given error message
     if the option is not provided (and has no default value).

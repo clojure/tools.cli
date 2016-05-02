@@ -5,14 +5,14 @@
    :wiki-url
    "http://clojure.github.com/tools.cli/clojure.tools.cli-api.html",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj"}),
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj"}),
  :vars
  ({:raw-source-url
-   "https://github.com/clojure/tools.cli/raw/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
    :name "cli",
    :file "src/main/clojure/clojure/tools/cli.clj",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L180",
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L180",
    :line 180,
    :var-type "function",
    :arglists ([args & specs]),
@@ -22,13 +22,28 @@
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/cli"}
   {:raw-source-url
-   "https://github.com/clojure/tools.cli/raw/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
+   :added "0.3.0",
+   :name "format-lines",
+   :file "src/main/clojure/clojure/tools/cli.clj",
+   :source-url
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L432",
+   :line 432,
+   :var-type "function",
+   :arglists ([lens parts]),
+   :doc
+   "Format a sequence of summary parts into columns. lens is a sequence of\nlengths to use for parts. There are two sequences of lengths if we are\nnot displaying defaults. There are three sequences of lengths if we\nare showing defaults.",
+   :namespace "clojure.tools.cli",
+   :wiki-url
+   "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/format-lines"}
+  {:raw-source-url
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
    :added "0.3.2",
    :name "get-default-options",
    :file "src/main/clojure/clojure/tools/cli.clj",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L458",
-   :line 458,
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L466",
+   :line 466,
    :var-type "function",
    :arglists ([option-specs]),
    :doc
@@ -37,13 +52,28 @@
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/get-default-options"}
   {:raw-source-url
-   "https://github.com/clojure/tools.cli/raw/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
+   :added "0.3.0",
+   :name "make-summary-part",
+   :file "src/main/clojure/clojure/tools/cli.clj",
+   :source-url
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L416",
+   :line 416,
+   :var-type "function",
+   :arglists ([show-defaults? spec]),
+   :doc
+   "Given a single compiled option spec, turn it into a formatted string,\noptionally with its default values if requested.",
+   :namespace "clojure.tools.cli",
+   :wiki-url
+   "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/make-summary-part"}
+  {:raw-source-url
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
    :added "0.3.0",
    :name "parse-opts",
    :file "src/main/clojure/clojure/tools/cli.clj",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L463",
-   :line 463,
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L471",
+   :line 471,
    :var-type "function",
    :arglists ([args option-specs & options]),
    :doc
@@ -52,13 +82,13 @@
    :wiki-url
    "http://clojure.github.com/tools.cli//clojure.tools.cli-api.html#clojure.tools.cli/parse-opts"}
   {:raw-source-url
-   "https://github.com/clojure/tools.cli/raw/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj",
+   "https://github.com/clojure/tools.cli/raw/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj",
    :added "0.3.0",
    :name "summarize",
    :file "src/main/clojure/clojure/tools/cli.clj",
    :source-url
-   "https://github.com/clojure/tools.cli/blob/289232fc40bf57418d1c2e1cafb205460a023c94/src/main/clojure/clojure/tools/cli.clj#L443",
-   :line 443,
+   "https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L451",
+   :line 451,
    :var-type "function",
    :arglists ([specs]),
    :doc

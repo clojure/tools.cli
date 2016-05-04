@@ -1,4 +1,4 @@
-(defproject org.clojure/tools.cli "0.3.5-SNAPSHOT"
+(defproject org.clojure/tools.cli "0.3.6-SNAPSHOT"
   :description "Command line arguments library."
   :parent [org.clojure/pom.contrib "0.1.2"]
   :url "https://github.com/clojure/tools.cli"

@@ -4,7 +4,7 @@ Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 
-Latest stable release: 0.3.4
+Latest stable release: 0.3.5
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 
@@ -12,14 +12,14 @@ Latest stable release: 0.3.4
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 ```clojure
-[org.clojure/tools.cli "0.3.4"]
+[org.clojure/tools.cli "0.3.5"]
 ```
 [Maven](http://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>0.3.4</version>
+  <version>0.3.5</version>
  </dependency>
 ```
 The 0.3.x series of tools.cli features a new flexible API, better adherence
@@ -278,11 +278,14 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.5 on 2016-05-04
+  * Fix `summarize` in cljs after renaming during TCLI-36 below
+    [TCLI-85](http://dev.clojure.org/jira/browse/TCLI-85).
 * Release 0.3.4 on 2016-05-01
   * Clarify use of `summarize` via expanded docstring and make both of the
     functions it calls public so it is easier to build your own `:summary-fn`.
     [TCLI-36](http://dev.clojure.org/jira/browse/TCLI-36).
-* Release 0.3.3 on 2015-08-21
+ * Release 0.3.3 on 2015-08-21
   * Add `:missing` to option specification to produce the given error message
     if the option is not provided (and has no default value).
     [TCLI-12](http://dev.clojure.org/jira/browse/TCLI-12)

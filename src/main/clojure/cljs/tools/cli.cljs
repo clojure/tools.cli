@@ -299,7 +299,7 @@
   [specs]
   (if (seq specs)
     (let [show-defaults? (some #(and (:required %) (contains? % :default)) specs)
-          parts (map (partial make-summary-parts show-defaults?) specs)
+          parts (map (partial make-summary-part show-defaults?) specs)
           lens (apply map (fn [& cols] (apply max (map count cols))) parts)
           lines (format-lines lens parts)]
       (s/join \newline lines))

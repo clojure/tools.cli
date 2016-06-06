@@ -72,6 +72,9 @@ namespace.
       <a href="#clojure.tools.cli/summarize" class="toc-entry-anchor">summarize</a>
       
     </div>
+  </div><div class="toc-section" style="margin-left: 1em;">
+    <a style="margin-top: 3px;" href="#"></a>
+    
   </div>
 </div>
 </div>
@@ -118,6 +121,7 @@ detailed examples.
 Returns a vector containing a map of the parsed arguments, a vector
 of extra arguments that did not match known switches, and a
 documentation banner to provide usage instructions.</pre>
+    <pre id="var-specs"></pre>
     
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L180">Source</a>
@@ -132,6 +136,7 @@ documentation banner to provide usage instructions.</pre>
 lengths to use for parts. There are two sequences of lengths if we are
 not displaying defaults. There are three sequences of lengths if we
 are showing defaults.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L432">Source</a>
@@ -143,6 +148,7 @@ are showing defaults.</pre>
     <pre id="var-usage">Usage: (get-default-options option-specs)
 </pre>
     <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.2</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L466">Source</a>
@@ -155,6 +161,7 @@ are showing defaults.</pre>
 </pre>
     <pre id="var-docstr">Given a single compiled option spec, turn it into a formatted string,
 optionally with its default values if requested.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L416">Source</a>
@@ -284,6 +291,7 @@ parse-opts:
                 (documented at #'clojure.tools.cli/compile-option-specs), and
                 returns a custom option summary string.
 </pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L471">Source</a>
@@ -299,6 +307,7 @@ Note that the specs argument should be the compiled version. That effectively
 means that you shouldn't call summarize directly. When you call parse-opts
 you get back a :summary key which is the result of calling summarize (or
 your user-supplied :summary-fn option) on the compiled option specs.</pre>
+    <pre id="var-specs"></pre>
     <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
     
     <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L451">Source</a>

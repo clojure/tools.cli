@@ -247,23 +247,36 @@ versions are likely to work as well.
   (str "The following errors occurred while parsing your command:\n\n"
        (string/join \newline errors)))
 
+(defn validate-args
+  "Validate command line arguments. Either return a map indicating the program
+  should exit (with a error message, and optional ok status), or a map
+  indicating the action the program should take and the options provided."
+  [args]
+  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
+    (cond
+      (:help options) ; help => exit OK with usage summary
+      {:exit-message (usage summary) :ok? true}
+      errors ; errors => exit with description of errors
+      {:exit-message (error-msg errors)}
+      ;; custom validation on arguments
+      (and (= 1 (count arguments))
+           (#{"start" "stop" "status"} (first arguments)))
+      {:action (first arguments) :options options}
+      :else ; failed custom validation => exit with usage summary
+      {:exit-message (usage summary)})))
+
 (defn exit [status msg]
   (println msg)
   (System/exit status))
 
 (defn -main [& args]
-  (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]
-    ;; Handle help and error conditions
-    (cond
-      (:help options) (exit 0 (usage summary))
-      (not= (count arguments) 1) (exit 1 (usage summary))
-      errors (exit 1 (error-msg errors)))
-    ;; Execute program with options
-    (case (first arguments)
-      "start" (server/start! options)
-      "stop" (server/stop! options)
-      "status" (server/status! options)
-      (exit 1 (usage summary)))))
+  (let [{:keys [action options exit-message ok?]} (validate-args args)]
+    (if exit-message
+      (exit (if ok? 0 1) exit-message)
+      (case action
+        "start"  (server/start! options)
+        "stop"   (server/stop! options)
+        "status" (server/status! options)))))
 ```
 
 ## Developer Information

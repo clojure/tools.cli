@@ -49,6 +49,13 @@
             ["-b" "--beta" nil nil]
             [nil nil nil "DESC"]
             ["-f" "--foo" "FOO" "desc"]])))
+  (testing "parses --[no-]opt style flags to a proper id"
+    (is (= (-> (compile-option-specs [["-f" "--[no-]foo" ]])
+               first
+               (select-keys [:id :short-opt :long-opt]))
+           {:id :foo,
+            :short-opt "-f",
+            :long-opt "--[no-]foo"})))
   (testing "throws AssertionError on unset :id, duplicate :short-opt or :long-opt,
             or multiple :default entries per :id"
     (is (thrown? ^{:cljs js/Error} AssertionError
@@ -164,7 +171,19 @@
                                          [:long-opt "--verbose"]])
              [{:alpha true :verbose 3} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
-             [{:verbose 1} []])))))
+             [{:verbose 1} []]))))
+  (testing "can deal with negative flags"
+    (let [specs (compile-option-specs [["-p" "--[no-]profile" "Enable/disable profiling"]])]
+      (is (= (parse-option-tokens specs []) [{} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-p"]]) [{:profile true} []]))
+      (is (= (parse-option-tokens specs [[:long-opt "--profile"]]) [{:profile true} []]))
+      (is (= (parse-option-tokens specs [[:long-opt "--no-profile"]]) [{:profile false} []])))
+    (let [specs (compile-option-specs [["-p" "--[no-]profile" "Enable/disable profiling"
+                                        :default false]])]
+      (is (= (parse-option-tokens specs []) [{:profile false} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-p"]]) [{:profile true} []]))
+      (is (= (parse-option-tokens specs [[:long-opt "--profile"]]) [{:profile true} []]))
+      (is (= (parse-option-tokens specs [[:long-opt "--no-profile"]]) [{:profile false} []])))))
 
 (deftest test-summarize
   (testing "summarizes options"
@@ -186,6 +205,7 @@
                                        "t" true
                                        "f" false
                                        "?" :maybe)]
+                         ["-d" "--[no-]daemon" "Daemonize the process"]
                          [nil "--help"]]))
            (join \newline
                  ["  -s, --server HOST    example.com  Upstream server"
@@ -193,6 +213,7 @@
                   "  -o PATH                           Output file"
                   "  -v                                Verbosity level; may be specified more than once"
                   "      --ternary t|f|?  false        A ternary option defaulting to false"
+                  "  -d, --[no-]daemon                 Daemonize the process"
                   "      --help"]))))
   (testing "does not print :default column when no defaults will be shown"
     (is (= (summarize (compile-option-specs [["-b" "--boolean" "A boolean option with a hidden default"

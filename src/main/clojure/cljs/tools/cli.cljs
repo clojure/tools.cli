@@ -77,7 +77,7 @@
         [long-opt req] (when long-opt
                          (rest (re-find #"^(--[^ =]+)(?:[ =](.*))?" long-opt)))
         id (when long-opt
-             (keyword (subs long-opt 2)))
+             (keyword (nth (re-find #"^--(\[no-\])?(.*)" long-opt) 2)))
         validate (:validate spec-map)
         [validate-fn validate-msg] (when (seq validate)
                                      (->> (partition 2 2 (repeat nil) validate)
@@ -167,7 +167,16 @@
           {} specs))
 
 (defn- find-spec [specs opt-type opt]
-  (first (filter #(= opt (opt-type %)) specs)))
+  (first
+   (filter
+    (fn [spec]
+      (when-let [spec-opt (get spec opt-type)]
+        (let [flag-tail (second (re-find #"^--\[no-\](.*)" spec-opt))
+              candidates (if flag-tail
+                           #{(str "--" flag-tail) (str "--no-" flag-tail)}
+                           #{spec-opt})]
+          (contains? candidates opt))))
+    specs)))
 
 (defn- pr-join [& xs]
   (pr-str (s/join \space xs)))
@@ -203,11 +212,18 @@
       [::error error]
       (validate value spec opt optarg))))
 
+(defn- neg-flag? [spec opt]
+  (and (re-find #"^--\[no-\]" (:long-opt spec))
+       (re-find #"^--no-" opt)))
+
 (defn- parse-optarg [spec opt optarg]
   (let [{:keys [required]} spec]
     (if (and required (nil? optarg))
       [::error (missing-required-error opt required)]
-      (parse-value (if required optarg true) spec opt optarg))))
+      (let [value (if required
+                    optarg
+                    (not (neg-flag? spec opt)))]
+        (parse-value value spec opt optarg)))))
 
 (defn- parse-option-tokens
   "Reduce sequence of [opt-type opt ?optarg?] tokens into a map of

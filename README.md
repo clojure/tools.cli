@@ -225,6 +225,8 @@ versions are likely to work as well.
     :default 0
     ;; Use assoc-fn to create non-idempotent options
     :assoc-fn (fn [m k _] (update-in m [k] inc))]
+   ;; A boolean option that can explicitly be set to false
+   ["-d" "--[no-]daemon" "Daemonize the process" :default true]
    ["-h" "--help"]])
 
 (defn usage [options-summary]

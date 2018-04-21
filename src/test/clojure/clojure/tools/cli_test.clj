@@ -156,7 +156,8 @@
              [{:alpha true :beta true :gamma "GAMMA" :delta "delta"} []]))))
   (testing "associates :id and value with :assoc-fn"
     (let [specs (compile-option-specs
-                  [["-a" "--alpha"
+                  [["-a" nil
+                    :id :alpha
                     :default true
                     :assoc-fn (fn [m k v] (assoc m k (not v)))]
                    ["-v" "--verbose"

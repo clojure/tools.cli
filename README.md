@@ -4,7 +4,7 @@ Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 
-Latest stable release: 0.3.6
+Latest stable release: 0.3.7
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 
@@ -12,14 +12,14 @@ Latest stable release: 0.3.6
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 ```clojure
-[org.clojure/tools.cli "0.3.6"]
+[org.clojure/tools.cli "0.3.7"]
 ```
 [Maven](http://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>0.3.6</version>
+  <version>0.3.7</version>
  </dependency>
 ```
 The 0.3.x series of tools.cli features a new flexible API, better adherence
@@ -293,6 +293,9 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.3.7 on 2018-04-25
+  * Fix NPE from `nil` long option
+    [TCLI-89](http://dev.clojure.org/jira/browse/TCLI-89) (Peter Schwarz).
 * Release 0.3.6 on 2018-04-11
   * Restore support for `--no` prefix in long options
     [TCLI-88](http://dev.clojure.org/jira/browse/TCLI-88) (Arne Brasseur).

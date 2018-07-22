@@ -1,4 +1,4 @@
-(ns ^{:author "Gareth Jones, Sung Pae"
+(ns ^{:author "Gareth Jones, Sung Pae, Sean Corfield"
       :doc "Tools for working with command line arguments."}
   clojure.tools.cli
   (:require [clojure.pprint :as pp]
@@ -218,14 +218,13 @@
   "Select only known spec entries from map and warn the user about unknown
    entries at development time."
   [map]
-  ;; The following is formatted strangely for better manual diffing
   (when *assert*
     (let [unknown-keys (keys (apply dissoc map spec-keys))]
       (when (seq unknown-keys)
         (binding [*out* *err*]
           (println (str "Warning: The following options to parse-opts are unrecognized: "
-                        (s/join ", " unknown-keys)))))
-      ))
+                        (s/join ", " unknown-keys)))))))
+
   (select-keys map spec-keys))
 
 (defn- compile-spec [spec]
@@ -411,9 +410,9 @@
               (let [[value error] (parse-optarg spec opt optarg)
                     id (:id spec)]
                 (if-not (= value ::error)
-                  (if-let [matched-spec (and strict
-                                             (or (find-spec specs :short-opt optarg)
-                                                 (find-spec specs :long-opt optarg)))]
+                  (if (and strict
+                           (or (find-spec specs :short-opt optarg)
+                               (find-spec specs :long-opt optarg)))
                     [m ids (conj errors (missing-required-error opt (:required spec)))]
                     [((:assoc-fn spec assoc) m id value) (conj ids id) errors])
                   [m ids (conj errors error)]))

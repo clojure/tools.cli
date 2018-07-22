@@ -45,7 +45,7 @@ are not ready to migrate to `parse-opts`.
     :default 80
     :parse-fn #(Integer/parseInt %)
     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
-   ;; A non-idempotent option
+   ;; A non-idempotent option (:default is applied first)
    ["-v" nil "Verbosity level"
     :id :verbosity
     :default 0
@@ -223,7 +223,7 @@ versions are likely to work as well.
     ;; If no long-option is specified, an option :id must be given
     :id :verbosity
     :default 0
-    ;; Use assoc-fn to create non-idempotent options
+    ;; Use assoc-fn to create non-idempotent options (:default is applied first)
     :assoc-fn (fn [m k _] (update-in m [k] inc))]
    ;; A boolean option that can explicitly be set to false
    ["-d" "--[no-]daemon" "Daemonize the process" :default true]

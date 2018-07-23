@@ -50,7 +50,7 @@
             [nil nil nil "DESC"]
             ["-f" "--foo" "FOO" "desc"]])))
   (testing "parses --[no-]opt style flags to a proper id"
-    (is (= (-> (compile-option-specs [["-f" "--[no-]foo" ]])
+    (is (= (-> (compile-option-specs [["-f" "--[no-]foo"]])
                first
                (select-keys [:id :short-opt :long-opt]))
            {:id :foo,
@@ -159,9 +159,11 @@
                   [["-a" nil
                     :id :alpha
                     :default true
+                    ;; same as (update-in m [k] not)
                     :assoc-fn (fn [m k v] (assoc m k (not v)))]
                    ["-v" "--verbose"
                     :default 0
+                    ;; same as (update-in m [k] inc)
                     :assoc-fn (fn [m k _] (assoc m k (inc (m k))))]])]
       (is (= (parse-option-tokens specs [])
              [{:alpha true :verbose 0} []]))
@@ -171,6 +173,25 @@
                                          [:short-opt "-v"]
                                          [:long-opt "--verbose"]])
              [{:alpha true :verbose 3} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
+             [{:verbose 1} []]))))
+  (testing "associates :id and value with :assoc-fn, without :default"
+    (let [specs (compile-option-specs
+                  [["-a" nil
+                    :id :alpha
+                    ;; use fnil to have an implied :default true
+                    :assoc-fn (fn [m k v] (update-in m [k] (fnil not true)))]
+                   ["-v" "--verbose"
+                    ;; use fnil to have an implied :default 0
+                    :assoc-fn (fn [m k _] (update-in m [k] (fnil inc 0)))]])]
+      (is (= (parse-option-tokens specs [])
+             [{} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:verbose 3} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
              [{:verbose 1} []]))))
   (testing "can deal with negative flags"
@@ -288,5 +309,4 @@
       (clojure.java.shell/sh
         "phantomjs"
         "target/runner.js"
-        "target/cli_test.js")))
-  )
+        "target/cli_test.js"))))

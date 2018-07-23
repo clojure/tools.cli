@@ -149,10 +149,10 @@
              (wrap-val :validate-msg)))
        option-specs))
 
-(defn- default-option-map [specs]
+(defn- default-option-map [specs default-key]
   (reduce (fn [m s]
-            (if (contains? s :default)
-              (assoc m (:id s) (:default s))
+            (if (contains? s default-key)
+              (assoc m (:id s) (default-key s))
               m))
           {} specs))
 
@@ -243,7 +243,7 @@
   Returns [option-map error-messages-vector]."
   [specs tokens & options]
   (let [{:keys [no-defaults strict]} (apply hash-map options)
-        defaults (default-option-map specs)
+        defaults (default-option-map specs :default)
         requireds (missing-errors specs)]
     (-> (reduce
           (fn [[m ids errors] [opt-type opt optarg]]
@@ -324,7 +324,7 @@
 (defn ^{:added "0.3.2"} get-default-options
   "Extract the map of default options from a sequence of option vectors."
   [option-specs]
-  (default-option-map (compile-option-specs option-specs)))
+  (default-option-map (compile-option-specs option-specs) :default))
 
 (defn ^{:added "0.3.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the

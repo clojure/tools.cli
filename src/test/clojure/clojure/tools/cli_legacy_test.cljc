@@ -1,7 +1,7 @@
 (ns clojure.tools.cli-legacy-test
-  (:use [clojure.string :only [split]]
-        [clojure.test :only [deftest is testing]]
-        [clojure.tools.cli :as cli :only [cli]]))
+  (:require [clojure.string :refer [split]]
+            [clojure.test :refer [deftest is testing]]
+            [clojure.tools.cli :as cli :refer [cli]]))
 
 (testing "syntax"
   (deftest should-handle-simple-strings

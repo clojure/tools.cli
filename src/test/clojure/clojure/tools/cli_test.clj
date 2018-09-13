@@ -1,12 +1,7 @@
-(ns ^{:cljs 'cljs.tools.cli-test} clojure.tools.cli-test
-  ^{:cljs
-    '(:require [cljs.tools.cli :as cli :refer [get-default-options parse-opts summarize]]
-               [clojure.string :refer [join]]
-               cemerick.cljs.test)}
-  (:use [clojure.tools.cli :as cli :only [get-default-options parse-opts summarize]]
-        [clojure.string :only [join]]
-        [clojure.test :only [deftest is testing]])
-  #_(:cljs (:require-macros [cemerick.cljs.test :refer [deftest is testing]])))
+(ns clojure.tools.cli-test
+  (:require [clojure.tools.cli :as cli :refer [get-default-options parse-opts summarize]]
+            [clojure.string :refer [join]]
+            [clojure.test :refer [deftest is testing]]))
 
 ;; Refer private vars
 (def tokenize-args        (^{:cljs 'do} var cli/tokenize-args))
@@ -88,7 +83,7 @@
     (is (= (compile-option-specs [{:id ::foo :short-opt "-f" :long-opt "--foo"}])
            [{:id ::foo :short-opt "-f" :long-opt "--foo"}])))
   (testing "warns about unknown keys"
-    (^{:cljs 'do} when ^{:clj true} *assert*
+    (when *assert*
       (is (re-find #"Warning:.* :flag"
                    (with-out-str
                      (binding ^{:cljs []} [*err* *out*]

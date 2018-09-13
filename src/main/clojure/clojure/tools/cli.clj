@@ -82,13 +82,13 @@
   (s/replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
 (defn- flag-for [^String v]
-  (not (.startsWith v "--no-")))
+  (not (s/starts-with? v "--no-")))
 
 (defn- opt? [^String x]
-  (.startsWith x "-"))
+  (s/starts-with? x "-"))
 
 (defn- flag? [^String x]
-  (.startsWith x "--[no-]"))
+  (s/starts-with? x "--[no-]"))
 
 (defn- end-of-args? [x]
   (= "--" x))
@@ -141,10 +141,14 @@
 (defn- switches-for
   [switches flag]
   (-> (for [^String s switches]
-        (cond
-         (and flag (flag? s))            [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
-         (and flag (.startsWith s "--")) [(s/replace s #"--" "--no-") s]
-         :default                        [s]))
+        (cond (and flag (flag? s))
+              [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
+
+              (and flag (s/starts-with? s "--"))
+              [(s/replace s #"--" "--no-") s]
+
+              :default
+              [s]))
       flatten))
 
 (defn- generate-spec

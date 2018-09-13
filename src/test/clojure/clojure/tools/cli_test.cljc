@@ -4,9 +4,9 @@
             [clojure.test :refer [deftest is testing]]))
 
 ;; Refer private vars
-(def tokenize-args        (^{:cljs 'do} var cli/tokenize-args))
-(def compile-option-specs (^{:cljs 'do} var cli/compile-option-specs))
-(def parse-option-tokens  (^{:cljs 'do} var cli/parse-option-tokens))
+(def tokenize-args        #'cli/tokenize-args)
+(def compile-option-specs #'cli/compile-option-specs)
+(def parse-option-tokens  #'cli/parse-option-tokens)
 
 (deftest test-tokenize-args
   (testing "expands clumped short options"
@@ -53,13 +53,13 @@
             :long-opt "--[no-]foo"})))
   (testing "throws AssertionError on unset :id, duplicate :short-opt or :long-opt,
             or multiple :default entries per :id"
-    (is (thrown? ^{:cljs js/Error} AssertionError
+    (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [["-a" :id nil]])))
-    (is (thrown? ^{:cljs js/Error} AssertionError
+    (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :a :short-opt "-a"} {:id :b :short-opt "-a"}])))
-    (is (thrown? ^{:cljs js/Error} AssertionError
+    (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}])))
-    (is (thrown? ^{:cljs js/Error} AssertionError
+    (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}]))))
   (testing "desugars `--long-opt=value`"
     (is (= (map (juxt :id :long-opt :required)
@@ -86,20 +86,20 @@
     (when *assert*
       (is (re-find #"Warning:.* :flag"
                    (with-out-str
-                     (binding ^{:cljs []} [*err* *out*]
+                     (binding [*err* *out*]
                        (compile-option-specs [[nil "--alpha" :validate nil :flag true]])))))
       (is (re-find #"Warning:.* :validate"
                    (with-out-str
-                     (binding ^{:cljs []} [*err* *out*]
+                     (binding [*err* *out*]
                        (compile-option-specs [{:id :alpha :validate nil}]))))))))
 
 (defn has-error? [re coll]
   (seq (filter (partial re-seq re) coll)))
 
 (defn parse-int [x]
-  ^{:cljs (do (assert (re-seq #"^\d" x))
-              (js/parseInt x))}
-  (Integer/parseInt x))
+  #?(:clj  (Integer/parseInt x)
+     :cljs (do (assert (re-seq #"^\d" x))
+               (js/parseInt x))))
 
 (deftest test-parse-option-tokens
   (testing "parses and validates option arguments"

@@ -4,31 +4,40 @@ Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 
-Latest stable release: 0.3.7
+Latest stable release: 0.4.0
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
+[clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependecy information:
+```clojure
+clj -Sdeps '{:deps {org.clojure/tools.cli {:mvn/version "0.4.0"}}}'
+```
+
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 ```clojure
-[org.clojure/tools.cli "0.3.7"]
+[org.clojure/tools.cli "0.4.0"]
 ```
 [Maven](http://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>0.3.7</version>
+  <version>0.4.0</version>
  </dependency>
 ```
+The 0.4.x series of tools.cli supports use with `clj`/`deps.edn` and brings
+the legacy API to ClojureScript by switching to `.cljc` files. This means it
+requires Clojure(Script) 1.8 or later.
+
 The 0.3.x series of tools.cli features a new flexible API, better adherence
 to GNU option parsing conventions, and ClojureScript support.
 
 The function `clojure.tools.cli/cli` has been superseded by
 `clojure.tools.cli/parse-opts`, and should not be used in new programs.
 
-The previous function will remain for the forseeable future. It has also been
+The previous function will remain for the foreseeable future. It has also been
 adapted to use the new tokenizer, so upgrading is still worthwhile even if you
 are not ready to migrate to `parse-opts`.
 
@@ -185,12 +194,12 @@ During development, parse-opts asserts the uniqueness of option `:id`,
 
 ### ClojureScript Support
 
-The `cljs.tools.cli` namespace is available for use in ClojureScript programs!
-Both `parse-opts` and `summarize` have been ported, and have complete feature
-parity with their Clojure counterparts.
+As of 0.4.x, the namespace is `clojure.tools.cli` for both Clojure and
+ClojureScript programs. The entire API, including the legacy (pre-0.3.x)
+functions, is now available in both Clojure and ClojureScript.
 
-ClojureScript Versions `0.0-2080` and above are supported, but earlier
-versions are likely to work as well.
+For the 0.3.x releases, the ClojureScript namespace was `cljs.tools.cli` and
+only `parse-opts` and `summarize` were available.
 
 ## Example Usage
 
@@ -293,6 +302,13 @@ versions are likely to work as well.
 
 ## Change Log
 
+* Release 0.4.0 on 2018-09-12
+  * Convert everything to use `.cljc` files and add `clj`/`deps.edn` support
+    [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91). This **drops
+    support for Clojure 1.7 and earlier** but brings full feature parity to
+    ClojureScript. Tests for Clojure can be run with `clj -A:test:runner` and
+    for ClojureScript with `clj -A:test:cljs-runner`. Multi-version testing is
+    possible with aliases `:1.8`, `:1.9`, and `:master`.
 * Release 0.3.7 on 2018-04-25
   * Fix NPE from `nil` long option
     [TCLI-89](http://dev.clojure.org/jira/browse/TCLI-89) (Peter Schwarz).

@@ -1,0 +1,11 @@
+{:paths ["src/main/clojure"]
+ :aliases {:test {:extra-paths ["src/test/clojure"]}
+           :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
+           :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
+           :master {:override-deps {org.clojure/clojure {:mvn/version "1.10.0-master-SNAPSHOT"}}}
+           :runner
+           {:extra-deps {com.cognitect/test-runner
+                         {:git/url "https://github.com/cognitect-labs/test-runner"
+                          :sha "76568540e7f40268ad2b646110f237a60295fa3c"}}
+            :main-opts ["-m" "cognitect.test-runner"
+                        "-d" "src/test/clojure"]}}}

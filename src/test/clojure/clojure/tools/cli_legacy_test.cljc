@@ -3,6 +3,11 @@
             [clojure.test :refer [deftest is testing]]
             [clojure.tools.cli :as cli :refer [cli]]))
 
+(defn parse-int [x]
+  #?(:clj  (Integer/parseInt x)
+     :cljs (do (assert (re-seq #"^\d" x))
+               (js/parseInt x))))
+
 (testing "syntax"
   (deftest should-handle-simple-strings
     (is (= {:host "localhost"}
@@ -69,7 +74,7 @@
             [options args _] (cli ["-p" "1" "--port" "2"]
                                   ["-p" "--port" "description"
                                    :assoc-fn assoc-fn
-                                   :parse-fn #(Integer/parseInt %)])]
+                                   :parse-fn #(parse-int %)])]
         (is (= {:port #{1 2}} options)))))
 
   (testing "extra arguments"
@@ -110,7 +115,7 @@
                           ["-c" "--charlie" :flag true]
                           ["-h" "--host" :flag false]
                           ["-p" "--port" "Port number"
-                           :flag false :parse-fn #(Integer/parseInt %)]))
+                           :flag false :parse-fn #(parse-int %)]))
              [{:alpha true :bravo true :charlie true :port 80 :host "example.com"}
               ["foo" "bar"]])))))
 
@@ -145,7 +150,7 @@
                                "--log-directory" "/tmp"
                                "--server" "localhost"
                                "filename"]
-                              ["-p" "--port" :parse-fn #(Integer/parseInt %)]
+                              ["-p" "--port" :parse-fn #(parse-int %)]
                               ["--host" :default "localhost"]
                               ["--[no-]verbose" :default true]
                               ["--log-directory" :default "/some/path"]

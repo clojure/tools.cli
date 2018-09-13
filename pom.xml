@@ -13,7 +13,14 @@
   <developers>
     <developer><name>Gareth Jones</name></developer>
     <developer><name>Sung Pae</name></developer>
+    <developer><name>Sean Corfield</name></developer>
   </developers>
+
+  <properties>
+    <!-- set clojure.version to >= 1.8.0 to run cljs test suite
+         (and make sure to run on jdk >= 1.8 for nashorn support) -->
+    <clojure.version>1.8.0</clojure.version>
+  </properties>
 
   <scm>
     <connection>scm:git:git@github.com:clojure/tools.cli.git</connection>

@@ -357,7 +357,7 @@
   (let [{:keys [validate-fn validate-msg]} spec]
     (or (loop [[vfn & vfns] validate-fn [msg & msgs] validate-msg]
           (when vfn
-            (if (try (vfn value) (catch Throwable e))
+            (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) e))
               (recur vfns msgs)
               [::error (validation-error opt optarg msg)])))
         [value nil])))
@@ -367,7 +367,7 @@
         [value error] (if parse-fn
                         (try
                           [(parse-fn value) nil]
-                          (catch Throwable e
+                          (catch #?(:clj Throwable :cljs :default) e
                             [nil (parse-error opt optarg (str e))]))
                         [value nil])]
     (if error

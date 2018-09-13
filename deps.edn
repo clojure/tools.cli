@@ -7,5 +7,8 @@
            {:extra-deps {com.cognitect/test-runner
                          {:git/url "https://github.com/cognitect-labs/test-runner"
                           :sha "76568540e7f40268ad2b646110f237a60295fa3c"}}
+            ;; required to override test-runner's transitive dependency
+            ;; on an older version of this project:
+            :override-deps {org.clojure/tools.cli {:local/root "."}}
             :main-opts ["-m" "cognitect.test-runner"
                         "-d" "src/test/clojure"]}}}

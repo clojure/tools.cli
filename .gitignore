@@ -1,5 +1,6 @@
 target
-.lein-failures
-/src/test/clojure/cljs
+/.lein-failures
+/.cpcache
+/cljs-test-runner-out
 /.lein-repl-history
 /.nrepl-port

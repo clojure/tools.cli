@@ -82,13 +82,13 @@
   (s/replace k #"^--no-|^--\[no-\]|^--|^-" ""))
 
 (defn- flag-for [^String v]
-  (not (.startsWith v "--no-")))
+  (not (s/starts-with? v "--no-")))
 
 (defn- opt? [^String x]
-  (.startsWith x "-"))
+  (s/starts-with? x "-"))
 
 (defn- flag? [^String x]
-  (.startsWith x "--[no-]"))
+  (s/starts-with? x "--[no-]"))
 
 (defn- end-of-args? [x]
   (= "--" x))
@@ -141,10 +141,14 @@
 (defn- switches-for
   [switches flag]
   (-> (for [^String s switches]
-        (cond
-         (and flag (flag? s))            [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
-         (and flag (.startsWith s "--")) [(s/replace s #"--" "--no-") s]
-         :default                        [s]))
+        (cond (and flag (flag? s))
+              [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
+
+              (and flag (s/starts-with? s "--"))
+              [(s/replace s #"--" "--no-") s]
+
+              :default
+              [s]))
       flatten))
 
 (defn- generate-spec
@@ -353,7 +357,7 @@
   (let [{:keys [validate-fn validate-msg]} spec]
     (or (loop [[vfn & vfns] validate-fn [msg & msgs] validate-msg]
           (when vfn
-            (if (try (vfn value) (catch Throwable e))
+            (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) e))
               (recur vfns msgs)
               [::error (validation-error opt optarg msg)])))
         [value nil])))
@@ -363,7 +367,7 @@
         [value error] (if parse-fn
                         (try
                           [(parse-fn value) nil]
-                          (catch Throwable e
+                          (catch #?(:clj Throwable :cljs :default) e
                             [nil (parse-error opt optarg (str e))]))
                         [value nil])]
     (if error

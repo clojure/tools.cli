@@ -1,0 +1,23 @@
+{:paths ["src/main/clojure"]
+ :aliases {:test {:extra-paths ["src/test/clojure"]}
+           :1.8 {:override-deps {org.clojure/clojure {:mvn/version "1.8.0"}}}
+           :1.9 {:override-deps {org.clojure/clojure {:mvn/version "1.9.0"}}}
+           :master {:override-deps {org.clojure/clojure {:mvn/version "1.10.0-master-SNAPSHOT"}}}
+           :runner
+           {:extra-deps {com.cognitect/test-runner
+                         {:git/url "https://github.com/cognitect-labs/test-runner"
+                          :sha "76568540e7f40268ad2b646110f237a60295fa3c"}}
+            ;; required to override test-runner's transitive dependency
+            ;; on an older version of this project:
+            :override-deps {org.clojure/tools.cli {:local/root "."}}
+            :main-opts ["-m" "cognitect.test-runner"
+                        "-d" "src/test/clojure"]}
+           :cljs-runner
+           {:extra-deps {olical/cljs-test-runner
+                         {:git/url "https://github.com/Olical/cljs-test-runner"
+                          :sha "244951de48f716a5ff3875bad8d02e45b97cb36e"}}
+            ;; required to override cljs-test-runner's transitive dependency
+            ;; on an older version of this project:
+            :override-deps {org.clojure/tools.cli {:local/root "."}}
+            :main-opts ["-m" "cljs-test-runner.main"
+                        "-d" "src/test/clojure"]}}}

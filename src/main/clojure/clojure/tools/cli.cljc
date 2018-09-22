@@ -216,7 +216,7 @@
 
 (def ^{:private true} spec-keys
   [:id :short-opt :long-opt :required :desc :default :default-desc :parse-fn
-   :assoc-fn :validate-fn :validate-msg :missing])
+   :assoc-fn :update-fn :validate-fn :validate-msg :missing])
 
 (defn- select-spec-keys
   "Select only known spec entries from map and warn the user about unknown
@@ -277,6 +277,7 @@
    :default-desc String   ; \"example.com\"
    :parse-fn     IFn      ; #(InetAddress/getByName %)
    :assoc-fn     IFn      ; assoc
+   :update-fn    IFn      ; identity
    :validate-fn  [IFn]    ; [#(instance? Inet4Address %)
                           ;  #(not (.isMulticastAddress %)]
    :validate-msg [String] ; [\"Must be an IPv4 host\"
@@ -298,12 +299,15 @@
   vector.
 
   An assertion error is thrown if any :id values are unset, or if there exist
-  any duplicate :id, :short-opt, or :long-opt values."
+  any duplicate :id, :short-opt, or :long-opt values, or if both :assoc-fn and
+  :update-fn are provided for any single option."
   [option-specs]
-  {:post [(every? (comp identity :id) %)
+  {:post [(every? :id %)
           (distinct?* (map :id (filter :default %)))
           (distinct?* (remove nil? (map :short-opt %)))
-          (distinct?* (remove nil? (map :long-opt %)))]}
+          (distinct?* (remove nil? (map :long-opt %)))
+          (every? (comp not (partial every? identity))
+                  (map (juxt :assoc-fn :update-fn) %))]}
   (map (fn [spec]
          (-> (if (map? spec)
                (select-spec-keys spec)
@@ -418,7 +422,11 @@
                            (or (find-spec specs :short-opt optarg)
                                (find-spec specs :long-opt optarg)))
                     [m ids (conj errors (missing-required-error opt (:required spec)))]
-                    [((:assoc-fn spec assoc) m id value) (conj ids id) errors])
+                    [(if-let [update-fn (:update-fn spec)]
+                       (update-in m [id] update-fn)
+                       ((:assoc-fn spec assoc) m id value))
+                     (conj ids id)
+                     errors])
                   [m ids (conj errors error)]))
               [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
           [defaults [] []] tokens)
@@ -558,7 +566,16 @@
 
     :assoc-fn     A function that receives the current option map, the current
                   option :id, and the current parsed option value, and returns
-                  a new option map.
+                  a new option map. The default is 'assoc'.
+
+                  For non-idempotent options, use :update-fn below.
+
+    :update-fn    A function that receives the the current parsed option value,
+                  and returns a new option value, for each option :id present.
+                  The default is 'identity'.
+
+                  You cannot specify both :assoc-fn and :update-fn for an
+                  option.
 
                   This may be used to create non-idempotent options, like
                   setting a verbosity level by specifying an option multiple
@@ -566,7 +583,13 @@
 
                   [\"-v\" \"--verbose\"
                    :default 0
-                   :assoc-fn (fn [m k _] (update-in m [k] inc))]
+                   :update-fn inc]
+
+                  :default is applied first. If you wish to avoid the :default
+                  option value, use fnil in your :update-fn as follows:
+
+                  [\"-v\" \"--verbose\"
+                   :update-fn (fnil inc 0)]
 
     :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
                   of validation functions and error messages may be provided.

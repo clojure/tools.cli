@@ -10,7 +10,7 @@ Latest stable release: 0.4.0
 
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
-[clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependecy information:
+[clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```clojure
 clj -Sdeps '{:deps {org.clojure/tools.cli {:mvn/version "0.4.0"}}}'
 ```
@@ -302,6 +302,9 @@ only `parse-opts` and `summarize` were available.
 
 ## Change Log
 
+* Release 0.4.1 in progress
+  * Add `:update-fn` as the preferred way to handle non-idempotent options. It
+    is a simpler alternative to using `:assoc-fn` for such options.
 * Release 0.4.0 on 2018-09-12
   * Convert everything to use `.cljc` files and add `clj`/`deps.edn` support
     [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91). This **drops

@@ -60,7 +60,9 @@
     (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}])))
     (is (thrown? #?(:clj AssertionError :cljs :default)
-                 (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}]))))
+                 (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}])))
+    (is (thrown? #?(:clj AssertionError :cljs :default)
+                 (compile-option-specs [{:id :alpha :assoc-fn assoc :update-fn identity}]))))
   (testing "desugars `--long-opt=value`"
     (is (= (map (juxt :id :long-opt :required)
                 (compile-option-specs [[nil "--foo FOO"] [nil "--bar=BAR"]]))
@@ -170,6 +172,25 @@
              [{:alpha true :verbose 3} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
              [{:verbose 1} []]))))
+  (testing "updates :id and value with :update-fn"
+    (let [specs (compile-option-specs
+                  [["-a" nil
+                    :id :alpha
+                    :default true
+                    :update-fn not]
+                   ["-v" "--verbose"
+                    :default 0
+                    :update-fn inc]])]
+      (is (= (parse-option-tokens specs [])
+             [{:alpha true :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false :verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:alpha true :verbose 3} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
+             [{:verbose 1} []]))))
   (testing "associates :id and value with :assoc-fn, without :default"
     (let [specs (compile-option-specs
                   [["-a" nil
@@ -179,6 +200,25 @@
                    ["-v" "--verbose"
                     ;; use fnil to have an implied :default 0
                     :assoc-fn (fn [m k _] (update-in m [k] (fnil inc 0)))]])]
+      (is (= (parse-option-tokens specs [])
+             [{} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:verbose 3} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
+             [{:verbose 1} []]))))
+  (testing "updates :id and value with :update-fn, without :default"
+    (let [specs (compile-option-specs
+                  [["-a" nil
+                    :id :alpha
+                    ;; use fnil to have an implied :default true
+                    :update-fn (fnil not true)]
+                   ["-v" "--verbose"
+                    ;; use fnil to have an implied :default 0
+                    :update-fn (fnil inc 0)]])]
       (is (= (parse-option-tokens specs [])
              [{} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-a"]])

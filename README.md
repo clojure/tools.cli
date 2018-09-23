@@ -4,7 +4,7 @@ Tools for working with command line arguments.
 
 ## Stable Releases and Dependency Information
 
-Latest stable release: 0.4.0
+Latest stable release: 0.4.1
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 
@@ -12,19 +12,19 @@ Latest stable release: 0.4.0
 
 [clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```clojure
-clj -Sdeps '{:deps {org.clojure/tools.cli {:mvn/version "0.4.0"}}}'
+clj -Sdeps '{:deps {org.clojure/tools.cli {:mvn/version "0.4.1"}}}'
 ```
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 ```clojure
-[org.clojure/tools.cli "0.4.0"]
+[org.clojure/tools.cli "0.4.1"]
 ```
 [Maven](http://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>0.4.0</version>
+  <version>0.4.1</version>
  </dependency>
 ```
 The 0.4.x series of tools.cli supports use with `clj`/`deps.edn` and brings
@@ -316,9 +316,13 @@ only `parse-opts` and `summarize` were available.
 
 ## Change Log
 
-* Release 0.4.1 in progress
+* Release 0.4.1 2018-09-22
   * Add `:update-fn` as the preferred way to handle non-idempotent options. It
     is a simpler alternative to using `:assoc-fn` for such options.
+  * Add `:default-fn` as a way to compute default option values after parsing.
+    This is particularly useful with `:update-fn` since you can use it to
+    override the `:default` value if necessary
+    [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91).
 * Release 0.4.0 on 2018-09-12
   * Convert everything to use `.cljc` files and add `clj`/`deps.edn` support
     [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91). This **drops

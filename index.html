@@ -1,7 +1,7 @@
 <html>
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-    <title>clojure.tools.cli - Command-line processor 0.3.6 API documentation</title>
+    <title>clojure.tools.cli - tools.cli 0.4.1-SNAPSHOT API documentation</title>
     <link rel="icon" href="static/favicon.png" />
     <link rel="shortcut icon" href="static/favicon.png" />
     <link rel="stylesheet" href="static/clojure.css" type="text/css" media="all" />
@@ -25,14 +25,14 @@ namespace.
       <div id="leftcolumn"><div style="text-align: center;"></div>
 <div class="menu">
   <div class="WikiCustomNav WikiElement wiki">
-    <span class="toc-header"><span id="project-name">Command-line processor</span> <span id="version">0.3.6</span> API</span><br />
+    <span class="toc-header"><span id="project-name">tools.cli</span> <span id="version">0.4.1-SNAPSHOT</span> API</span><br />
     <ul>
       <li><a href="index.html" class="wiki_link">Overview</a></li>
       <li><a href="api-index.html" class="wiki_link">API Index</a></li>
     </ul>
     
     
-    <a class="wiki_link" href="http://clojure.org">Clojure Home</a>
+    <a class="wiki_link" href="https://clojure.org">Clojure Home</a>
   </div>
 </div>
 </div>
@@ -79,13 +79,13 @@ namespace.
 </div>
 </div>
                 <div id="content-tag"><h1 id="overview">API for <span id="clojure.tools.cli">clojure.tools.cli</span>
-  - <span id="header-project">Command-line processor</span> <span id="header-version">0.3.6</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
+  - <span id="header-project">tools.cli</span> <span id="header-version">0.4.1-SNAPSHOT</span><span id="header-status-block"> (<span id="header-status">in development</span>)</span>
   </h1>
-<span id="author-line">by <span id="author-name">Gareth Jones, Sung Pae</span><br /></span>
+<span id="author-line">by <span id="author-name">Gareth Jones, Sung Pae, Sean Corfield</span><br /></span>
 <br />Full namespace name: <span id="long-name">clojure.tools.cli</span>
 <p></p>
 <h2>Overview</h2>
-<div id="home-page">Project home page is <a href="http://github.com/clojure/tools.cli/">http://github.com/clojure/tools.cli/</a></div>
+<div id="home-page">Project home page is <a href="https://github.com/clojure/tools.cli/">https://github.com/clojure/tools.cli/</a></div>
 <pre id="namespace-docstr">Tools for working with command line arguments.</pre>
 
 
@@ -124,7 +124,7 @@ documentation banner to provide usage instructions.</pre>
     <pre id="var-specs"></pre>
     
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L180">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L184">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -137,9 +137,9 @@ lengths to use for parts. There are two sequences of lengths if we are
 not displaying defaults. There are three sequences of lengths if we
 are showing defaults.</pre>
     <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
+    <span class="var-added"><span id="content">Added in tools.cli version 0.3.0</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L432">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L481">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -147,11 +147,13 @@ are showing defaults.</pre>
     <span id="var-type">function</span><br />
     <pre id="var-usage">Usage: (get-default-options option-specs)
 </pre>
-    <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.</pre>
+    <pre id="var-docstr">Extract the map of default options from a sequence of option vectors.
+
+As of 0.4.1, this also applies any :default-fn present.</pre>
     <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.2</span><br /></span>
+    <span class="var-added"><span id="content">Added in tools.cli version 0.3.2</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L466">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L517">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -162,9 +164,9 @@ are showing defaults.</pre>
     <pre id="var-docstr">Given a single compiled option spec, turn it into a formatted string,
 optionally with its default values if requested.</pre>
     <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
+    <span class="var-added"><span id="content">Added in tools.cli version 0.3.0</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L416">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L457">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -200,7 +202,7 @@ positional string arguments. The valid properties are:
 
                 Multiple option entries can share the same :id in order to
                 transform a value in different ways, but only one of these
-                option entries may contain a :default entry.
+                option entries may contain a :default(-fn) entry.
 
                 This option is mandatory.
 
@@ -222,11 +224,19 @@ positional string arguments. The valid properties are:
 
   :default      The default value of this option. If none is specified, the
                 resulting option map will not contain an entry for this
-                option unless set on the command line.
+                option unless set on the command line. Also see :default-fn
+                (below).
 
   :default-desc An optional description of the default value. This should be
                 used when the string representation of the default value is
-                too ugly to be printed on the command line.
+                too ugly to be printed on the command line, or :default-fn
+                is used to compute the default.
+
+  :default-fn   A function to compute the default value of this option, given
+                the whole, parsed option map as its one argument. If no
+                function is specified, the resulting option map will not
+                contain an entry for this option unless set on the command
+                line. Also see :default (above).
 
   :parse-fn     A function that receives the required option argument and
                 returns the option value.
@@ -241,7 +251,16 @@ positional string arguments. The valid properties are:
 
   :assoc-fn     A function that receives the current option map, the current
                 option :id, and the current parsed option value, and returns
-                a new option map.
+                a new option map. The default is 'assoc'.
+
+                For non-idempotent options, use :update-fn below.
+
+  :update-fn    A function that receives the the current parsed option value,
+                and returns a new option value, for each option :id present.
+                The default is 'identity'.
+
+                You cannot specify both :assoc-fn and :update-fn for an
+                option.
 
                 This may be used to create non-idempotent options, like
                 setting a verbosity level by specifying an option multiple
@@ -249,7 +268,13 @@ positional string arguments. The valid properties are:
 
                 ["-v" "--verbose"
                  :default 0
-                 :assoc-fn (fn [m k _] (update-in m [k] inc))]
+                 :update-fn inc]
+
+                :default is applied first. If you wish to avoid the :default
+                option value, use fnil in your :update-fn as follows:
+
+                ["-v" "--verbose"
+                 :update-fn (fnil inc 0)]
 
   :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
                 of validation functions and error messages may be provided.
@@ -292,9 +317,9 @@ parse-opts:
                 returns a custom option summary string.
 </pre>
     <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
+    <span class="var-added"><span id="content">Added in tools.cli version 0.3.0</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L471">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L532">Source</a>
   </div><div id="var-entry">
     <br />
     <hr />
@@ -308,9 +333,9 @@ means that you shouldn't call summarize directly. When you call parse-opts
 you get back a :summary key which is the result of calling summarize (or
 your user-supplied :summary-fn option) on the compiled option specs.</pre>
     <pre id="var-specs"></pre>
-    <span class="var-added"><span id="content">Added in Command-line processor version 0.3.0</span><br /></span>
+    <span class="var-added"><span id="content">Added in tools.cli version 0.3.0</span><br /></span>
     
-    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/401c51f3c2c5c549b9b4713951e41ed20cfcc4d7/src/main/clojure/clojure/tools/cli.clj#L451">Source</a>
+    <a id="var-source" href="https://github.com/clojure/tools.cli/blob/7a5117017062e7f758f509635b9b10b6de501970/src/main/clojure/clojure/tools/cli.cljc#L500">Source</a>
   </div>
 </div>
 
@@ -321,7 +346,7 @@ your user-supplied :summary-fn option) on the compiled option specs.</pre>
           </div>
 	</div>
 	<div id="foot">
-	  <div id="copyright" style="text-align: center;">Copyright 2007-2017 by Rich Hickey and the various contributors</div>
+	  <div id="copyright" style="text-align: center;">Copyright 2007-2018 by Rich Hickey and the various contributors</div>
 	</div>
       </div>
       <div id="DesignedBy">Logo &amp; site design by <a href="http://www.tomhickey.com" title="Visit Tom Hickey's website.">Tom Hickey</a>.<br />

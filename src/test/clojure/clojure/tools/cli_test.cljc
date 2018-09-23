@@ -34,6 +34,12 @@
                                           [["-f" "--foo"]
                                            ["-b" "--bar=ARG" :default 0]]))
            [false true])))
+  (testing "does not set values for :default-fn unless specified"
+    (is (= (map #(contains? % :default-fn) (compile-option-specs
+                                             [["-f" "--foo"]
+                                              ["-b" "--bar=ARG"
+                                               :default-fn (constantly 0)]]))
+           [false true])))
   (testing "interprets first three string arguments as short-opt, long-opt=required, and desc"
     (is (= (map (juxt :short-opt :long-opt :required :desc)
                 (compile-option-specs [["-a" :id :alpha]
@@ -52,7 +58,7 @@
             :short-opt "-f",
             :long-opt "--[no-]foo"})))
   (testing "throws AssertionError on unset :id, duplicate :short-opt or :long-opt,
-            or multiple :default entries per :id"
+            multiple :default(-fn) entries per :id, or both :assoc-fn/:update-fn present"
     (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [["-a" :id nil]])))
     (is (thrown? #?(:clj AssertionError :cljs :default)
@@ -61,6 +67,9 @@
                  (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}])))
     (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}])))
+    (is (thrown? #?(:clj AssertionError :cljs :default)
+                 (compile-option-specs [{:id :alpha :default-fn (constantly 0)}
+                                        {:id :alpha :default-fn (constantly 1)}])))
     (is (thrown? #?(:clj AssertionError :cljs :default)
                  (compile-option-specs [{:id :alpha :assoc-fn assoc :update-fn identity}]))))
   (testing "desugars `--long-opt=value`"
@@ -229,6 +238,76 @@
              [{:verbose 3} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
              [{:verbose 1} []]))))
+  (testing "updates :id and value with :update-fn, with :default-fn"
+    (let [specs (compile-option-specs
+                  [["-a" nil
+                    :id :alpha
+                    ;; use fnil to have an implied :default true
+                    :update-fn (fnil not true)]
+                   ["-v" "--verbose"
+                    :default-fn #(if (contains? % :alpha) 1 0)
+                    ;; use fnil to have an implied :default 0
+                    :update-fn (fnil inc 0)]])]
+      (is (= (parse-option-tokens specs [])
+             [{:verbose 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-a"]])
+             [{:alpha false :verbose 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]
+                                         [:short-opt "-v"]
+                                         [:long-opt "--verbose"]])
+             [{:verbose 3} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
+             [{:verbose 1} []]))))
+  (testing ":default-fn can override :default value"
+    (let [specs (compile-option-specs
+                 [["-x" "--X"
+                   :default 0
+                   :update-fn inc
+                   ;; account for :Y always having a default here
+                   :default-fn #(if (pos? (:Y %)) 1 2)]
+                  ["-y" "--Y"
+                   :default 0
+                   :update-fn inc]])]
+      (is (= (parse-option-tokens specs [])
+             [{:X 2 :Y 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]])
+             [{:X 1 :Y 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-x"]])
+             [{:X 2 :Y 0} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-y"]])
+             [{:X 1 :Y 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-y"]])
+             [{:X 1 :Y 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-x"]
+                                         [:short-opt "-y"]])
+             [{:X 2 :Y 1} []])))
+    (let [specs (compile-option-specs
+                 [["-x" "--X"
+                   :default 0
+                   :update-fn inc
+                   ;; account for :Y not having a default here
+                   :default-fn #(if (contains? % :Y) 1 2)]
+                  ["-y" "--Y"
+                   :update-fn (fnil inc 0)]])]
+      (is (= (parse-option-tokens specs [])
+             [{:X 2} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]])
+             [{:X 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-x"]])
+             [{:X 2} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-y"]])
+             [{:X 1 :Y 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-y"]])
+             [{:X 1 :Y 1} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-x"]
+                                         [:short-opt "-x"]
+                                         [:short-opt "-y"]])
+             [{:X 2 :Y 1} []]))))
   (testing "can deal with negative flags"
     (let [specs (compile-option-specs [["-p" "--[no-]profile" "Enable/disable profiling"]])]
       (is (= (parse-option-tokens specs []) [{} []]))

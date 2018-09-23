@@ -58,7 +58,9 @@ are not ready to migrate to `parse-opts`.
    ["-v" nil "Verbosity level"
     :id :verbosity
     :default 0
-    :assoc-fn (fn [m k _] (update-in m [k] inc))]
+    :update-fn inc
+    ;; Prior to 0.4.1, you would have to use:
+    ;; :assoc-fn (fn [m k _] (update-in m [k] inc))]
    ;; A boolean option defaulting to nil
    ["-h" "--help"]])
 
@@ -172,7 +174,7 @@ argument *after* being parsed by `:parse-fn` if it exists.
      :parse-fn #(Integer/parseInt %)
      :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
 
-If the validation-fn returns a falsy value, the validation-msg is added to the
+If the validation-fn returns a falsey value, the validation-msg is added to the
 errors vector.
 
 ### Error Handling and Return Values
@@ -232,11 +234,23 @@ only `parse-opts` and `summarize` were available.
     ;; If no long-option is specified, an option :id must be given
     :id :verbosity
     :default 0
-    ;; Use assoc-fn to create non-idempotent options (:default is applied first)
-    :assoc-fn (fn [m k _] (update-in m [k] inc))]
+    ;; Use :update-fn to create non-idempotent options (:default is applied first)
+    :update-fn inc]
    ;; A boolean option that can explicitly be set to false
    ["-d" "--[no-]daemon" "Daemonize the process" :default true]
    ["-h" "--help"]])
+
+;; The :default values are applied first to options. Sometimes you might want
+;; to apply default values after parsing is complete, or specifically to
+;; compute a default value based on other option values in the map. For those
+;; situations, you can use :default-fn to specify a function that is called
+;; for any options that do not have a value after parsing is complete, and
+;; which is passed the complete, parsed option map as it's single argument.
+;; :default-fn (constantly 42) is effectively the same as :default 42 unless
+;; you have a non-idempotent option (with :update-fn or :assoc-fn) -- in which
+;; case any :default value is used as the initial option value rather than nil,
+;; and :default-fn will be called to compute the final option value if none was
+;; given on the command-line (thus, :default-fn can override :default)
 
 (defn usage [options-summary]
   (->> ["This is my program. There are many like it, but this one is mine."

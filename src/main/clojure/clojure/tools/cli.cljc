@@ -215,8 +215,8 @@
 ;;
 
 (def ^{:private true} spec-keys
-  [:id :short-opt :long-opt :required :desc :default :default-desc :parse-fn
-   :assoc-fn :update-fn :validate-fn :validate-msg :missing])
+  [:id :short-opt :long-opt :required :desc :default :default-desc :default-fn
+   :parse-fn :assoc-fn :update-fn :validate-fn :validate-msg :missing])
 
 (defn- select-spec-keys
   "Select only known spec entries from map and warn the user about unknown
@@ -275,6 +275,7 @@
    :desc         String   ; \"Remote server\"
    :default      Object   ; #<Inet4Address example.com/93.184.216.119>
    :default-desc String   ; \"example.com\"
+   :default-fn   IFn      ; (constantly 0)
    :parse-fn     IFn      ; #(InetAddress/getByName %)
    :assoc-fn     IFn      ; assoc
    :update-fn    IFn      ; identity
@@ -292,7 +293,11 @@
   entries :validate-fn and :validate-msg. Multiple pairs of validation
   functions and error messages may be provided.
 
-  A :default entry will not be included in the compiled spec unless specified.
+  A :default(-fn) entry will not be included in the compiled spec unless
+  specified. The :default is applied before options are parsed, the :default-fn
+  is applied after options are parsed (only where an option was not specified,
+  and is passed the whole options map as its single argument, so defaults can
+  be computed from other options if needed).
 
   An option spec may also be passed as a map containing the entries above,
   in which case that subset of the map is transferred directly to the result
@@ -304,6 +309,7 @@
   [option-specs]
   {:post [(every? :id %)
           (distinct?* (map :id (filter :default %)))
+          (distinct?* (map :id (filter :default-fn %)))
           (distinct?* (remove nil? (map :short-opt %)))
           (distinct?* (remove nil? (map :long-opt %)))
           (every? (comp not (partial every? identity))
@@ -411,6 +417,7 @@
   [specs tokens & options]
   (let [{:keys [no-defaults strict]} (apply hash-map options)
         defaults (default-option-map specs :default)
+        default-fns (default-option-map specs :default-fn)
         requireds (missing-errors specs)]
     (-> (reduce
           (fn [[m ids errors] [opt-type opt optarg]]
@@ -436,6 +443,12 @@
                [m ids errors]
                [m ids (conj errors error)]))
            % requireds))
+        (#(reduce
+           (fn [[m ids errors] [id f]]
+             (if (contains? (set ids) id)
+               [m ids errors]
+               [(assoc m id (f (first %))) ids errors]))
+           % default-fns))
         (#(let [[m ids errors] %]
             (if no-defaults
               [(select-keys m ids) errors]
@@ -445,13 +458,21 @@
   "Given a single compiled option spec, turn it into a formatted string,
   optionally with its default values if requested."
   [show-defaults? spec]
-  (let [{:keys [short-opt long-opt required default default-desc desc]} spec
+  (let [{:keys [short-opt long-opt required desc
+                default default-desc default-fn]} spec
         opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
                   long-opt (str "    " long-opt)
                   short-opt short-opt)
         [opt dd] (if required
                    [(str opt \space required)
-                    (or default-desc (str default))]
+                    (or default-desc
+                        (when (contains? spec :default)
+                          (if (some? default)
+                            (str default)
+                            "nil"))
+                        (when default-fn
+                          "<computed>")
+                        "")]
                    [opt ""])]
     (if show-defaults?
       [opt dd (or desc "")]
@@ -484,7 +505,9 @@
   your user-supplied :summary-fn option) on the compiled option specs."
   [specs]
   (if (seq specs)
-    (let [show-defaults? (some #(and (:required %) (contains? % :default)) specs)
+    (let [show-defaults? (some #(and (:required %)
+                                     (or (contains? % :default)
+                                         (contains? % :default-fn))) specs)
           parts (map (partial make-summary-part show-defaults?) specs)
           lens (apply map (fn [& cols] (apply max (map count cols))) parts)
           lines (format-lines lens parts)]
@@ -492,9 +515,19 @@
     ""))
 
 (defn ^{:added "0.3.2"} get-default-options
-  "Extract the map of default options from a sequence of option vectors."
+  "Extract the map of default options from a sequence of option vectors.
+
+  As of 0.4.1, this also applies any :default-fn present."
   [option-specs]
-  (default-option-map (compile-option-specs option-specs) :default))
+  (let [specs (compile-option-specs option-specs)
+        vals  (default-option-map specs :default)]
+    (reduce (fn [m [id f]]
+              (if (contains? m id)
+                m
+                (update-in m [id] (f vals))))
+            vals
+            (default-option-map specs :default-fn))))
+
 
 (defn ^{:added "0.3.0"} parse-opts
   "Parse arguments sequence according to given option specifications and the
@@ -525,7 +558,7 @@
 
                   Multiple option entries can share the same :id in order to
                   transform a value in different ways, but only one of these
-                  option entries may contain a :default entry.
+                  option entries may contain a :default(-fn) entry.
 
                   This option is mandatory.
 
@@ -547,11 +580,19 @@
 
     :default      The default value of this option. If none is specified, the
                   resulting option map will not contain an entry for this
-                  option unless set on the command line.
+                  option unless set on the command line. Also see :default-fn
+                  (below).
 
     :default-desc An optional description of the default value. This should be
                   used when the string representation of the default value is
-                  too ugly to be printed on the command line.
+                  too ugly to be printed on the command line, or :default-fn
+                  is used to compute the default.
+
+    :default-fn   A function to compute the default value of this option, given
+                  the whole, parsed option map as its one argument. If no
+                  function is specified, the resulting option map will not
+                  contain an entry for this option unless set on the command
+                  line. Also see :default (above).
 
     :parse-fn     A function that receives the required option argument and
                   returns the option value.

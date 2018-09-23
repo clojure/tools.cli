@@ -322,7 +322,7 @@ only `parse-opts` and `summarize` were available.
   * Add `:default-fn` as a way to compute default option values after parsing.
     This is particularly useful with `:update-fn` since you can use it to
     override the `:default` value if necessary
-    [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91).
+    [TCLI-90](http://dev.clojure.org/jira/browse/TCLI-90).
 * Release 0.4.0 on 2018-09-12
   * Convert everything to use `.cljc` files and add `clj`/`deps.edn` support
     [TCLI-91](http://dev.clojure.org/jira/browse/TCLI-91). This **drops

@@ -583,6 +583,14 @@
                   option unless set on the command line. Also see :default-fn
                   (below).
 
+                  This default is applied before any arguments are parsed so
+                  this is a good way to seed values for :assoc-fn or :update-fn
+                  as well as the simplest way to provide defaults.
+
+                  If you need to compute a default based on other command line
+                  arguments, or you need to provide a default separate from the
+                  seed for :assoc-fn or :update-fn, see :default-fn below.
+
     :default-desc An optional description of the default value. This should be
                   used when the string representation of the default value is
                   too ugly to be printed on the command line, or :default-fn
@@ -593,6 +601,10 @@
                   function is specified, the resulting option map will not
                   contain an entry for this option unless set on the command
                   line. Also see :default (above).
+
+                  If both :default and :default-fn are provided, if the
+                  argument is not provided on the command-line, :default-fn will
+                  still be called (and can override :default).
 
     :parse-fn     A function that receives the required option argument and
                   returns the option value.
@@ -609,18 +621,21 @@
                   option :id, and the current parsed option value, and returns
                   a new option map. The default is 'assoc'.
 
-                  For non-idempotent options, use :update-fn below.
+                  For non-idempotent options, where you need to compute a option
+                  value based on the current value and a new value from the
+                  command line. If you only need the the current value, consider
+                  :update-fn (below).
+
+                  You cannot specify both :assoc-fn and :update-fn for an
+                  option.
 
     :update-fn    A function that receives the the current parsed option value,
                   and returns a new option value, for each option :id present.
                   The default is 'identity'.
 
-                  You cannot specify both :assoc-fn and :update-fn for an
-                  option.
-
-                  This may be used to create non-idempotent options, like
-                  setting a verbosity level by specifying an option multiple
-                  times. (\"-vvv\" -> 3)
+                  This may be used to create non-idempotent options where you
+                  only need the current value, like setting a verbosity level by
+                  specifying an option multiple times. (\"-vvv\" -> 3)
 
                   [\"-v\" \"--verbose\"
                    :default 0
@@ -631,6 +646,9 @@
 
                   [\"-v\" \"--verbose\"
                    :update-fn (fnil inc 0)]
+
+                  You cannot specify both :assoc-fn and :update-fn for an
+                  option.
 
     :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
                   of validation functions and error messages may be provided.

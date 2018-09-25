@@ -318,7 +318,7 @@ only `parse-opts` and `summarize` were available.
 
 * Release 0.4.1 2018-09-22
   * Add `:update-fn` as the preferred way to handle non-idempotent options. It
-    is a simpler alternative to using `:assoc-fn` for such options.
+    is a simpler alternative to using `:assoc-fn` for some such options.
   * Add `:default-fn` as a way to compute default option values after parsing.
     This is particularly useful with `:update-fn` since you can use it to
     override the `:default` value if necessary

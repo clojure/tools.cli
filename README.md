@@ -60,7 +60,8 @@ are not ready to migrate to `parse-opts`.
     :default 0
     :update-fn inc
     ;; Prior to 0.4.1, you would have to use:
-    ;; :assoc-fn (fn [m k _] (update-in m [k] inc))]
+    ;; :assoc-fn (fn [m k _] (update-in m [k] inc))
+    ]
    ;; A boolean option defaulting to nil
    ["-h" "--help"]])
 

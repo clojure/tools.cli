@@ -641,7 +641,7 @@
                    :default 0
                    :update-fn inc]
 
-                  :default is applied first. If you wish to avoid the :default
+                  :default is applied first. If you wish to omit the :default
                   option value, use fnil in your :update-fn as follows:
 
                   [\"-v\" \"--verbose\"

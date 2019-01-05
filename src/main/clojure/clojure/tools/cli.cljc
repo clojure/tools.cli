@@ -1,8 +1,7 @@
 (ns ^{:author "Gareth Jones, Sung Pae, Sean Corfield"
       :doc "Tools for working with command line arguments."}
   clojure.tools.cli
-  (:require [clojure.pprint :as pp]
-            [clojure.string :as s]))
+  (:require [clojure.string :as s]))
 
 (defn- tokenize-args
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
@@ -53,6 +52,11 @@
             (recur opts (conj argv car) cdr)))
         [opts argv]))))
 
+(defn- make-format
+  "Given a sequence of column widths, return a string suitable for use in
+  format to print a sequences of strings in those columns."
+  [lens]
+  (s/join (map #(str "  %" (if-not (zero? %) (str "-" %)) "s") lens)))
 ;;
 ;; Legacy API
 ;;
@@ -75,7 +79,8 @@
         vs (for [d docs]
              (mapcat (fn [& x] (apply vector x)) max-cols d))]
     (doseq [v vs]
-      (pp/cl-format true "~{ ~vA  ~vA  ~vA ~}" v)
+      (let [fmt (make-format (take-nth 2 v))]
+        (print (apply format fmt (take-nth 2 (rest v)))))
       (prn))))
 
 (defn- name-for [k]
@@ -484,10 +489,8 @@
   not displaying defaults. There are three sequences of lengths if we
   are showing defaults."
   [lens parts]
-  (let [fmt (case (count lens)
-              2 "~{  ~vA  ~vA~}"
-              3 "~{  ~vA  ~vA  ~vA~}")]
-    (map #(s/trimr (pp/cl-format nil fmt (interleave lens %))) parts)))
+  (let [fmt (make-format lens)]
+    (map #(s/trimr (apply format fmt %)) parts)))
 
 (defn- required-arguments [specs]
   (reduce

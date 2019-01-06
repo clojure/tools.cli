@@ -315,6 +315,9 @@ only `parse-opts` and `summarize` were available.
 
 ## Change Log
 
+* Release 0.4.2 in progress
+  * Replace `clojure.pprint/cl-format` for better compatibility with GraalVM
+    [TCLI-93](http://dev.clojure.org/jira/browse/TCLI-93).
 * Release 0.4.1 2018-09-22
   * Add `:update-fn` as the preferred way to handle non-idempotent options. It
     is a simpler alternative to using `:assoc-fn` for some such options.

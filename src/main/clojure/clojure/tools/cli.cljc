@@ -66,6 +66,14 @@
    (or (str default) "")
    (or docs "")])
 
+#?(:cljs
+   ;; `format` has been removed from cljs and Clojure's `format`
+   ;; isn't exactly what `google.format.string` does and so we
+   ;; just provide _a format_ for now
+   (defn format
+     [fmt & args]
+     (s/join " " args)))
+
 (defn- banner-for [desc specs]
   (when desc
     (println desc)
@@ -128,7 +136,8 @@
          (recur options (into extra-args (vec (rest args))) nil)
 
          (and (opt? opt) (nil? spec))
-         (throw (Exception. (str "'" opt "' is not a valid argument")))
+         (throw #?(:clj (Exception. (str "'" opt "' is not a valid argument"))
+                   :cljs (js/Error. (str "'" opt "' is not a valid argument"))))
 
          (and (opt? opt) (spec :flag))
          (recur ((spec :assoc-fn) options (spec :name) (flag-for opt))
@@ -230,9 +239,10 @@
   (when *assert*
     (let [unknown-keys (keys (apply dissoc map spec-keys))]
       (when (seq unknown-keys)
-        (binding [*out* *err*]
-          (println (str "Warning: The following options to parse-opts are unrecognized: "
-                        (s/join ", " unknown-keys)))))))
+        (let [msg (str "Warning: The following options to parse-opts are unrecognized: "
+                       (s/join ", " unknown-keys))]
+          #?(:clj  (binding [*out* *err*] (println msg))
+             :cljs (binding [*print-fn* *print-err-fn*] (println msg)))))))
 
   (select-keys map spec-keys))
 

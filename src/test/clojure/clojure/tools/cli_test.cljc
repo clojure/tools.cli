@@ -97,12 +97,16 @@
     (when *assert*
       (is (re-find #"Warning:.* :flag"
                    (with-out-str
-                     (binding [*err* *out*]
-                       (compile-option-specs [[nil "--alpha" :validate nil :flag true]])))))
+                     #?(:clj (binding [*err* *out*]
+                               (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))
+                        :cljs (binding [*print-err-fn* *print-fn*]
+                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))))))
       (is (re-find #"Warning:.* :validate"
                    (with-out-str
-                     (binding [*err* *out*]
-                       (compile-option-specs [{:id :alpha :validate nil}]))))))))
+                     #?(:clj (binding [*err* *out*]
+                               (compile-option-specs [{:id :alpha :validate nil}]))
+                        :cljs (binding [*print-err-fn* *print-fn*]
+                                (compile-option-specs [{:id :alpha :validate nil}])))))))))
 
 (defn has-error? [re coll]
   (seq (filter (partial re-seq re) coll)))

@@ -1,7 +1,8 @@
 (ns ^{:author "Gareth Jones, Sung Pae, Sean Corfield"
       :doc "Tools for working with command line arguments."}
   clojure.tools.cli
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s]
+            #?(:cljs goog.string.format)))
 
 (defn- tokenize-args
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
@@ -67,12 +68,10 @@
    (or docs "")])
 
 #?(:cljs
-   ;; `format` has been removed from cljs and Clojure's `format`
-   ;; isn't exactly what `google.format.string` does and so we
-   ;; just provide _a format_ for now
+   ;; alias to Google Closure string format
    (defn format
      [fmt & args]
-     (s/join " " args)))
+     (apply goog.string.format fmt args)))
 
 (defn- banner-for [desc specs]
   (when desc

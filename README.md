@@ -95,6 +95,11 @@ and refer to the docstring of `parse-opts` for comprehensive documentation:
 
 http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
 
+## See Also
+
+An interesting library built on top of `tool.cli` that provides a more compact,
+higher-level API is [cli-matic](https://github.com/l3nz/cli-matic).
+
 ## New Features in 0.3.x
 
 ### Better Option Tokenization

@@ -329,7 +329,7 @@ only `parse-opts` and `summarize` were available.
 
 ## Change Log
 
-* Release 1.0.194 in progress
+* Release 1.0.194 2020-02-20
   * Switch to 1.0.x versioning.
   * Document the `:missing` option [TCLI-95](http://clojure.atlassian.net/browse/TCLI-95).
 * Release 0.4.2 2019-03-26

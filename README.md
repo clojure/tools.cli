@@ -102,7 +102,7 @@ http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
 An interesting library built on top of `tool.cli` that provides a more compact,
 higher-level API is [cli-matic](https://github.com/l3nz/cli-matic).
 
-## New Features in 0.3.x
+## Since Release 0.3.x
 
 ### Better Option Tokenization
 
@@ -249,6 +249,12 @@ only `parse-opts` and `summarize` were available.
     :default 0
     ;; Use :update-fn to create non-idempotent options (:default is applied first)
     :update-fn inc]
+   ["-f" "--file NAME" "File names to read"
+    :multi true ; use :update-fn to combine multiple instance of -f/--file
+    :default []
+    ;; with :multi true, the :update-fn is passed both the existing parsed
+    ;; value(s) and the new parsed value from each option
+    :update-fn conj]
    ;; A boolean option that can explicitly be set to false
    ["-d" "--[no-]daemon" "Daemonize the process" :default true]
    ["-h" "--help"]])

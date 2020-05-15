@@ -57,7 +57,7 @@
   "Given a sequence of column widths, return a string suitable for use in
   format to print a sequences of strings in those columns."
   [lens]
-  (s/join (map #(str "  %" (if-not (zero? %) (str "-" %)) "s") lens)))
+  (s/join (map #(str "  %" (when-not (zero? %) (str "-" %)) "s") lens)))
 ;;
 ;; Legacy API
 ;;
@@ -148,7 +148,7 @@
                 extra-args
                 (drop 2 args))
 
-         :default
+         :else
          (recur options (conj extra-args (first args)) (rest args)))))))
 
 (defn- switches-for
@@ -160,7 +160,7 @@
               (and flag (s/starts-with? s "--"))
               [(s/replace s #"--" "--no-") s]
 
-              :default
+              :else
               [s]))
       flatten))
 
@@ -218,10 +218,10 @@
                        [(first specs) (rest specs)]
                        [nil specs])
         specs (map generate-spec specs)
-        args (normalize-args specs args)]
-    (let [[options extra-args] (apply-specs specs args)
-          banner  (with-out-str (banner-for desc specs))]
-      [options extra-args banner])))
+        args (normalize-args specs args)
+        [options extra-args] (apply-specs specs args)
+        banner (with-out-str (banner-for desc specs))]
+    [options extra-args banner]))
 
 ;;
 ;; New API
@@ -229,7 +229,7 @@
 
 (def ^{:private true} spec-keys
   [:id :short-opt :long-opt :required :desc :default :default-desc :default-fn
-   :parse-fn :assoc-fn :update-fn :validate-fn :validate-msg :missing])
+   :parse-fn :assoc-fn :update-fn :multi :validate-fn :validate-msg :missing])
 
 (defn- select-spec-keys
   "Select only known spec entries from map and warn the user about unknown
@@ -381,7 +381,7 @@
   (let [{:keys [validate-fn validate-msg]} spec]
     (or (loop [[vfn & vfns] validate-fn [msg & msgs] validate-msg]
           (when vfn
-            (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) e))
+            (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) _))
               (recur vfns msgs)
               [::error (validation-error opt optarg msg)])))
         [value nil])))
@@ -444,7 +444,9 @@
                                (find-spec specs :long-opt optarg)))
                     [m ids (conj errors (missing-required-error opt (:required spec)))]
                     [(if-let [update-fn (:update-fn spec)]
-                       (update-in m [id] update-fn)
+                       (if (:multi spec)
+                         (update m id update-fn value)
+                         (update m id update-fn))
                        ((:assoc-fn spec assoc) m id value))
                      (conj ids id)
                      errors])
@@ -641,7 +643,9 @@
                   You cannot specify both :assoc-fn and :update-fn for an
                   option.
 
-    :update-fn    A function that receives the the current parsed option value,
+    :update-fn    Without :multi true:
+
+                  A function that receives just the existing parsed option value,
                   and returns a new option value, for each option :id present.
                   The default is 'identity'.
 
@@ -659,8 +663,31 @@
                   [\"-v\" \"--verbose\"
                    :update-fn (fnil inc 0)]
 
-                  You cannot specify both :assoc-fn and :update-fn for an
-                  option.
+                  With :multi true:
+
+                  A function that receives both the existing parsed option value,
+                  and the parsed option value from each instance of the option,
+                  and returns a new option value, for each option :id present.
+                  The :multi option is ignored if you do not specify :update-fn.
+
+                  For non-idempotent options, where you need to compute a option
+                  value based on the current value and a new value from the
+                  command line. This can sometimes be easier than use :assoc-fn.
+
+                  [\"-f\" \"--file NAME\"
+                   :default []
+                   :update-fn conj
+                   :multi true]
+
+                  :default is applied first. If you wish to omit the :default
+                  option value, use fnil in your :update-fn as follows:
+
+                  [\"-f\" \"--file NAME\"
+                   :update-fn (fnil conj [])
+                   :multi true]
+
+                  Regardless of :multi, you cannot specify both :assoc-fn
+                  and :update-fn for an option.
 
     :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
                   of validation functions and error messages may be provided.

@@ -1,7 +1,7 @@
 # Change Log
 
-* Release 1.0.next
-  * Planning to add `:multi true` to modify behavior of `:update-fn` [TCLI-96](https://clojure.atlassian.net/browse/TCLI-96).
+* Release 1.0.next (on **master**)
+  * Add `:multi true` to modify behavior of `:update-fn` [TCLI-96](https://clojure.atlassian.net/browse/TCLI-96).
 
 * Release 1.0.194 2020-02-20
   * Switch to 1.0.x versioning.

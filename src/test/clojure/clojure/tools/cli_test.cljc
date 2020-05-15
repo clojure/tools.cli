@@ -193,15 +193,23 @@
                     :update-fn not]
                    ["-v" "--verbose"
                     :default 0
-                    :update-fn inc]])]
+                    :update-fn inc]
+                   ["-f" "--file NAME"
+                    :multi true
+                    :default []
+                    :update-fn conj]])]
       (is (= (parse-option-tokens specs [])
-             [{:alpha true :verbose 0} []]))
+             [{:alpha true :verbose 0 :file []} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-a"]])
-             [{:alpha false :verbose 0} []]))
+             [{:alpha false :verbose 0 :file []} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-f" "ONE"]
+                                         [:short-opt "-f" "TWO"]
+                                         [:long-opt "--file" "THREE"]])
+             [{:alpha true :verbose 0 :file ["ONE" "TWO" "THREE"]} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]
                                          [:short-opt "-v"]
                                          [:long-opt "--verbose"]])
-             [{:alpha true :verbose 3} []]))
+             [{:alpha true :verbose 3 :file []} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]] :no-defaults true)
              [{:verbose 1} []]))))
   (testing "associates :id and value with :assoc-fn, without :default"
@@ -209,7 +217,7 @@
                   [["-a" nil
                     :id :alpha
                     ;; use fnil to have an implied :default true
-                    :assoc-fn (fn [m k v] (update-in m [k] (fnil not true)))]
+                    :assoc-fn (fn [m k _] (update-in m [k] (fnil not true)))]
                    ["-v" "--verbose"
                     ;; use fnil to have an implied :default 0
                     :assoc-fn (fn [m k _] (update-in m [k] (fnil inc 0)))]])]
@@ -231,11 +239,19 @@
                     :update-fn (fnil not true)]
                    ["-v" "--verbose"
                     ;; use fnil to have an implied :default 0
-                    :update-fn (fnil inc 0)]])]
+                    :update-fn (fnil inc 0)]
+                   ["-f" "--file NAME"
+                    :multi true
+                    ;; use fnil to have an implied :default []
+                    :update-fn (fnil conj [])]])]
       (is (= (parse-option-tokens specs [])
              [{} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-a"]])
              [{:alpha false} []]))
+      (is (= (parse-option-tokens specs [[:short-opt "-f" "A"]
+                                         [:short-opt "-f" "B"]
+                                         [:long-opt "--file" "C"]])
+             [{:file ["A" "B" "C"]} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-v"]
                                          [:short-opt "-v"]
                                          [:long-opt "--verbose"]])

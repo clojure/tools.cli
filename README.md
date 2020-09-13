@@ -14,7 +14,7 @@ Latest stable release: 1.0.194
 
 [clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```clojure
-clj -Sdeps '{:deps {org.clojure/tools.cli {:mvn/version "1.0.194"}}}'
+org.clojure/tools.cli {:mvn/version "1.0.194"}
 ```
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:

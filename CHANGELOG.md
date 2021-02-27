@@ -1,6 +1,7 @@
 # Change Log
 
 * Release 1.0.next (on **master**)
+  * Allow validation message to be a function (of the invalid argument) in addition to being a plain string [TCLI-97](https://clojure.atlassian.net/browse/TCLI-97).
   * Add `:multi true` to modify behavior of `:update-fn` [TCLI-96](https://clojure.atlassian.net/browse/TCLI-96).
 
 * Release 1.0.194 2020-02-20

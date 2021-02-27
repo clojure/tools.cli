@@ -121,7 +121,7 @@
     (let [specs (compile-option-specs
                   [["-p" "--port NUMBER"
                     :parse-fn parse-int
-                    :validate [#(< 0 % 0x10000) "Must be between 0 and 65536"]]
+                    :validate [#(< 0 % 0x10000) #(str % " is not between 0 and 65536")]]
                    ["-f" "--file PATH"
                     :missing "--file is required"
                     :validate [#(not= \/ (first %)) "Must be a relative path"
@@ -143,7 +143,7 @@
                       (peek (parse-option-tokens specs [[:short-opt "-f" "-p"]] :strict true))))
       (is (has-error? #"--file is required"
                       (peek (parse-option-tokens specs []))))
-      (is (has-error? #"Must be between"
+      (is (has-error? #"0 is not between"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
       (is (has-error? #"Error while parsing"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))

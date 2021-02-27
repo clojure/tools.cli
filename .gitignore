@@ -1,5 +1,6 @@
 target
 /.lein-failures
+/.lsp
 /.cpcache
 /cljs-test-runner-out
 /.lein-repl-history

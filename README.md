@@ -174,11 +174,13 @@ be useful within your own `:summary-fn` for generating the default summary.
 
 There is a new option entry `:validate`, which takes a tuple of
 `[validation-fn validation-msg]`. The validation-fn receives an option's
-argument *after* being parsed by `:parse-fn` if it exists.
+argument *after* being parsed by `:parse-fn` if it exists. The validation-msg
+can either be a string or a function of one argument that can be called on
+the invalid option argument to produce a string:
 
     ["-p" "--port PORT" "A port number"
      :parse-fn #(Integer/parseInt %)
-     :validate [#(< 0 % 0x10000) "Must be a number between 0 and 65536"]]
+     :validate [#(< 0 % 0x10000) #(str % " is not a number between 0 and 65536")]]
 
 If the validation-fn returns a falsey value, the validation-msg is added to the
 errors vector.

@@ -305,6 +305,7 @@
                           ;  #(not (.isMulticastAddress %)]
    :validate-msg [String] ; [\"Must be an IPv4 host\"
                           ;  \"Must not be a multicast address\"]
+                          ; can also be a function (of the invalid argument)
    :missing      String   ; \"server must be specified\"
    }
 
@@ -383,7 +384,7 @@
 
 (defn- validation-error [opt optarg msg]
   (str "Failed to validate " (pr-join opt optarg)
-       (if msg (str ": " msg) "")))
+       (if msg (str ": " (if (string? msg) msg (msg optarg))) "")))
 
 (defn- validate [value spec opt optarg]
   (let [{:keys [validate-fn validate-msg]} spec]
@@ -707,7 +708,8 @@
 
     :validate-msg A vector of error messages corresponding to :validate-fn
                   that will be added to the :errors vector on validation
-                  failure.
+                  failure. Can be plain strings, or functions to be applied
+                  to the (invalid) option argument to produce a string.
 
   parse-opts returns a map with four entries:
 

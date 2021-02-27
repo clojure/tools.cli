@@ -172,6 +172,16 @@ be useful within your own `:summary-fn` for generating the default summary.
 
 ### Option Argument Validation
 
+By default, option validation is performed immediately after parsing, which
+means that "flag" arguments will have a Boolean value, even if a `:default`
+is specified with a different type of value.
+
+You can choose to perform validation after option processing instead, with
+the `:post-validation true` flag. During option processing, `:default` values
+are applied and `:assoc-fn` and `:update-fn` are invoked. If an option is
+specified more than once, `:post-validation true` will cause validation to
+be performed after each new option value is processed.
+
 There is a new option entry `:validate`, which takes a tuple of
 `[validation-fn validation-msg]`. The validation-fn receives an option's
 argument *after* being parsed by `:parse-fn` if it exists. The validation-msg

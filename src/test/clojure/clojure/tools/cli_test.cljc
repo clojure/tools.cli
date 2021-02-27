@@ -127,14 +127,18 @@
                     :validate [#(not= \/ (first %)) "Must be a relative path"
                                ;; N.B. This is a poor way to prevent path traversal
                                #(not (re-find #"\.\." %)) "No path traversal allowed"]]
+                   ["-l" "--level"
+                    :default 0 :update-fn inc
+                    :post-validation true
+                    :validate [#(<= % 2) #(str "Level " % " is more than 2")]]
                    ["-q" "--quiet"
                     :id :verbose
                     :default true
                     :parse-fn not]])]
       (is (= (parse-option-tokens specs [[:long-opt "--port" "80"] [:short-opt "-q"] [:short-opt "-f" "FILE"]])
-             [{:port (int 80) :verbose false :file "FILE"} []]))
+             [{:port (int 80) :verbose false :file "FILE" :level 0} []]))
       (is (= (parse-option-tokens specs [[:short-opt "-f" "-p"]])
-             [{:file "-p" :verbose true} []]))
+             [{:file "-p" :verbose true :level 0} []]))
       (is (has-error? #"Unknown option"
                       (peek (parse-option-tokens specs [[:long-opt "--unrecognized"]]))))
       (is (has-error? #"Missing required"
@@ -145,6 +149,9 @@
                       (peek (parse-option-tokens specs []))))
       (is (has-error? #"0 is not between"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "0"]]))))
+      (is (has-error? #"Level 3 is more than 2"
+                      (peek (parse-option-tokens specs [[:short-opt "-f" "FILE"]
+                                                        [:short-opt "-l"] [:short-opt "-l"] [:long-opt "--level"]]))))
       (is (has-error? #"Error while parsing"
                       (peek (parse-option-tokens specs [[:long-opt "--port" "FOO"]]))))
       (is (has-error? #"Must be a relative path"

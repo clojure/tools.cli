@@ -237,7 +237,8 @@
 
 (def ^{:private true} spec-keys
   [:id :short-opt :long-opt :required :desc :default :default-desc :default-fn
-   :parse-fn :assoc-fn :update-fn :multi :validate-fn :validate-msg :missing])
+   :parse-fn :assoc-fn :update-fn :multi :post-validation
+   :validate-fn :validate-msg :missing])
 
 (defn- select-spec-keys
   "Select only known spec entries from map and warn the user about unknown
@@ -306,6 +307,7 @@
    :validate-msg [String] ; [\"Must be an IPv4 host\"
                           ;  \"Must not be a multicast address\"]
                           ; can also be a function (of the invalid argument)
+   :post-validation Boolean ; default false
    :missing      String   ; \"server must be specified\"
    }
 
@@ -382,9 +384,9 @@
 (defn- parse-error [opt optarg msg]
   (str "Error while parsing option " (pr-join opt optarg) ": " msg))
 
-(defn- validation-error [opt optarg msg]
+(defn- validation-error [value opt optarg msg]
   (str "Failed to validate " (pr-join opt optarg)
-       (if msg (str ": " (if (string? msg) msg (msg optarg))) "")))
+       (if msg (str ": " (if (string? msg) msg (msg value))) "")))
 
 (defn- validate [value spec opt optarg]
   (let [{:keys [validate-fn validate-msg]} spec]
@@ -392,7 +394,7 @@
           (when vfn
             (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) _))
               (recur vfns msgs)
-              [::error (validation-error opt optarg msg)])))
+              [::error (validation-error value opt optarg msg)])))
         [value nil])))
 
 (defn- parse-value [value spec opt optarg]
@@ -403,9 +405,12 @@
                           (catch #?(:clj Throwable :cljs :default) e
                             [nil (parse-error opt optarg (str e))]))
                         [value nil])]
-    (if error
-      [::error error]
-      (validate value spec opt optarg))))
+    (cond error
+          [::error error]
+          (:post-validation spec)
+          [value nil]
+          :else
+          (validate value spec opt optarg))))
 
 (defn- neg-flag? [spec opt]
   (and (:long-opt spec)
@@ -452,13 +457,17 @@
                            (or (find-spec specs :short-opt optarg)
                                (find-spec specs :long-opt optarg)))
                     [m ids (conj errors (missing-required-error opt (:required spec)))]
-                    [(if-let [update-fn (:update-fn spec)]
-                       (if (:multi spec)
-                         (update m id update-fn value)
-                         (update m id update-fn))
-                       ((:assoc-fn spec assoc) m id value))
-                     (conj ids id)
-                     errors])
+                    (let [m' (if-let [update-fn (:update-fn spec)]
+                               (if (:multi spec)
+                                 (update m id update-fn value)
+                                 (update m id update-fn))
+                               ((:assoc-fn spec assoc) m id value))]
+                      (if (:post-validation spec)
+                        (let [[value error] (validate (get m' id) spec opt optarg)]
+                          (if (= value ::error)
+                            [m ids (conj errors error)]
+                            [m' (conj ids id) errors]))
+                        [m' (conj ids id) errors])))
                   [m ids (conj errors error)]))
               [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
           [defaults [] []] tokens)

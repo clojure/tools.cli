@@ -6,7 +6,7 @@ Tools for working with command line arguments.
 
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
-Latest stable release: 1.0.194
+Latest stable release: 1.0.206
 
 * [All Released Versions](http://search.maven.org/#search%7Cgav%7C1%7Cg%3A%22org.clojure%22%20AND%20a%3A%22tools.cli%22)
 
@@ -14,19 +14,19 @@ Latest stable release: 1.0.194
 
 [clj/deps.edn](https://clojure.org/guides/deps_and_cli) dependency information:
 ```clojure
-org.clojure/tools.cli {:mvn/version "1.0.194"}
+org.clojure/tools.cli {:mvn/version "1.0.206"}
 ```
 
 [Leiningen](https://github.com/technomancy/leiningen) dependency information:
 ```clojure
-[org.clojure/tools.cli "1.0.194"]
+[org.clojure/tools.cli "1.0.206"]
 ```
 [Maven](http://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>1.0.194</version>
+  <version>1.0.206</version>
  </dependency>
 ```
 The 0.4.x series of tools.cli supports use with `clj`/`deps.edn` and brings

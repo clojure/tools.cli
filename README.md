@@ -305,7 +305,7 @@ only `parse-opts` and `summarize` were available.
 
 (defn validate-args
   "Validate command line arguments. Either return a map indicating the program
-  should exit (with a error message, and optional ok status), or a map
+  should exit (with an error message, and optional ok status), or a map
   indicating the action the program should take and the options provided."
   [args]
   (let [{:keys [options arguments errors summary]} (parse-opts args cli-options)]

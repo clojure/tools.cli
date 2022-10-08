@@ -202,12 +202,14 @@ and returns them to the caller. Unknown options, missing required arguments,
 validation errors, and exceptions thrown during `:parse-fn` are all added to
 the errors vector.
 
-By default, the error message when a required argument is omitted is:
+Any option can be flagged as required by providing a `:missing` key in the
+option spec with a string that should be used for the error message if the
+option is omitted.
+
+The error message when a required argument is omitted (either a short opt with
+`:require` or a long opt describing an argument) is:
 
 `Missing required argument for ...`
-
-This can be overridden by providing a `:missing` key in the option spec with a
-string that should be used for the error message instead of the default.
 
 Correspondingly, `parse-opts` returns the following map of values:
 

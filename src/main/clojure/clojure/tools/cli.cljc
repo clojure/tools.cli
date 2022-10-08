@@ -236,7 +236,8 @@
 ;;
 
 (def ^{:private true} spec-keys
-  [:id :short-opt :long-opt :required :desc :default :default-desc :default-fn
+  [:id :short-opt :long-opt :required :desc
+   :default :default-desc :default-fn
    :parse-fn :assoc-fn :update-fn :multi :post-validation
    :validate-fn :validate-msg :missing])
 
@@ -608,6 +609,9 @@
                   boolean toggle that is set to true when specified on the
                   command line.
 
+    :missing      Indicates that this option is required (not just an argument),
+                  and provides the string to use as an error message if omitted.
+
     :desc         A optional short description of this option.
 
     :default      The default value of this option. If none is specified, the
@@ -707,6 +711,8 @@
                   Regardless of :multi, you cannot specify both :assoc-fn
                   and :update-fn for an option.
 
+    :multi        true/false, applies only to options that use :update-fn.
+
     :validate     A vector of [validate-fn validate-msg ...]. Multiple pairs
                   of validation functions and error messages may be provided.
 
@@ -719,6 +725,11 @@
                   that will be added to the :errors vector on validation
                   failure. Can be plain strings, or functions to be applied
                   to the (invalid) option argument to produce a string.
+
+    :post-validation true/false. By default, validation is performed after
+                  parsing an option, prior to assoc/default/update processing.
+                  Specifying true here will cause the validation to be
+                  performed after assoc/default/update processing, instead.
 
   parse-opts returns a map with four entries:
 

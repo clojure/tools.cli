@@ -1,7 +1,9 @@
-target
-/.lein-failures
-/.lsp
+/.clj-kondo/.cache
 /.cpcache
-/cljs-test-runner-out
+/.lein-failures
 /.lein-repl-history
+/.lsp
 /.nrepl-port
+/.portal
+/cljs-test-runner-out
+target

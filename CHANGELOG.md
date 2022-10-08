@@ -1,6 +1,6 @@
 # Change Log
 
-* Release 1.0.next in progress
+* Release 1.0.214 2022-10-08
   * Document `:missing`, `:multi`, and `:post-validation` in the docstrings and in the README.
   * In the help summary, display default values for all options that provide them [TCLI-100](https://clojure.atlassian.net/browse/TCLI-100). Previously, only options that had required arguments would have their defaults shown.
 

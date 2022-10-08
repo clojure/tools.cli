@@ -1,3 +1,4 @@
+/.calva/output-window
 /.clj-kondo/.cache
 /.cpcache
 /.lein-failures
@@ -5,5 +6,6 @@
 /.lsp
 /.nrepl-port
 /.portal
+/.socket-repl-port
 /cljs-test-runner-out
 target

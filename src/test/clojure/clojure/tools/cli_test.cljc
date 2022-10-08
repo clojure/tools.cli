@@ -374,16 +374,16 @@
                  ["  -s, --server HOST    example.com  Upstream server"
                   "  -p, --port PORT      80           Upstream port number"
                   "  -o PATH                           Output file"
-                  "  -v                                Verbosity level; may be specified more than once"
+                  "  -v                   0            Verbosity level; may be specified more than once"
                   "      --ternary t|f|?  false        A ternary option defaulting to false"
                   "  -d, --[no-]daemon                 Daemonize the process"
                   "      --help"]))))
-  (testing "does not print :default column when no defaults will be shown"
+  (testing "prints :default column even when no default for required flag"
     (is (= (summarize (compile-option-specs [["-b" "--boolean" "A boolean option with a hidden default"
                                               :default true]
                                              ["-o" "--option ARG" "An option without a default"]]))
-           (join \newline ["  -b, --boolean     A boolean option with a hidden default"
-                           "  -o, --option ARG  An option without a default"]))))
+           (join \newline ["  -b, --boolean     true  A boolean option with a hidden default"
+                           "  -o, --option ARG        An option without a default"]))))
   (testing "works with no options"
     (is (= (summarize (compile-option-specs []))
            ""))))

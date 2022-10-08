@@ -1,5 +1,9 @@
 # Change Log
 
+* Release 1.0.next in progress
+  * Document `:missing`, `:multi`, and `:post-validation` in the docstrings and in the README.
+  * In the help summary, display default values for all options that provide them [TCLI-100](https://clojure.atlassian.net/browse/TCLI-100). Previously, only options that had required arguments would have their defaults shown.
+
 * Release 1.0.206 2021-02-27
   * Allow validation to be performed either after parsing (before option processing) -- current default -- or after option processing, via the `:post-validation true` flag [TCLI-98](https://clojure.atlassian.net/browse/TCLI-98).
   * Allow validation message to be a function (of the invalid argument) in addition to being a plain string [TCLI-97](https://clojure.atlassian.net/browse/TCLI-97).

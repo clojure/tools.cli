@@ -501,17 +501,17 @@
         opt (cond (and short-opt long-opt) (str short-opt ", " long-opt)
                   long-opt (str "    " long-opt)
                   short-opt short-opt)
-        [opt dd] (if required
-                   [(str opt \space required)
-                    (or default-desc
-                        (when (contains? spec :default)
-                          (if (some? default)
-                            (str default)
-                            "nil"))
-                        (when default-fn
-                          "<computed>")
-                        "")]
-                   [opt ""])]
+        [opt dd] [(if required
+                    (str opt \space required)
+                    opt)
+                  (or default-desc
+                      (when (contains? spec :default)
+                        (if (some? default)
+                          (str default)
+                          "nil"))
+                      (when default-fn
+                        "<computed>")
+                      "")]]
     (if show-defaults?
       [opt dd (or desc "")]
       [opt (or desc "")])))
@@ -541,9 +541,8 @@
   your user-supplied :summary-fn option) on the compiled option specs."
   [specs]
   (if (seq specs)
-    (let [show-defaults? (some #(and (:required %)
-                                     (or (contains? % :default)
-                                         (contains? % :default-fn))) specs)
+    (let [show-defaults? (some #(or (contains? % :default)
+                                    (contains? % :default-fn)) specs)
           parts (map (partial make-summary-part show-defaults?) specs)
           lens (apply map (fn [& cols] (apply max (map count cols))) parts)
           lines (format-lines lens parts)]

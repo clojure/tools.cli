@@ -71,7 +71,9 @@ are not ready to migrate to `parse-opts`.
 
 Execute the command line:
 
-    my-program -vvvp8080 foo --help --invalid-opt
+    clojure -M -m my.program -vvvp8080 foo --help --invalid-opt
+
+(or use `lein run` or however you run your program instead of `clojure -M -m my.program`)
 
 to produce the map:
 

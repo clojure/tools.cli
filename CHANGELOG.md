@@ -1,7 +1,7 @@
 # Change Log
 
 * Release 1.0.219 2023-05-08
-  * Add ClojureCLR support [TCLI-102](https://clojure.atlassian.net/browse/TCLI-102) [@dmiller](https://github.com/dmiller)/
+  * Add ClojureCLR support [TCLI-102](https://clojure.atlassian.net/browse/TCLI-102) [@dmiller](https://github.com/dmiller).
 
 * Release 1.0.214 2022-10-08
   * Document `:missing`, `:multi`, and `:post-validation` in the docstrings and in the README.

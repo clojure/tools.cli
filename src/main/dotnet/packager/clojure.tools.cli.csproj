@@ -18,11 +18,11 @@
 		<RepositoryUrl>https://github.com/clojure/tools.cku</RepositoryUrl>
 		<Company>Clojure contributors</Company>
 		<PackageTags>Clojure;ClojureCLR</PackageTags>
-		<Version>1.0.214</Version>
+		<Version>1.0.219</Version>
 	</PropertyGroup>
 
 	<ItemGroup>
 		<EmbeddedResource CopyToOutputDirectory="Never" Include="..\..\clojure\clojure\tools\**\*" />
 	</ItemGroup>
-	
+
 </Project>

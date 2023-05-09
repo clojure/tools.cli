@@ -143,7 +143,8 @@
          (recur options (into extra-args (vec (rest args))) nil)
 
          (and (opt? opt) (nil? spec))
-         (throw #?(:clj (Exception. (str "'" opt "' is not a valid argument"))
+         (throw #?(:clj  (Exception. (str "'" opt "' is not a valid argument"))
+                   :cljr (Exception. (str "'" opt "' is not a valid argument"))	
                    :cljs (js/Error. (str "'" opt "' is not a valid argument"))))
 
          (and (opt? opt) (spec :flag))
@@ -251,6 +252,7 @@
         (let [msg (str "Warning: The following options to parse-opts are unrecognized: "
                        (s/join ", " unknown-keys))]
           #?(:clj  (binding [*out* *err*] (println msg))
+             :cljr (binding [*out* *err*] (println msg))
              :cljs (binding [*print-fn* *print-err-fn*] (println msg)))))))
 
   (select-keys map spec-keys))
@@ -262,6 +264,7 @@
         long-opt (or long-opt (:long-opt spec-map))
         [long-opt req] (when long-opt
                          (rest (re-find #"^(--[^ =]+)(?:[ =](.*))?" long-opt)))
+	    #?@(:cljr (req (if (= req "") nil req)))                                   ;;; Regular expression variation
         id (when long-opt
              (keyword (nth (re-find #"^--(\[no-\])?(.*)" long-opt) 2)))
         validate (:validate spec-map)
@@ -393,7 +396,7 @@
   (let [{:keys [validate-fn validate-msg]} spec]
     (or (loop [[vfn & vfns] validate-fn [msg & msgs] validate-msg]
           (when vfn
-            (if (try (vfn value) (catch #?(:clj Throwable :cljs :default) _))
+            (if (try (vfn value) (catch #?(:clj Throwable :cljr Exception :cljs :default) _))
               (recur vfns msgs)
               [::error (validation-error value opt optarg msg)])))
         [value nil])))
@@ -403,7 +406,7 @@
         [value error] (if parse-fn
                         (try
                           [(parse-fn value) nil]
-                          (catch #?(:clj Throwable :cljs :default) e
+                          (catch #?(:clj Throwable :cljr Exception :cljs :default) e
                             [nil (parse-error opt optarg (str e))]))
                         [value nil])]
     (cond error
@@ -507,7 +510,7 @@
                   (or default-desc
                       (when (contains? spec :default)
                         (if (some? default)
-                          (str default)
+                          #?(:cljr (pr-str default) :default (str default)) ;; in order to get the proper case for booleans
                           "nil"))
                       (when default-fn
                         "<computed>")

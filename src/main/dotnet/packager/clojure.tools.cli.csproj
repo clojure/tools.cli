@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+  </PropertyGroup>
+
+
+	<PropertyGroup>
+		<PackageId>clojure.tools.cli</PackageId>
+		<RootNamespace>clojure.tools</RootNamespace>
+		<Title>clojure.tools.cli</Title>
+		<Product>clojure.tools.cli</Product>
+		<AssemblyTitle>clojure.tools.cli</AssemblyTitle>
+		<Authors>Gareth Jones, Sung Pae, Sean Corfield</Authors>
+		<Description>Something appropriate.</Description>
+		<Copyright>Copyright © Rich Hickey and contributors 2023</Copyright>
+		<PackageLicenseExpression>EPL-1.0</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/clojure/tools.cku</RepositoryUrl>
+		<Company>Clojure contributors</Company>
+		<PackageTags>Clojure;ClojureCLR</PackageTags>
+		<Version>1.0.214</Version>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<EmbeddedResource CopyToOutputDirectory="Never" Include="..\..\clojure\clojure\tools\**\*" />
+	</ItemGroup>
+	
+</Project>

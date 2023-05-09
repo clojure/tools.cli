@@ -59,18 +59,18 @@
             :long-opt "--[no-]foo"})))
   (testing "throws AssertionError on unset :id, duplicate :short-opt or :long-opt,
             multiple :default(-fn) entries per :id, or both :assoc-fn/:update-fn present"
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [["-a" :id nil]])))
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [{:id :a :short-opt "-a"} {:id :b :short-opt "-a"}])))
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [{:id :alpha :long-opt "--alpha"} {:id :beta :long-opt "--alpha"}])))
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [{:id :alpha :default 0} {:id :alpha :default 1}])))
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [{:id :alpha :default-fn (constantly 0)}
                                         {:id :alpha :default-fn (constantly 1)}])))
-    (is (thrown? #?(:clj AssertionError :cljs :default)
+    (is (thrown? #?(:clj AssertionError :cljr Exception :cljs :default)
                  (compile-option-specs [{:id :alpha :assoc-fn assoc :update-fn identity}]))))
   (testing "desugars `--long-opt=value`"
     (is (= (map (juxt :id :long-opt :required)
@@ -99,11 +99,15 @@
                    (with-out-str
                      #?(:clj (binding [*err* *out*]
                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))
+                        :cljr (binding [*err* *out*]
+                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))							   
                         :cljs (binding [*print-err-fn* *print-fn*]
                                 (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))))))
       (is (re-find #"Warning:.* :validate"
                    (with-out-str
                      #?(:clj (binding [*err* *out*]
+                               (compile-option-specs [{:id :alpha :validate nil}]))
+                        :cljr (binding [*err* *out*]
                                (compile-option-specs [{:id :alpha :validate nil}]))
                         :cljs (binding [*print-err-fn* *print-fn*]
                                 (compile-option-specs [{:id :alpha :validate nil}])))))))))
@@ -113,6 +117,7 @@
 
 (defn parse-int [x]
   #?(:clj  (Integer/parseInt x)
+     :cljr (Int32/Parse x)
      :cljs (do (assert (re-seq #"^\d" x))
                (js/parseInt x))))
 
@@ -440,10 +445,6 @@
            "Usage: myprog [--alpha|--beta] arg1 arg2"))))
 
 (comment
-  ;; Chas Emerick's PhantomJS test runner
-  (spit "target/runner.js"
-        (slurp (clojure.java.io/resource "cemerick/cljs/test/runner.js")))
-
   ;; CLJS test runner; same as `lein cljsbuild test`
   (defn run-cljs-tests []
     (println

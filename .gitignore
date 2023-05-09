@@ -3,9 +3,18 @@
 /.cpcache
 /.lein-failures
 /.lein-repl-history
-/.lsp
+/.lsp/.cache
 /.nrepl-port
-/.portal
+/.portal/vs-code.edn
 /.socket-repl-port
 /cljs-test-runner-out
 target
+
+
+#Visual Studio artifacts
+bin/
+obj/
+.vs/
+*.user
+*.suo
+*.nupkg

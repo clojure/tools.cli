@@ -342,12 +342,8 @@ only `parse-opts` and `summarize` were available.
 ## Developer Information
 
 * [GitHub project](https://github.com/clojure/tools.cli)
-
 * [Bug Tracker](http://clojure.atlassian.net/browse/TCLI)
-
-* [Continuous Integration](http://build.clojure.org/job/tools.cli/)
-
-* [Compatibility Test Matrix](http://build.clojure.org/job/tools.cli-test-matrix/)
+* [Continuous Integration](https://github.com/clojure/tools.cli/actions/workflows/test.yml)
 
 ## License
 

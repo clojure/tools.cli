@@ -95,7 +95,8 @@ to produce the map:
 handled explicitly after checking the `:errors` entry for a truthy value.
 
 Please see the [example program](#example-usage) for a more detailed example
-and refer to the docstring of `parse-opts` for comprehensive documentation:
+and refer to the docstring of `parse-opts` for comprehensive documentation
+(as part of the [API Documentation](http://clojure.github.io/tools.cli/)):
 
 http://clojure.github.io/tools.cli/index.html#clojure.tools.cli/parse-opts
 

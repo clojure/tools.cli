@@ -1,0 +1,4 @@
+{:cljdoc.doc/tree [["Readme" {:file "README.md"}]
+                   ["Changes" {:file "CHANGELOG.md"}]
+                   ["Command-Line Options" {:file "doc/parse-opts.md"}]
+                   ["Changes since 0.3.x" {:file "doc/new-in-0-4.md"}]]}

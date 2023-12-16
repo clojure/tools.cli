@@ -12,6 +12,16 @@
   (:require [clojure.string :as s]
             #?(:cljs goog.string.format)))
 
+;;
+;; Utility Functions:
+;;
+
+(defn- make-format
+  "Given a sequence of column widths, return a string suitable for use in
+  format to print a sequences of strings in those columns."
+  [lens]
+  (s/join (map #(str "  %" (when-not (zero? %) (str "-" %)) "s") lens)))
+
 (defn- tokenize-args
   "Reduce arguments sequence into [opt-type opt ?optarg?] vectors and a vector
   of remaining arguments. Returns as [option-tokens remaining-args].
@@ -61,180 +71,11 @@
             (recur opts (conj argv car) cdr)))
         [opts argv]))))
 
-(defn- make-format
-  "Given a sequence of column widths, return a string suitable for use in
-  format to print a sequences of strings in those columns."
-  [lens]
-  (s/join (map #(str "  %" (when-not (zero? %) (str "-" %)) "s") lens)))
-;;
-;; Legacy API
-;;
-
-(defn- build-doc [{:keys [switches docs default]}]
-  [(apply str (interpose ", " switches))
-   (or (str default) "")
-   (or docs "")])
-
 #?(:cljs
    ;; alias to Google Closure string format
-   (defn format
+   (defn- format
      [fmt & args]
      (apply goog.string.format fmt args)))
-
-(defn- banner-for [desc specs]
-  (when desc
-    (println desc)
-    (println))
-  (let [docs (into (map build-doc specs)
-                   [["--------" "-------" "----"]
-                    ["Switches" "Default" "Desc"]])
-        max-cols (->> (for [d docs] (map count d))
-                      (apply map (fn [& c] (apply vector c)))
-                      (map #(apply max %)))
-        vs (for [d docs]
-             (mapcat (fn [& x] (apply vector x)) max-cols d))]
-    (doseq [v vs]
-      (let [fmt (make-format (take-nth 2 v))]
-        (print (apply format fmt (take-nth 2 (rest v)))))
-      (prn))))
-
-(defn- name-for [k]
-  (s/replace k #"^--no-|^--\[no-\]|^--|^-" ""))
-
-(defn- flag-for [^String v]
-  (not (s/starts-with? v "--no-")))
-
-(defn- opt? [^String x]
-  (s/starts-with? x "-"))
-
-(defn- flag? [^String x]
-  (s/starts-with? x "--[no-]"))
-
-(defn- end-of-args? [x]
-  (= "--" x))
-
-(defn- spec-for
-  [arg specs]
-  (->> specs
-       (filter (fn [s]
-                   (let [switches (set (s :switches))]
-                     (contains? switches arg))))
-       first))
-
-(defn- default-values-for
-  [specs]
-  (reduce (fn [m s]
-            (if (contains? s :default)
-              ((:assoc-fn s) m (:name s) (:default s))
-              m))
-          {} specs))
-
-(defn- apply-specs
-  [specs args]
-  (loop [options    (default-values-for specs)
-         extra-args []
-         args       args]
-    (if-not (seq args)
-      [options extra-args]
-      (let [opt  (first args)
-            spec (spec-for opt specs)]
-        (cond
-         (end-of-args? opt)
-         (recur options (into extra-args (vec (rest args))) nil)
-
-         (and (opt? opt) (nil? spec))
-         (throw #?(:clj  (Exception. (str "'" opt "' is not a valid argument"))
-                   :cljr (Exception. (str "'" opt "' is not a valid argument"))	
-                   :cljs (js/Error. (str "'" opt "' is not a valid argument"))))
-
-         (and (opt? opt) (spec :flag))
-         (recur ((spec :assoc-fn) options (spec :name) (flag-for opt))
-                extra-args
-                (rest args))
-
-         (opt? opt)
-         (recur ((spec :assoc-fn) options (spec :name) ((spec :parse-fn) (second args)))
-                extra-args
-                (drop 2 args))
-
-         :else
-         (recur options (conj extra-args (first args)) (rest args)))))))
-
-(defn- switches-for
-  [switches flag]
-  (-> (for [^String s switches]
-        (cond (and flag (flag? s))
-              [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
-
-              (and flag (s/starts-with? s "--"))
-              [(s/replace s #"--" "--no-") s]
-
-              :else
-              [s]))
-      flatten))
-
-(defn- generate-spec
-  [raw-spec]
-  (let [[switches raw-spec] (split-with #(and (string? %) (opt? %)) raw-spec)
-        [docs raw-spec]     (split-with string? raw-spec)
-        options             (apply hash-map raw-spec)
-        aliases             (map name-for switches)
-        flag                (or (flag? (last switches)) (options :flag))]
-    (merge {:switches (switches-for switches flag)
-            :docs     (first docs)
-            :aliases  (set aliases)
-            :name     (keyword (last aliases))
-            :parse-fn identity
-            :assoc-fn assoc
-            :flag     flag}
-           (when flag {:default false})
-           options)))
-
-(defn- normalize-args
-  "Rewrite arguments sequence into a normalized form that is parsable by cli."
-  [specs args]
-  (let [required-opts (->> specs
-                           (filter (complement :flag))
-                           (mapcat :switches)
-                           (into #{}))
-        ;; Preserve double-dash since this is a pre-processing step
-        largs (take-while (partial not= "--") args)
-        rargs (drop (count largs) args)
-        [opts largs] (tokenize-args required-opts largs)]
-    (concat (mapcat rest opts) largs rargs)))
-
-(defn cli
-  "THIS IS A LEGACY FUNCTION and may be deprecated in the future. Please use
-  clojure.tools.cli/parse-opts in new applications.
-
-  Parse the provided args using the given specs. Specs are vectors
-  describing a command line argument. For example:
-
-  [\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]
-
-  First provide the switches (from least to most specific), then a doc
-  string, and pairs of options.
-
-  Valid options are :default, :parse-fn, and :flag. See
-  https://github.com/clojure/tools.cli/wiki/Documentation-for-0.2.4 for more
-  detailed examples.
-
-  Returns a vector containing a map of the parsed arguments, a vector
-  of extra arguments that did not match known switches, and a
-  documentation banner to provide usage instructions."
-  [args & specs]
-  (let [[desc specs] (if (string? (first specs))
-                       [(first specs) (rest specs)]
-                       [nil specs])
-        specs (map generate-spec specs)
-        args (normalize-args specs args)
-        [options extra-args] (apply-specs specs args)
-        banner (with-out-str (banner-for desc specs))]
-    [options extra-args banner]))
-
-;;
-;; New API
-;;
 
 (def ^{:private true} spec-keys
   [:id :short-opt :long-opt :required :desc
@@ -495,7 +336,7 @@
               [(select-keys m ids) errors]
               [m errors]))))))
 
-(defn ^{:added "0.3.0"} make-summary-part
+(defn make-summary-part
   "Given a single compiled option spec, turn it into a formatted string,
   optionally with its default values if requested."
   [show-defaults? spec]
@@ -519,7 +360,7 @@
       [opt dd (or desc "")]
       [opt (or desc "")])))
 
-(defn ^{:added "0.3.0"} format-lines
+(defn format-lines
   "Format a sequence of summary parts into columns. lens is a sequence of
   lengths to use for parts. There are two sequences of lengths if we are
   not displaying defaults. There are three sequences of lengths if we
@@ -536,7 +377,7 @@
         s))
     #{} specs))
 
-(defn ^{:added "0.3.0"} summarize
+(defn summarize
   "Reduce options specs into a options summary for printing at a terminal.
   Note that the specs argument should be the compiled version. That effectively
   means that you shouldn't call summarize directly. When you call parse-opts
@@ -552,7 +393,7 @@
       (s/join \newline lines))
     ""))
 
-(defn ^{:added "0.3.2"} get-default-options
+(defn get-default-options
   "Extract the map of default options from a sequence of option vectors.
 
   As of 0.4.1, this also applies any :default-fn present."
@@ -566,8 +407,7 @@
             vals
             (default-option-map specs :default-fn))))
 
-
-(defn ^{:added "0.3.0"} parse-opts
+(defn parse-opts
   "Parse arguments sequence according to given option specifications and the
   GNU Program Argument Syntax Conventions:
 
@@ -775,3 +615,163 @@
      :arguments rest-args
      :summary ((or summary-fn summarize) specs)
      :errors (when (seq errors) errors)}))
+
+;;
+;; Legacy API
+;;
+
+(defn- build-doc [{:keys [switches docs default]}]
+  [(apply str (interpose ", " switches))
+   (or (str default) "")
+   (or docs "")])
+
+(defn- banner-for [desc specs]
+  (when desc
+    (println desc)
+    (println))
+  (let [docs (into (map build-doc specs)
+                   [["--------" "-------" "----"]
+                    ["Switches" "Default" "Desc"]])
+        max-cols (->> (for [d docs] (map count d))
+                      (apply map (fn [& c] (apply vector c)))
+                      (map #(apply max %)))
+        vs (for [d docs]
+             (mapcat (fn [& x] (apply vector x)) max-cols d))]
+    (doseq [v vs]
+      (let [fmt (make-format (take-nth 2 v))]
+        (print (apply format fmt (take-nth 2 (rest v)))))
+      (prn))))
+
+(defn- name-for [k]
+  (s/replace k #"^--no-|^--\[no-\]|^--|^-" ""))
+
+(defn- flag-for [^String v]
+  (not (s/starts-with? v "--no-")))
+
+(defn- opt? [^String x]
+  (s/starts-with? x "-"))
+
+(defn- flag? [^String x]
+  (s/starts-with? x "--[no-]"))
+
+(defn- end-of-args? [x]
+  (= "--" x))
+
+(defn- spec-for
+  [arg specs]
+  (->> specs
+       (filter (fn [s]
+                 (let [switches (set (s :switches))]
+                   (contains? switches arg))))
+       first))
+
+(defn- default-values-for
+  [specs]
+  (reduce (fn [m s]
+            (if (contains? s :default)
+              ((:assoc-fn s) m (:name s) (:default s))
+              m))
+          {} specs))
+
+(defn- apply-specs
+  [specs args]
+  (loop [options    (default-values-for specs)
+         extra-args []
+         args       args]
+    (if-not (seq args)
+      [options extra-args]
+      (let [opt  (first args)
+            spec (spec-for opt specs)]
+        (cond
+          (end-of-args? opt)
+          (recur options (into extra-args (vec (rest args))) nil)
+
+          (and (opt? opt) (nil? spec))
+          (throw #?(:clj  (Exception. (str "'" opt "' is not a valid argument"))
+                    :cljr (Exception. (str "'" opt "' is not a valid argument"))
+                    :cljs (js/Error. (str "'" opt "' is not a valid argument"))))
+
+          (and (opt? opt) (spec :flag))
+          (recur ((spec :assoc-fn) options (spec :name) (flag-for opt))
+                 extra-args
+                 (rest args))
+
+          (opt? opt)
+          (recur ((spec :assoc-fn) options (spec :name) ((spec :parse-fn) (second args)))
+                 extra-args
+                 (drop 2 args))
+
+          :else
+          (recur options (conj extra-args (first args)) (rest args)))))))
+
+(defn- switches-for
+  [switches flag]
+  (-> (for [^String s switches]
+        (cond (and flag (flag? s))
+              [(s/replace s #"\[no-\]" "no-") (s/replace s #"\[no-\]" "")]
+
+              (and flag (s/starts-with? s "--"))
+              [(s/replace s #"--" "--no-") s]
+
+              :else
+              [s]))
+      flatten))
+
+(defn- generate-spec
+  [raw-spec]
+  (let [[switches raw-spec] (split-with #(and (string? %) (opt? %)) raw-spec)
+        [docs raw-spec]     (split-with string? raw-spec)
+        options             (apply hash-map raw-spec)
+        aliases             (map name-for switches)
+        flag                (or (flag? (last switches)) (options :flag))]
+    (merge {:switches (switches-for switches flag)
+            :docs     (first docs)
+            :aliases  (set aliases)
+            :name     (keyword (last aliases))
+            :parse-fn identity
+            :assoc-fn assoc
+            :flag     flag}
+           (when flag {:default false})
+           options)))
+
+(defn- normalize-args
+  "Rewrite arguments sequence into a normalized form that is parsable by cli."
+  [specs args]
+  (let [required-opts (->> specs
+                           (filter (complement :flag))
+                           (mapcat :switches)
+                           (into #{}))
+        ;; Preserve double-dash since this is a pre-processing step
+        largs (take-while (partial not= "--") args)
+        rargs (drop (count largs) args)
+        [opts largs] (tokenize-args required-opts largs)]
+    (concat (mapcat rest opts) largs rargs)))
+
+(defn ^{:deprecated "since 0.4.x"} cli
+  "THIS IS A LEGACY FUNCTION and is deprecated. Please use
+  clojure.tools.cli/parse-opts in new applications.
+
+  Parse the provided args using the given specs. Specs are vectors
+  describing a command line argument. For example:
+
+  [\"-p\" \"--port\" \"Port to listen on\" :default 3000 :parse-fn #(Integer/parseInt %)]
+
+  First provide the switches (from least to most specific), then a doc
+  string, and pairs of options.
+
+  Valid options are :default, :parse-fn, and :flag. See
+  https://github.com/clojure/tools.cli/wiki/Documentation-for-0.2.4 for more
+  detailed examples.
+
+  Returns a vector containing a map of the parsed arguments, a vector
+  of extra arguments that did not match known switches, and a
+  documentation banner to provide usage instructions."
+  [args & specs]
+  (let [[desc specs] (if (string? (first specs))
+                       [(first specs) (rest specs)]
+                       [nil specs])
+        specs (map generate-spec specs)
+        args (normalize-args specs args)
+        [options extra-args] (apply-specs specs args)
+        banner (with-out-str (banner-for desc specs))]
+    [options extra-args banner]))

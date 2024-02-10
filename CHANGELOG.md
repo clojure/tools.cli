@@ -1,5 +1,8 @@
 # Change Log
 
+* Release 1.0.next in progress
+  * Update dependencies to latest versions for testing.
+
 * Release 1.0.219 2023-05-08
   * Add ClojureCLR support [TCLI-102](https://clojure.atlassian.net/browse/TCLI-102) [@dmiller](https://github.com/dmiller).
 

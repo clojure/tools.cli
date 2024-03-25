@@ -1,3 +1,11 @@
+
+
+#Visual Studio artifacts
+*.nupkg
+*.suo
+*.user
+.calva/repl.calva-repl
+.vs/
 /.calva/output-window
 /.clj-kondo/.cache
 /.cpcache
@@ -8,13 +16,6 @@
 /.portal/vs-code.edn
 /.socket-repl-port
 /cljs-test-runner-out
-target
-
-
-#Visual Studio artifacts
 bin/
 obj/
-.vs/
-*.user
-*.suo
-*.nupkg
+target

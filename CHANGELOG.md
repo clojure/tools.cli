@@ -1,7 +1,10 @@
 # Change Log
 
-* Release 1.0.next in progress
-  * Update dependencies to latest versions for testing.
+* Release 1.1.next in progress (maybe 1.2.next)
+  * Update dependencies to latest versions for testing; add multi-version testing script; drop Clojure 1.8 support.
+
+* Release 1.1.230 2024-02-19
+  * Documentation and dev/test/CI infrastructure updates.
 
 * Release 1.0.219 2023-05-08
   * Add ClojureCLR support [TCLI-102](https://clojure.atlassian.net/browse/TCLI-102) [@dmiller](https://github.com/dmiller).

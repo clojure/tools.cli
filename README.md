@@ -30,7 +30,7 @@ org.clojure/tools.cli {:mvn/version "1.1.230"}
 ```
 The 0.4.x series of tools.cli supports use with `clj`/`deps.edn` and brings
 the legacy API to ClojureScript by switching to `.cljc` files. This means it
-requires Clojure(Script) 1.8 or later.
+requires Clojure(Script) 1.9 or later.
 
 The 0.3.x series of tools.cli features a new flexible API, better adherence
 to GNU option parsing conventions, and ClojureScript support.

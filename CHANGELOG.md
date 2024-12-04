@@ -1,6 +1,7 @@
 # Change Log
 
 * Release 1.1.next in progress (maybe 1.2.next)
+  * Clarify `:id` and `:required` properties for when long option is omitted.
   * Update dependencies to latest versions for testing; add multi-version testing script; drop Clojure 1.8 support.
 
 * Release 1.1.230 2024-02-19

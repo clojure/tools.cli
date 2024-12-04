@@ -28,17 +28,20 @@ org.clojure/tools.cli {:mvn/version "1.1.230"}
   <version>1.1.230</version>
  </dependency>
 ```
-The 0.4.x series of tools.cli supports use with `clj`/`deps.edn` and brings
+
+### Historical Release Notes
+
+Starting with 0.4.x, `tools.cli` supports use with `clj`/`deps.edn` and brings
 the legacy API to ClojureScript by switching to `.cljc` files. This means it
 requires Clojure(Script) 1.9 or later.
 
-The 0.3.x series of tools.cli features a new flexible API, better adherence
+The 0.3.x series of tools.cli introduced a new flexible API, better adherence
 to GNU option parsing conventions, and ClojureScript support.
 
-The function `clojure.tools.cli/cli` has been superseded by
+The old function `clojure.tools.cli/cli` was superseded by
 `clojure.tools.cli/parse-opts`, and should not be used in new programs.
 
-The previous function will remain for the foreseeable future. It has also been
+The older function will remain for the foreseeable future. It has also been
 adapted to use the new tokenizer, so upgrading is still worthwhile even if you
 are not ready to migrate to `parse-opts`.
 
@@ -146,6 +149,13 @@ For detailed documentation, please see the docstring of `parse-opts`.
     ;; with :multi true, the :update-fn is passed both the existing parsed
     ;; value(s) and the new parsed value from each option
     :update-fn conj]
+   ["-t" nil "Timeout in seconds"
+    ;; Since there is no long option, :id is required...
+    :id :timeout
+    ;; ...and we require an argument to be provided:
+    :required "TIMEOUT"
+    ;; parse-long was added in Clojure 1.11:
+    :parse-fn parse-long]
    ;; A boolean option that can explicitly be set to false
    ["-d" "--[no-]daemon" "Daemonize the process" :default true]
    ["-h" "--help"]])

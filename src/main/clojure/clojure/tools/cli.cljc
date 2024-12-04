@@ -438,7 +438,7 @@
                   transform a value in different ways, but only one of these
                   option entries may contain a :default(-fn) entry.
 
-                  This option is mandatory.
+                  This option is mandatory if no long option is provided.
 
     :short-opt    The short format for this option, normally set by the first
                   positional string parameter: e.g. \"-p\". Must be unique.
@@ -448,7 +448,8 @@
 
     :required     A description of the required argument for this option if
                   one is required; normally set in the second positional
-                  string parameter after the long option: \"--port PORT\".
+                  string parameter after the long option: \"--port PORT\",
+                  which would be equivalent to :required \"PORT\".
 
                   The absence of this entry indicates that the option is a
                   boolean toggle that is set to true when specified on the

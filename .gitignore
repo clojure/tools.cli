@@ -19,3 +19,4 @@
 bin/
 obj/
 target
+.rebel_readline_history

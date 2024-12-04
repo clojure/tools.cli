@@ -24,7 +24,7 @@ this into complete documentation for the library, with examples, over time):
   By default, options are toggles that default to nil, but the second string
   parameter may be used to specify that an option requires an argument.
 
-    e.g. [\"-p\" \"--port PORT\"] specifies that --port requires an argument,
+    e.g. ["-p" "--port PORT"] specifies that --port requires an argument,
          of which PORT is a short description.
 
   The :property value pairs are optional and take precedence over the
@@ -38,17 +38,18 @@ this into complete documentation for the library, with examples, over time):
                   transform a value in different ways, but only one of these
                   option entries may contain a :default(-fn) entry.
 
-                  This option is mandatory.
+                  This option is mandatory if no long option is provided.
 
     :short-opt    The short format for this option, normally set by the first
-                  positional string parameter: e.g. \"-p\". Must be unique.
+                  positional string parameter: e.g. "-p". Must be unique.
 
     :long-opt     The long format for this option, normally set by the second
-                  positional string parameter; e.g. \"--port\". Must be unique.
+                  positional string parameter; e.g. "--port". Must be unique.
 
     :required     A description of the required argument for this option if
                   one is required; normally set in the second positional
-                  string parameter after the long option: \"--port PORT\".
+                  string parameter after the long option: "--port PORT",
+                  which would be equivalent to :required "PORT".
 
                   The absence of this entry indicates that the option is a
                   boolean toggle that is set to true when specified on the
@@ -93,7 +94,7 @@ this into complete documentation for the library, with examples, over time):
                   If this is a boolean option, parse-fn will receive the value
                   true. This may be used to invert the logic of this option:
 
-                  [\"-q\" \"--quiet\"
+                  ["-q" "--quiet"
                    :id :verbose
                    :default true
                    :parse-fn not]
@@ -118,16 +119,16 @@ this into complete documentation for the library, with examples, over time):
 
                   This may be used to create non-idempotent options where you
                   only need the current value, like setting a verbosity level by
-                  specifying an option multiple times. (\"-vvv\" -> 3)
+                  specifying an option multiple times. ("-vvv" -> 3)
 
-                  [\"-v\" \"--verbose\"
+                  ["-v" "--verbose"
                    :default 0
                    :update-fn inc]
 
                   :default is applied first. If you wish to omit the :default
                   option value, use fnil in your :update-fn as follows:
 
-                  [\"-v\" \"--verbose\"
+                  ["-v" "--verbose"
                    :update-fn (fnil inc 0)]
 
                   With :multi true:
@@ -141,7 +142,7 @@ this into complete documentation for the library, with examples, over time):
                   value based on the current value and a new value from the
                   command line. This can sometimes be easier than use :assoc-fn.
 
-                  [\"-f\" \"--file NAME\"
+                  ["-f" "--file NAME"
                    :default []
                    :update-fn conj
                    :multi true]
@@ -149,7 +150,7 @@ this into complete documentation for the library, with examples, over time):
                   :default is applied first. If you wish to omit the :default
                   option value, use fnil in your :update-fn as follows:
 
-                  [\"-f\" \"--file NAME\"
+                  ["-f" "--file NAME"
                    :update-fn (fnil conj [])
                    :multi true]
 

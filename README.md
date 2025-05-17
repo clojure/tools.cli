@@ -53,7 +53,7 @@ are not ready to migrate to `parse-opts`.
   (:gen-class))
 
 (def cli-options
-  ;; An option with a required argument
+  ;; An option with an argument
   [["-p" "--port PORT" "Port number"
     :default 80
     :parse-fn #(Integer/parseInt %)
@@ -134,7 +134,7 @@ For detailed documentation, please see the docstring of `parse-opts`.
     ;; if the default value's string representation is very ugly
     :default-desc "localhost"
     :parse-fn #(InetAddress/getByName %)]
-   ;; If no required argument description is given, the option is assumed to
+   ;; If no argument description is given, the option is assumed to
    ;; be a boolean option defaulting to nil
    [nil "--detach" "Detach from controlling process"]
    ["-v" nil "Verbosity level; may be specified multiple times to increase value"
@@ -150,15 +150,23 @@ For detailed documentation, please see the docstring of `parse-opts`.
     ;; value(s) and the new parsed value from each option
     :update-fn conj]
    ["-t" nil "Timeout in seconds"
-    ;; Since there is no long option, :id is required...
+    ;; Since there is no long option, we need to specify the name used for
+    ;; the argument to the option...
     :id :timeout
-    ;; ...and we require an argument to be provided:
+    ;; ...and we need to specify the description of argument that is required
+    ;; for the option:
     :required "TIMEOUT"
     ;; parse-long was added in Clojure 1.11:
     :parse-fn parse-long]
    ;; A boolean option that can explicitly be set to false
    ["-d" "--[no-]daemon" "Daemonize the process" :default true]
    ["-h" "--help"]])
+
+;; The :required specification provides the name shown in the usage summary
+;; for the argument that an option expects. It is only needed when the long
+;; form specification of the option is not given, only the short form. In
+;; addition, :id must be specified to provide the internal keyword name for
+;; the option. There is no way to specify that an option itself is mandatory.
 
 ;; The :default values are applied first to options. Sometimes you might want
 ;; to apply default values after parsing is complete, or specifically to

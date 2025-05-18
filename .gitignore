@@ -1,11 +1,10 @@
-
-
-#Visual Studio artifacts
+.calva/mcp-server/port
+.calva/repl.calva-repl
+.rebel_readline_history
+.vs/
 *.nupkg
 *.suo
 *.user
-.calva/repl.calva-repl
-.vs/
 /.calva/output-window
 /.clj-kondo/.cache
 /.cpcache
@@ -19,4 +18,3 @@
 bin/
 obj/
 target
-.rebel_readline_history

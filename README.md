@@ -145,10 +145,12 @@ For detailed documentation, please see the docstring of `parse-opts`.
     :update-fn inc]
    ["-f" "--file NAME" "File names to read"
     :multi true ; use :update-fn to combine multiple instance of -f/--file
-    :default []
+    ;; if no -f/--file options are given, return this error:
+    :missing "At least one file name is required"
     ;; with :multi true, the :update-fn is passed both the existing parsed
-    ;; value(s) and the new parsed value from each option
-    :update-fn conj]
+    ;; value(s) and the new parsed value from each option; using fnil lets
+    ;; us avoid specifying a :default value
+    :update-fn (fnil conj [])]
    ["-t" nil "Timeout in seconds"
     ;; Since there is no long option, we need to specify the name used for
     ;; the argument to the option...
@@ -166,7 +168,9 @@ For detailed documentation, please see the docstring of `parse-opts`.
 ;; for the argument that an option expects. It is only needed when the long
 ;; form specification of the option is not given, only the short form. In
 ;; addition, :id must be specified to provide the internal keyword name for
-;; the option. There is no way to specify that an option itself is mandatory.
+;; the option. If you want to indicate that an option itself is required,
+;; you can use the :missing key to provide a message that will be shown
+;; if the option is not present.
 
 ;; The :default values are applied first to options. Sometimes you might want
 ;; to apply default values after parsing is complete, or specifically to

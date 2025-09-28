@@ -6,26 +6,26 @@ Tools for working with command line arguments.
 
 This project follows the version scheme MAJOR.MINOR.COMMITS where MAJOR and MINOR provide some relative indication of the size of the change, but do not follow semantic versioning. In general, all changes endeavor to be non-breaking (by moving to new names rather than by breaking existing names). COMMITS is an ever-increasing counter of commits since the beginning of this repository.
 
-Latest stable release: 1.1.230
+Latest stable release: 1.2.245
 
 * [All Released Versions](https://central.sonatype.com/artifact/org.clojure/tools.cli/versions)
 * [Development Snapshot Versions](https://oss.sonatype.org/index.html#nexus-search;gav~org.clojure~tools.cli~~~)
 
 [clj/deps.edn](https://clojure.org/guides/deps_edn) dependency information:
 ```clojure
-org.clojure/tools.cli {:mvn/version "1.1.230"}
+org.clojure/tools.cli {:mvn/version "1.2.245"}
 ```
 
 [Leiningen](https://leiningen.org/) dependency information:
 ```clojure
-[org.clojure/tools.cli "1.1.230"]
+[org.clojure/tools.cli "1.2.245"]
 ```
 [Maven](https://maven.apache.org/) dependency information:
 ```xml
 <dependency>
   <groupId>org.clojure</groupId>
   <artifactId>tools.cli</artifactId>
-  <version>1.1.230</version>
+  <version>1.2.245</version>
  </dependency>
 ```
 

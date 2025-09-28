@@ -1,7 +1,8 @@
 # Change Log
 
-* Release 1.1.next in progress (maybe 1.2.next)
-  * Clarify `:id` and `:required` properties for when long option is omitted. Part of this addresses [TCLI-106](https://clojure.atlassian.net/browse/TCLI-106).
+* Release 1.2.245 2025-09-28
+  * Clarify `:id` and `:required` properties for when long option is omitted. Document `:missing` option. This addresses [TCLI-106](https://clojure.atlassian.net/browse/TCLI-106).
+  * Add `deps-clr.edn` to be compatible with `cljr` (ClojureCLR's `deps` tool).
   * Update dependencies to latest versions for testing; add multi-version testing script; drop Clojure 1.8 support.
 
 * Release 1.1.230 2024-02-19

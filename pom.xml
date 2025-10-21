@@ -3,6 +3,7 @@
   <artifactId>tools.cli</artifactId>
   <version>1.2.999-SNAPSHOT</version>
   <name>tools.cli</name>
+  <description>Command-line processing tools for Clojure.</description>
 
   <parent>
     <groupId>org.clojure</groupId>

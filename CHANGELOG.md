@@ -1,5 +1,8 @@
 # Change Log
 
+* next
+  * Update parent pom and Clojure dependency version
+
 * Release 1.2.245 2025-09-28
   * Clarify `:id` and `:required` properties for when long option is omitted. Document `:missing` option. This addresses [TCLI-106](https://clojure.atlassian.net/browse/TCLI-106).
   * Add `deps-clr.edn` to be compatible with `cljr` (ClojureCLR's `deps` tool).

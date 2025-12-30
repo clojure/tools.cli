@@ -1,6 +1,6 @@
 # Change Log
 
-* next
+* Release 1.3.250 2025-12-30
   * Update parent pom and Clojure dependency version
 
 * Release 1.2.245 2025-09-28

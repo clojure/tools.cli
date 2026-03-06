@@ -637,7 +637,7 @@
                              :strict      strict
                              :subcommand  subcommand)]
     {:options opts
-     :arguments (into rest-args implicit-args)
+     :arguments (into implicit-args rest-args)
      :summary ((or summary-fn summarize) specs)
      :errors (when (seq errors) errors)}))
 

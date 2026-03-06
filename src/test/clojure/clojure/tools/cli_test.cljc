@@ -470,6 +470,22 @@
     (is (= (:errors (parse-opts ["-a" "-b"]
                                 [["-b" "--beta"]]
                                 :subcommand :implicit))
+           nil))
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-b" "--beta"]]
+                                   :subcommand :explicit))
+           ["foo" "-b"]))
+    (is (= (:errors (parse-opts ["-a" "foo" "-b"]
+                                [["-b" "--beta"]]
+                                :subcommand :explicit))
+           ["Unknown option: \"-a\""]))
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-b" "--beta"]]
+                                   :subcommand :implicit))
+           ["-a" "foo" "-b"]))
+    (is (= (:errors (parse-opts ["-a" "foo" "-b"]
+                                [["-b" "--beta"]]
+                                :subcommand :implicit))
            nil)))
   (testing "does not merge over default values when :no-defaults is true"
     (let [option-specs [["-p" "--port PORT" :default 80]

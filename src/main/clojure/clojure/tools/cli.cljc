@@ -35,10 +35,10 @@
   Long options with `=` are always parsed as option + optarg, even if nothing
   follows the `=` sign.
 
-  If the :in-order flag is true, the first non-option, non-optarg argument
+  If the :subcommand option is present, the first non-option, non-optarg argument
   stops options processing. This is useful for handling subcommand options."
   [required-set args & options]
-  (let [{:keys [in-order]} (apply hash-map options)]
+  (let [{:keys [subcommand]} (apply hash-map options)]
     (loop [opts [] argv [] [car & cdr] args]
       (if car
         (condp re-seq car
@@ -66,7 +66,7 @@
                                         (recur (conj os [:short-opt o]) cs)
                                         [(conj os [:short-opt o]) cdr]))))]
                    (recur (into opts os) argv cdr))
-          (if in-order
+          (if subcommand
             (recur opts (into argv (cons car cdr)) [])
             (recur opts (conj argv car) cdr)))
         [opts argv]))))
@@ -282,59 +282,67 @@
   If the :no-defaults flag is true, only options specified in the tokens are
   included in the option-map.
 
-  Unknown options, missing options, missing required arguments, option
-  argument parsing exceptions, and validation failures are collected into
-  a vector of error message strings.
+  By default, unknown options, missing options, missing required arguments,
+  option argument parsing exceptions, and validation failures are collected
+  into a vector of error message strings.
+
+  If :subcommand :implicit is provided, unknown options trigger in-order
+  processing, collecting the rest of the tokens as positional arguments.
 
   If the :strict flag is true, required arguments that match other options
   are treated as missing, instead of a literal value beginning with - or --.
 
   Returns [option-map error-messages-vector]."
   [specs tokens & options]
-  (let [{:keys [no-defaults strict]} (apply hash-map options)
+  (let [{:keys [no-defaults strict subcommand]} (apply hash-map options)
         defaults (default-option-map specs :default)
         default-fns (default-option-map specs :default-fn)
-        requireds (missing-errors specs)]
+        requireds (missing-errors specs)
+        collecting (atom false)]
     (-> (reduce
-          (fn [[m ids errors] [opt-type opt optarg]]
-            (if-let [spec (find-spec specs opt-type opt)]
-              (let [[value error] (parse-optarg spec opt optarg)
-                    id (:id spec)]
-                (if-not (= value ::error)
-                  (if (and strict
-                           (or (find-spec specs :short-opt optarg)
-                               (find-spec specs :long-opt optarg)))
-                    [m ids (conj errors (missing-required-error opt (:required spec)))]
-                    (let [m' (if-let [update-fn (:update-fn spec)]
-                               (if (:multi spec)
-                                 (update m id update-fn value)
-                                 (update m id update-fn))
-                               ((:assoc-fn spec assoc) m id value))]
-                      (if (:post-validation spec)
-                        (let [[value error] (validate (get m' id) spec opt optarg)]
-                          (if (= value ::error)
-                            [m ids (conj errors error)]
-                            [m' (conj ids id) errors]))
-                        [m' (conj ids id) errors])))
-                  [m ids (conj errors error)]))
-              [m ids (conj errors (str "Unknown option: " (pr-str opt)))]))
-          [defaults [] []] tokens)
+         (fn [[m ids errors args] [opt-type opt optarg]]
+           (if-let [spec (when-not @collecting (find-spec specs opt-type opt))]
+             (let [[value error] (parse-optarg spec opt optarg)
+                   id (:id spec)]
+               (if-not (= value ::error)
+                 (if (and strict
+                          (or (find-spec specs :short-opt optarg)
+                              (find-spec specs :long-opt optarg)))
+                   [m ids (conj errors (missing-required-error opt (:required spec))) args]
+                   (let [m' (if-let [update-fn (:update-fn spec)]
+                              (if (:multi spec)
+                                (update m id update-fn value)
+                                (update m id update-fn))
+                              ((:assoc-fn spec assoc) m id value))]
+                     (if (:post-validation spec)
+                       (let [[value error] (validate (get m' id) spec opt optarg)]
+                         (if (= value ::error)
+                           [m ids (conj errors error)]
+                           [m' (conj ids id) errors]))
+                       [m' (conj ids id) errors args])))
+                 [m ids (conj errors error) args]))
+             (if (or @collecting (= :implicit subcommand))
+               (do
+                 (reset! collecting true)
+                 [m ids errors (conj args opt)])
+               [m ids (conj errors (str "Unknown option: " (pr-str opt))) args])))
+         [defaults [] [] []] tokens)
         (#(reduce
-           (fn [[m ids errors] [id error]]
+           (fn [[m ids errors args] [id error]]
              (if (contains? m id)
-               [m ids errors]
-               [m ids (conj errors error)]))
+               [m ids errors args]
+               [m ids (conj errors error) args]))
            % requireds))
         (#(reduce
-           (fn [[m ids errors] [id f]]
+           (fn [[m ids errors args] [id f]]
              (if (contains? (set ids) id)
-               [m ids errors]
-               [(assoc m id (f (first %))) ids errors]))
+               [m ids errors args]
+               [(assoc m id (f (first %))) ids errors args]))
            % default-fns))
-        (#(let [[m ids errors] %]
+        (#(let [[m ids errors args] %]
             (if no-defaults
-              [(select-keys m ids) errors]
-              [m errors]))))))
+              [(select-keys m ids) errors args]
+              [m errors args]))))))
 
 (defn make-summary-part
   "Given a single compiled option spec, turn it into a formatted string,
@@ -588,10 +596,6 @@
   A few function options may be specified to influence the behavior of
   parse-opts:
 
-    :in-order     Stop option processing at the first unknown argument. Useful
-                  for building programs with subcommands that have their own
-                  option specs.
-
     :no-defaults  Only include option values specified in arguments and do not
                   include any default values in the resulting options map.
                   Useful for parsing options from multiple sources; i.e. from a
@@ -601,19 +605,39 @@
                   matches any other option, it is considered to be missing (and
                   you have a parse error).
 
+    :subcommand   Stop option processing at the first unknown argument. Useful
+                  for building programs with subcommands that have their own
+                  option specs. Can be set to :explicit or :implicit. :explicit
+                  requires a non-option (explicit) subcommand argument to
+                  trigger collection of subcommand arguments. :implicit treats an
+                  unknown option as starting a new subcommand.
+
     :summary-fn   A function that receives the sequence of compiled option specs
                   (documented at #'clojure.tools.cli/compile-option-specs), and
                   returns a custom option summary string.
   "
   [args option-specs & options]
-  (let [{:keys [in-order no-defaults strict summary-fn]} (apply hash-map options)
+  (let [{:keys [in-order no-defaults strict subcommand summary-fn]}
+        (apply hash-map options)
+        ;; handle deprecation of in-order here:
+        subcommand (if subcommand
+                     (do
+                       (when in-order
+                         (throw (ex-info ":in-order is deprecated and cannot be used if :subcommand is present"
+                                         {:in-order   in-order
+                                          :subcommand subcommand})))
+                       subcommand)
+                     (when in-order :explicit))
         specs (compile-option-specs option-specs)
         req (required-arguments specs)
-        [tokens rest-args] (tokenize-args req args :in-order in-order)
-        [opts errors] (parse-option-tokens specs tokens
-                                           :no-defaults no-defaults :strict strict)]
+        [tokens rest-args] (tokenize-args req args :subcommand subcommand)
+        [opts errors implicit-args]
+        (parse-option-tokens specs tokens
+                             :no-defaults no-defaults
+                             :strict      strict
+                             :subcommand  subcommand)]
     {:options opts
-     :arguments rest-args
+     :arguments (into rest-args implicit-args)
      :summary ((or summary-fn summarize) specs)
      :errors (when (seq errors) errors)}))
 

@@ -6,7 +6,13 @@
 ;; Refer private vars
 (def tokenize-args        #'cli/tokenize-args)
 (def compile-option-specs #'cli/compile-option-specs)
-(def parse-option-tokens  #'cli/parse-option-tokens)
+(def parse-option-tokens' #'cli/parse-option-tokens)
+(defn- parse-option-tokens
+  "To avoid changing all the tests that assume parse-option-tokens returns
+   only [opts errors]"
+  [specs tokens & options]
+  (let [[opts errors _args] (apply #'cli/parse-option-tokens specs tokens options)]
+    [opts errors]))
 
 (deftest test-tokenize-args
   (testing "expands clumped short options"
@@ -20,10 +26,12 @@
   (testing "stops option processing on double dash"
     (is (= (tokenize-args #{} ["-a" "--" "-b"])
            [[[:short-opt "-a"]] ["-b"]])))
-  (testing "finds trailing options unless :in-order is true"
+  (testing "finds trailing options unless :subcommand is present"
     (is (= (tokenize-args #{} ["-a" "foo" "-b"])
            [[[:short-opt "-a"] [:short-opt "-b"]] ["foo"]]))
-    (is (= (tokenize-args #{} ["-a" "foo" "-b"] :in-order true)
+    (is (= (tokenize-args #{} ["-a" "foo" "-b"] :subcommand :explicit)
+           [[[:short-opt "-a"]] ["foo" "-b"]]))
+    (is (= (tokenize-args #{} ["-a" "foo" "-b"] :subcommand :implicit)
            [[[:short-opt "-a"]] ["foo" "-b"]])))
   (testing "does not interpret single dash as an option"
     (is (= (tokenize-args #{} ["-"]) [[] ["-"]]))))
@@ -100,7 +108,7 @@
                      #?(:clj (binding [*err* *out*]
                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))
                         :cljr (binding [*err* *out*]
-                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))							   
+                                (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))
                         :cljs (binding [*print-err-fn* *print-fn*]
                                 (compile-option-specs [[nil "--alpha" :validate nil :flag true]]))))))
       (is (re-find #"Warning:.* :validate"
@@ -422,11 +430,47 @@
            ["foo" "bar" "-b" "baz"])))
   (testing "provides an option summary at :summary"
     (is (re-seq #"-a\W+--alpha" (:summary (parse-opts [] [["-a" "--alpha"]])))))
+  ;; deprecated:
   (testing "processes arguments in order when :in-order is true"
     (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
                                    [["-a" "--alpha"] ["-b" "--beta"]]
                                    :in-order true))
            ["foo" "-b"])))
+  (testing "processes arguments in order when :subcommand is present"
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]
+                                   :subcommand :explicit))
+           ["foo" "-b"]))
+    (is (= (:arguments (parse-opts ["-a" "foo" "-b"]
+                                   [["-a" "--alpha"] ["-b" "--beta"]]
+                                   :subcommand :implicit))
+           ["foo" "-b"]))
+    ;; explicit subcommand requires at least one non-option argument:
+    (is (= (:arguments (parse-opts ["-a" "-b"]
+                                   [["-a" "--alpha"]]
+                                   :subcommand :explicit))
+           []))
+    (is (= (:errors (parse-opts ["-a" "-b"]
+                                [["-a" "--alpha"]]
+                                :subcommand :explicit))
+           ["Unknown option: \"-b\""]))
+    ;; implicit subcommand is triggered by an unknown option:
+    (is (= (:arguments (parse-opts ["-a" "-b"]
+                                   [["-a" "--alpha"]]
+                                   :subcommand :implicit))
+           ["-b"]))
+    (is (= (:errors (parse-opts ["-a" "-b"]
+                                [["-a" "--alpha"]]
+                                :subcommand :implicit))
+           nil))
+    (is (= (:arguments (parse-opts ["-a" "-b"]
+                                   [["-b" "--beta"]]
+                                   :subcommand :implicit))
+           ["-a" "-b"]))
+    (is (= (:errors (parse-opts ["-a" "-b"]
+                                [["-b" "--beta"]]
+                                :subcommand :implicit))
+           nil)))
   (testing "does not merge over default values when :no-defaults is true"
     (let [option-specs [["-p" "--port PORT" :default 80]
                         ["-H" "--host HOST" :default "example.com"]

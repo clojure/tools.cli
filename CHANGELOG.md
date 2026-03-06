@@ -1,5 +1,8 @@
 # Change Log
 
+* Release 1.4.next in progress
+  * Enhance support for subcommand option parsing: add `:subcommand :explicit` and `:subcommand :implicit` options. The former replaces `:in-order true` (which is deprecated) and the latter expands that parsing to treat an unknown option as starting a new subcommand.
+
 * Release 1.3.250 2025-12-30
   * Update parent pom and Clojure dependency version
 

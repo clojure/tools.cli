@@ -188,10 +188,6 @@ this into complete documentation for the library, with examples, over time):
   A few function options may be specified to influence the behavior of
   parse-opts:
 
-    :in-order     Stop option processing at the first unknown argument. Useful
-                  for building programs with subcommands that have their own
-                  option specs.
-
     :no-defaults  Only include option values specified in arguments and do not
                   include any default values in the resulting options map.
                   Useful for parsing options from multiple sources; i.e. from a
@@ -200,6 +196,12 @@ this into complete documentation for the library, with examples, over time):
     :strict       Parse required arguments strictly: if a required argument value
                   matches any other option, it is considered to be missing (and
                   you have a parse error).
+
+    :subcommand   Stop option processing at the first unknown argument. Useful
+                  for building programs with subcommands that have their own
+                  option specs. Can be set to :explicit or :implicit. :explicit
+                  requires a non-option (explicit) subcommand argument to
+                  trigger collection of subcommand arguments. :implicit treats an unknown option as starting a new subcommand.
 
     :summary-fn   A function that receives the sequence of compiled option specs
                   (documented at #'clojure.tools.cli/compile-option-specs), and

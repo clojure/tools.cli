@@ -67,14 +67,11 @@
   (testing "merging args"
     (deftest should-merge-identical-arguments
       (let [assoc-fn (fn [previous key val]
-                       (assoc previous key
-                              (if-let [oldval (get previous key)]
-                                (merge oldval val)
-                                (hash-set val))))
-            [options args _] (cli ["-p" "1" "--port" "2"]
-                                  ["-p" "--port" "description"
-                                   :assoc-fn assoc-fn
-                                   :parse-fn #(parse-int %)])]
+                       (update previous key (fnil conj #{}) val))
+            [options _ _] (cli ["-p" "1" "--port" "2"]
+                               ["-p" "--port" "description"
+                                :assoc-fn assoc-fn
+                                :parse-fn #(parse-int %)])]
         (is (= {:port #{1 2}} options)))))
 
   (testing "extra arguments"

@@ -1,6 +1,6 @@
 #!/bin/sh
 
-for v in 9 10 11 12
+for v in 9 10 11 12 13
 do
   echo ""
   echo "Running tests for Clojure 1.$v..."

@@ -1,5 +1,9 @@
 # Change Log
 
+* Release 1.4.next in progress
+  * Fix weird `merge` code in legacy test.
+  * Add Clojure 1.13 (alpha 7) to local test script.
+
 * Release 1.4.256 2026-03-10
   * Enhance support for subcommand option parsing: add `:subcommand :explicit` and `:subcommand :implicit` options. The former replaces `:in-order true` (which is deprecated) and the latter expands that parsing to treat an unknown option as starting a new subcommand.
 
